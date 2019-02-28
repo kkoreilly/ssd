@@ -1,9 +1,9 @@
 {
-    ...
+    
     "rootPath": "github.com/kplat1/efight",
     "heroku": {
         "install" : [ "./..." ],
         "goVersion": "go1.11.2"
          },
-    ...
+    
 }
