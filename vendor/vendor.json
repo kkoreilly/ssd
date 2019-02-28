@@ -1,0 +1,9 @@
+{
+    ...
+    "rootPath": "github.com/heroku/efight",
+    "heroku": {
+        "install" : [ "./..." ],
+        "goVersion": "go1.11.2"
+         },
+    ...
+}
