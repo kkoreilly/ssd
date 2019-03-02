@@ -20,7 +20,10 @@ func main() {
 }
 
 var signUpResult *gi.Label
+var logInResult *gi.Label
 var inspectText *gi.Label
+var tv *gi.TabView
+var SUPERMODE = false
 
 func mainrun() {
 	go data()
@@ -36,7 +39,7 @@ func mainrun() {
 	rec := ki.Node{}
 	rec.InitName(&rec, "rec")
 
-	tv := mfr.AddNewChild(gi.KiT_TabView, "tv").(*gi.TabView)
+	tv = mfr.AddNewChild(gi.KiT_TabView, "tv").(*gi.TabView)
 	tv.NewTabButton = false
 
 	signUpTabk, _ := tv.AddNewTab(gi.KiT_Frame, "Sign Up")
@@ -82,30 +85,41 @@ func mainrun() {
 	logInTitle.SetProp("text-align", "center")
 	logInTitle.Text = "<b>Enter your information to log into EFight:</b>"
 
-	homeTabk, _ := tv.AddNewTab(gi.KiT_Frame, "Home Tab")
-	homeTab := homeTabk.(*gi.Frame)
-	homeTab.Lay = gi.LayoutVert
-	homeTab.SetStretchMaxWidth()
-	homeTab.SetStretchMaxHeight()
+	logInText := logInTab.AddNewChild(gi.KiT_TextField, "logInText").(*gi.TextField)
+	logInText.SetProp("horizontal-align", gi.AlignCenter)
+	logInText.Placeholder = "Username"
+	logInText.SetStretchMaxWidth()
+	logInText2 := logInTab.AddNewChild(gi.KiT_TextField, "logInText2").(*gi.TextField)
+	logInText2.SetProp("horizontal-align", gi.AlignCenter)
+	logInText2.Placeholder = "Password"
+	logInText2.SetStretchMaxWidth()
 
-	mainTitle := homeTab.AddNewChild(gi.KiT_Label, "mainTitle").(*gi.Label)
-	mainTitle.SetProp("font-size", "x-large")
-	mainTitle.SetProp("font-family", "Times New Roman, serif")
-	mainTitle.SetProp("text-align", "center")
-	mainTitle.Text = "<b>Welcome to EFight, an Energy Based 3D battle game!</b>"
-	playButton := homeTab.AddNewChild(gi.KiT_Button, "playButton").(*gi.Button)
-	playButton.Text = "<b>Play!</b>"
-	playButton.SetProp("horizontal-align", gi.AlignCenter)
-	homeTab.SetProp("background-color", "lightgreen")
+	logInButton := logInTab.AddNewChild(gi.KiT_Button, "logInButton").(*gi.Button)
+	logInButton.Text = "<b>Log In</b>"
+	logInButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(gi.ButtonClicked) {
+			username := logInText.Text()
+			password := logInText2.Text()
+			fmt.Printf("User: %v Password: %v \n", username, password)
+			logIn(username, password)
+		}
+	})
 
-	inspectTabk, _ := tv.AddNewTab(gi.KiT_Frame, "Inspect Tab")
-	inspectTab := inspectTabk.(*gi.Frame)
-	inspectTab.Lay = gi.LayoutVert
+	logInResult = logInTab.AddNewChild(gi.KiT_Label, "logInResult").(*gi.Label)
+	logInResult.Text = "                                                                                                                                                                                  "
+	logInResult.Redrawable = true
 
-	inspectText = inspectTab.AddNewChild(gi.KiT_Label, "inspectText").(*gi.Label)
-	inspectText.Redrawable = true
-	inspectText.SetStretchMaxWidth()
-	initInspect()
+	if SUPERMODE == true {
+
+		inspectTabk, _ := tv.AddNewTab(gi.KiT_Frame, "Inspect Tab")
+		inspectTab := inspectTabk.(*gi.Frame)
+		inspectTab.Lay = gi.LayoutVert
+
+		inspectText = inspectTab.AddNewChild(gi.KiT_Label, "inspectText").(*gi.Label)
+		inspectText.Redrawable = true
+		inspectText.SetStretchMaxWidth()
+		initInspect()
+	}
 
 	tv.SelectTabIndex(0)
 
@@ -131,4 +145,24 @@ func mainrun() {
 	vp.UpdateEndNoSig(updt)
 
 	win.StartEventLoop()
+}
+
+func initMainTab() {
+	updt := tv.UpdateStart()
+	homeTabk, _ := tv.AddNewTab(gi.KiT_Frame, "Home Tab")
+	homeTab := homeTabk.(*gi.Frame)
+	homeTab.Lay = gi.LayoutVert
+	homeTab.SetStretchMaxWidth()
+	homeTab.SetStretchMaxHeight()
+
+	mainTitle := homeTab.AddNewChild(gi.KiT_Label, "mainTitle").(*gi.Label)
+	mainTitle.SetProp("font-size", "x-large")
+	mainTitle.SetProp("font-family", "Times New Roman, serif")
+	mainTitle.SetProp("text-align", "center")
+	mainTitle.Text = "<b>Welcome to EFight, an Energy Based 3D battle game!</b>"
+	playButton := homeTab.AddNewChild(gi.KiT_Button, "playButton").(*gi.Button)
+	playButton.Text = "<b>Play!</b>"
+	playButton.SetProp("horizontal-align", gi.AlignCenter)
+	homeTab.SetProp("background-color", "lightgreen")
+	tv.UpdateEnd(updt)
 }

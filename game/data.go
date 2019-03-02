@@ -94,3 +94,28 @@ func initInspect() {
 	// db.Query(fixStatement)
 
 }
+
+func logIn(user string, password string) {
+	loginCheckStatement := fmt.Sprintf("SELECT * FROM users WHERE username='%v' AND passwd='%v'", user, password)
+	results, err := db.Query(loginCheckStatement)
+	var in = false
+	if err != nil {
+		panic(err)
+	}
+	for results.Next() {
+		in = true
+	}
+	if in == true {
+		fmt.Printf("Found pair, logging in \n")
+		tv.DeleteTabIndex(0, true)
+		tv.DeleteTabIndex(0, true)
+		initMainTab()
+
+		tv.SelectTabIndex(0)
+
+	} else {
+		fmt.Printf("Username and password do not match \n")
+		logInResult.SetText("<b>Username and password do not match</b>")
+	}
+
+}
