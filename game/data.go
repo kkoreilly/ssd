@@ -36,7 +36,7 @@ func addUser(user string, password string) {
 		panic(err)
 	}
 
-	checkUsernameStatement := fmt.Sprintf("SELECT * FROM users	WHERE username='%v'", user)
+	checkUsernameStatement := fmt.Sprintf("SELECT * FROM users WHERE username='%v'", user)
 
 	checkResultRows, err := db.Query(checkUsernameStatement)
 

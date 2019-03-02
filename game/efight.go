@@ -23,7 +23,7 @@ var signUpResult *gi.Label
 var logInResult *gi.Label
 var inspectText *gi.Label
 var tv *gi.TabView
-var SUPERMODE = false
+var SUPERMODE = true
 
 func mainrun() {
 	go data()
@@ -41,6 +41,7 @@ func mainrun() {
 
 	tv = mfr.AddNewChild(gi.KiT_TabView, "tv").(*gi.TabView)
 	tv.NewTabButton = false
+	tv.SetStretchMaxWidth()
 
 	signUpTabk, _ := tv.AddNewTab(gi.KiT_Frame, "Sign Up")
 	signUpTab := signUpTabk.(*gi.Frame)
@@ -149,6 +150,7 @@ func mainrun() {
 
 func initMainTab() {
 	updt := tv.UpdateStart()
+	tv.SetFullReRender()
 	homeTabk, _ := tv.AddNewTab(gi.KiT_Frame, "Home Tab")
 	homeTab := homeTabk.(*gi.Frame)
 	homeTab.Lay = gi.LayoutVert
@@ -164,5 +166,6 @@ func initMainTab() {
 	playButton.Text = "<b>Play!</b>"
 	playButton.SetProp("horizontal-align", gi.AlignCenter)
 	homeTab.SetProp("background-color", "lightgreen")
+	// tv.SetStretchMaxWidth()
 	tv.UpdateEnd(updt)
 }
