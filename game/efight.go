@@ -5,6 +5,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/oswin"
@@ -16,6 +18,9 @@ func main() {
 		mainrun()
 	})
 }
+
+var signUpResult *gi.Label
+var inspectText *gi.Label
 
 func mainrun() {
 	go data()
@@ -43,6 +48,29 @@ func mainrun() {
 	signUpTitle.SetProp("font-size", "x-large")
 	signUpTitle.SetProp("text-align", "center")
 	signUpTitle.Text = "<b>Enter your information to sign up for EFight:</b>"
+	signUpText := signUpTab.AddNewChild(gi.KiT_TextField, "signUpText").(*gi.TextField)
+	signUpText.SetProp("horizontal-align", gi.AlignCenter)
+	signUpText.Placeholder = "Enter what you want your username to be"
+	signUpText.SetStretchMaxWidth()
+	signUpText2 := signUpTab.AddNewChild(gi.KiT_TextField, "signUpText2").(*gi.TextField)
+	signUpText2.SetProp("horizontal-align", gi.AlignCenter)
+	signUpText2.Placeholder = "Enter what you want your password to be"
+	signUpText2.SetStretchMaxWidth()
+
+	signUpButton := signUpTab.AddNewChild(gi.KiT_Button, "signUpButton").(*gi.Button)
+	signUpButton.Text = "<b>Sign Up!</b>"
+	signUpButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(gi.ButtonClicked) {
+			username := signUpText.Text()
+			password := signUpText2.Text()
+			fmt.Printf("User: %v Password: %v \n", username, password)
+			addUser(username, password)
+		}
+	})
+
+	signUpResult = signUpTab.AddNewChild(gi.KiT_Label, "signUpResult").(*gi.Label)
+	signUpResult.Text = "                                   "
+	signUpResult.Redrawable = true
 
 	logInTabk, _ := tv.AddNewTab(gi.KiT_Frame, "Log In")
 	logInTab := logInTabk.(*gi.Frame)
@@ -53,6 +81,7 @@ func mainrun() {
 	logInTitle.SetProp("font-size", "x-large")
 	logInTitle.SetProp("text-align", "center")
 	logInTitle.Text = "<b>Enter your information to log into EFight:</b>"
+
 	homeTabk, _ := tv.AddNewTab(gi.KiT_Frame, "Home Tab")
 	homeTab := homeTabk.(*gi.Frame)
 	homeTab.Lay = gi.LayoutVert
@@ -68,6 +97,16 @@ func mainrun() {
 	playButton.Text = "<b>Play!</b>"
 	playButton.SetProp("horizontal-align", gi.AlignCenter)
 	homeTab.SetProp("background-color", "lightgreen")
+
+	inspectTabk, _ := tv.AddNewTab(gi.KiT_Frame, "Inspect Tab")
+	inspectTab := inspectTabk.(*gi.Frame)
+	inspectTab.Lay = gi.LayoutVert
+
+	inspectText = inspectTab.AddNewChild(gi.KiT_Label, "inspectText").(*gi.Label)
+	inspectText.Redrawable = true
+	inspectText.SetStretchMaxWidth()
+	initInspect()
+
 	tv.SelectTabIndex(0)
 
 	// main menu

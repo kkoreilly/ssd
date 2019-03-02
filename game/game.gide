@@ -15,7 +15,7 @@
   },
   "SplitName": "",
   "MainLang": "Go",
-  "VersCtrl": "",
+  "VersCtrl": "Git",
   "ProjFilename": "/home/koreilly5297/go/src/github.com/kplat1/efight/game/game.gide",
   "ProjRoot": "/home/koreilly5297/go/src/github.com/kplat1/efight/game",
   "BuildCmds": [
@@ -47,10 +47,10 @@
   "OpenDirs": {},
   "Register": "",
   "Splits": [
-    0.1,
-    0.325,
-    0.325,
-    0.25,
+    0.10000002,
+    0.31970003,
+    0.32799563,
+    0.25230435,
     0
   ]
 }
