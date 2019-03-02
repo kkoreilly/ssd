@@ -36,11 +36,7 @@ func addUser(user string, password string) {
 		panic(err)
 	}
 
-	checkUsernameStatement :=
-		`
-				SELECT * FROM users
-				WHERE username=user
-				`
+	checkUsernameStatement := fmt.Sprintf("SELECT * FROM users	WHERE username='%v'", user)
 
 	checkResultRows, err := db.Query(checkUsernameStatement)
 
@@ -73,6 +69,7 @@ func addUser(user string, password string) {
 
 	} else {
 		fmt.Printf("Failed, username exists. \n")
+		signUpResult.SetText("<b>Username exists, failed</b>")
 	}
 
 }
