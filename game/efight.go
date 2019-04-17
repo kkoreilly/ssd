@@ -27,6 +27,7 @@ var SUPERMODE = true
 
 func mainrun() {
 	go data()
+	go startGame()
 	width := 1024
 	height := 768
 
