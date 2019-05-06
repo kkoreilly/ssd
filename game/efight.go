@@ -24,10 +24,11 @@ var logInResult *gi.Label
 var inspectText *gi.Label
 var tv *gi.TabView
 var SUPERMODE = true
+var signUpTab *gi.Frame
 
 func mainrun() {
-	go data()
-	go startGame()
+	data()
+
 	width := 1024
 	height := 768
 
@@ -44,8 +45,9 @@ func mainrun() {
 	tv.NewTabButton = false
 	tv.SetStretchMaxWidth()
 
-	signUpTabk, _ := tv.AddNewTab(gi.KiT_Frame, "Sign Up")
-	signUpTab := signUpTabk.(*gi.Frame)
+	signUpTab = tv.AddNewTab(gi.KiT_Frame, "Sign Up").(*gi.Frame)
+	startGame()
+
 	signUpTab.Lay = gi.LayoutVert
 	signUpTab.SetStretchMaxWidth()
 	signUpTab.SetStretchMaxHeight()
@@ -77,8 +79,8 @@ func mainrun() {
 	signUpResult.Text = "                                   "
 	signUpResult.Redrawable = true
 
-	logInTabk, _ := tv.AddNewTab(gi.KiT_Frame, "Log In")
-	logInTab := logInTabk.(*gi.Frame)
+	logInTab := tv.AddNewTab(gi.KiT_Frame, "Log In").(*gi.Frame)
+
 	logInTab.Lay = gi.LayoutVert
 	logInTab.SetStretchMaxWidth()
 	logInTab.SetStretchMaxHeight()
@@ -113,8 +115,8 @@ func mainrun() {
 
 	if SUPERMODE == true {
 
-		inspectTabk, _ := tv.AddNewTab(gi.KiT_Frame, "Inspect Tab")
-		inspectTab := inspectTabk.(*gi.Frame)
+		inspectTab := tv.AddNewTab(gi.KiT_Frame, "Inspect Tab").(*gi.Frame)
+
 		inspectTab.Lay = gi.LayoutVert
 
 		inspectText = inspectTab.AddNewChild(gi.KiT_Label, "inspectText").(*gi.Label)
@@ -152,8 +154,8 @@ func mainrun() {
 func initMainTab() {
 	updt := tv.UpdateStart()
 	tv.SetFullReRender()
-	homeTabk, _ := tv.AddNewTab(gi.KiT_Frame, "Home Tab")
-	homeTab := homeTabk.(*gi.Frame)
+	homeTab := tv.AddNewTab(gi.KiT_Frame, "Home Tab").(*gi.Frame)
+
 	homeTab.Lay = gi.LayoutVert
 	homeTab.SetStretchMaxWidth()
 	homeTab.SetStretchMaxHeight()
