@@ -5,6 +5,7 @@ import (
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gi3d"
+	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/oswin/mouse"
@@ -14,6 +15,7 @@ import (
 
 type Scene struct {
 	gi3d.Scene
+	TrackMouse bool
 }
 
 var KiT_Scene = kit.Types.AddType(&Scene{}, nil)
@@ -43,10 +45,19 @@ func startGame() {
 	cbm := gi3d.AddNewBox(&sc.Scene, "cube1", 1, 1, 1)
 	// cbm.Segs.Set(10, 10, 10) // not clear if any diff really..
 
-	rcb := sc.AddNewObject("red-cube", cbm.Name())
-	rcb.Pose.Pos.Set(-1, 0, 0)
+	fpobj := sc.AddNewGroup("TrackCamera")
+	rcb := fpobj.AddNewObject("red-cube", cbm.Name())
+	rcb.Pose.Pos.Set(0, -1, -5)
+	rcb.Pose.Scale.Set(0.5, 1.5, 0.5)
 	rcb.Mat.Color.SetString("red", nil)
-	rcb.Mat.Shiny = 500
+
+	cb1 := sc.AddNewObject("cb1", cbm.Name())
+	cb1.Pose.Pos.Set(0, 0, -2)
+
+	cb2 := sc.AddNewObject("cb2", cbm.Name())
+	cb2.Pose.Pos.Set(0, 2, -2)
+	cb2.Mat.Color.SetString("green", nil)
+
 }
 
 func AddNewScene(parent ki.Ki, name string) *Scene {
@@ -71,34 +82,37 @@ func (sc *Scene) Render2D() {
 }
 
 func (sc *Scene) NavEvents() {
-	// sc.ConnectEvent(oswin.MouseMoveEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
-	// 	me := d.(*mouse.MoveEvent)
-	// 	me.SetProcessed()
-	// 	ssc := recv.Embed(KiT_Scene).(*Scene)
-	// 	orbDel := float32(.2)
-	// 	panDel := float32(.05)
-	//
-	// 	del := me.Where.Sub(me.From)
-	// 	dx := float32(del.X)
-	// 	dy := float32(del.Y)
-	// 	switch {
-	// 	case key.HasAllModifierBits(me.Modifiers, key.Shift):
-	// 		ssc.Camera.Pan(dx*panDel, -dy*panDel)
-	// 	case key.HasAllModifierBits(me.Modifiers, key.Control):
-	// 		ssc.Camera.PanAxis(dx*panDel, -dy*panDel)
-	// 	case key.HasAllModifierBits(me.Modifiers, key.Alt):
-	// 		ssc.Camera.PanTarget(dx*panDel, -dy*panDel, 0)
-	// 	default:
-	// 		if mat32.Abs(dx) > mat32.Abs(dy) {
-	// 			dy = 0
-	// 		} else {
-	// 			dx = 0
-	// 		}
-	// 		ssc.Camera.Orbit(-dx*orbDel, -dy*orbDel)
-	// 	}
-	// 	ssc.UpdateSig()
-	//
-	// })
+	sc.ConnectEvent(oswin.MouseMoveEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+		if !sc.TrackMouse {
+			return
+		}
+		me := d.(*mouse.MoveEvent)
+		me.SetProcessed()
+		ssc := recv.Embed(KiT_Scene).(*Scene)
+		orbDel := float32(.2)
+		panDel := float32(.05)
+		//
+		del := me.Where.Sub(me.From)
+		dx := float32(-del.X)
+		dy := float32(-del.Y)
+		switch {
+		case key.HasAllModifierBits(me.Modifiers, key.Shift):
+			ssc.Camera.Pan(dx*panDel, -dy*panDel)
+		case key.HasAllModifierBits(me.Modifiers, key.Control):
+			ssc.Camera.PanAxis(dx*panDel, -dy*panDel)
+		case key.HasAllModifierBits(me.Modifiers, key.Alt):
+			ssc.Camera.PanTarget(dx*panDel, -dy*panDel, 0)
+		default:
+			if mat32.Abs(dx) > mat32.Abs(dy) {
+				dy = 0
+			} else {
+				dx = 0
+			}
+			ssc.Camera.Orbit(-dx*orbDel, -dy*orbDel)
+		}
+		ssc.UpdateSig()
+		//
+	})
 	sc.ConnectEvent(oswin.MouseScrollEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.ScrollEvent)
 		me.SetProcessed()
@@ -162,6 +176,10 @@ func (sc *Scene) NavKeyEvents(kt *key.ChordEvent) {
 	panDel := float32(.1)
 	zoomPct := float32(.05)
 	switch ch {
+	case "Escape":
+		sc.TrackMouse = !sc.TrackMouse
+		kt.SetProcessed()
+
 	case "UpArrow":
 		sc.Camera.Orbit(0, orbDeg)
 		kt.SetProcessed()
