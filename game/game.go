@@ -41,22 +41,27 @@ func startGame() {
 
 	// spot := gi3d.AddNewSpotLight(sc, "spot", 1, gi3d.DirectSun)
 	// spot.Pose.Pos.Set(0, 0, 2)
+	sc.Camera.Pose.Pos.Y = 3
+	sc.Camera.Pose.Pos.Z = 0
 
 	cbm := gi3d.AddNewBox(&sc.Scene, "cube1", 1, 1, 1)
+	center_bluem := gi3d.AddNewBox(&sc.Scene, "center_bluem", 3, 2, 3)
 	// cbm.Segs.Set(10, 10, 10) // not clear if any diff really..
 
 	fpobj := sc.AddNewGroup("TrackCamera")
 	rcb := fpobj.AddNewObject("red-cube", cbm.Name())
-	rcb.Pose.Pos.Set(0, -1, -5)
-	rcb.Pose.Scale.Set(0.5, 1.5, 0.5)
+	rcb.Pose.Pos.Set(.5, -.5, -3)
+	rcb.Pose.Scale.Set(0.1, 0.1, 1)
 	rcb.Mat.Color.SetString("red", nil)
 
-	cb1 := sc.AddNewObject("cb1", cbm.Name())
-	cb1.Pose.Pos.Set(0, 0, -2)
+	center_blue := sc.AddNewObject("center_blue", center_bluem.Name())
+	center_blue.Pose.Pos.Set(0, 0, 0)
+	center_blue.Mat.Color.SetString("blue", nil)
 
-	cb2 := sc.AddNewObject("cb2", cbm.Name())
-	cb2.Pose.Pos.Set(0, 2, -2)
-	cb2.Mat.Color.SetString("green", nil)
+	floorp := gi3d.AddNewPlane(&sc.Scene, "floor-plane", 100, 100)
+	floor := sc.AddNewObject("floor", floorp.Name())
+	floor.Pose.Pos.Set(0, 0, 0)
+	floor.Mat.Emissive.SetString("green", nil)
 
 }
 
@@ -90,6 +95,7 @@ func (sc *Scene) NavEvents() {
 		me.SetProcessed()
 		ssc := recv.Embed(KiT_Scene).(*Scene)
 		orbDel := float32(.2)
+		orbDels := orbDel * 0.2
 		panDel := float32(.05)
 		//
 		del := me.Where.Sub(me.From)
@@ -108,8 +114,17 @@ func (sc *Scene) NavEvents() {
 			} else {
 				dx = 0
 			}
-			ssc.Camera.Orbit(-dx*orbDel, -dy*orbDel)
+			cur := ssc.Camera.Pose.EulerRotation()
+			cur.X += dy * orbDels
+			if cur.X > 90 {
+				cur.X = 90
+			} else if cur.X < -90 {
+				cur.X = -90
+			}
+			ssc.Camera.Pose.SetEulerRotation(cur.X, cur.Y+dx*orbDels, 0)
+
 		}
+		ssc.Win.OSWin.SetMousePos(200, 200)
 		ssc.UpdateSig()
 		//
 	})
@@ -172,7 +187,7 @@ func (sc *Scene) NavEvents() {
 func (sc *Scene) NavKeyEvents(kt *key.ChordEvent) {
 	ch := string(kt.Chord())
 	// fmt.Printf(ch)
-	orbDeg := float32(5)
+	// orbDeg := float32(5)
 	panDel := float32(.1)
 	zoomPct := float32(.05)
 	switch ch {
@@ -180,75 +195,81 @@ func (sc *Scene) NavKeyEvents(kt *key.ChordEvent) {
 		sc.TrackMouse = !sc.TrackMouse
 		kt.SetProcessed()
 
-	case "UpArrow":
-		sc.Camera.Orbit(0, orbDeg)
-		kt.SetProcessed()
-	case "Shift+UpArrow":
-		sc.Camera.Pan(0, panDel)
-		kt.SetProcessed()
-	case "Control+UpArrow":
-		sc.Camera.PanAxis(0, panDel)
-		kt.SetProcessed()
-	case "Alt+UpArrow":
-		sc.Camera.PanTarget(0, panDel, 0)
-		kt.SetProcessed()
-	case "DownArrow":
-		sc.Camera.Orbit(0, -orbDeg)
-		kt.SetProcessed()
-	case "Shift+DownArrow":
-		sc.Camera.Pan(0, -panDel)
-		kt.SetProcessed()
-	case "Control+DownArrow":
-		sc.Camera.PanAxis(0, -panDel)
-		kt.SetProcessed()
-	case "Alt+DownArrow":
-		sc.Camera.PanTarget(0, -panDel, 0)
-		kt.SetProcessed()
-	case "LeftArrow":
-		sc.Camera.Orbit(orbDeg, 0)
-		kt.SetProcessed()
-	case "Shift+LeftArrow":
-		sc.Camera.Pan(-panDel, 0)
-		kt.SetProcessed()
-	case "Control+LeftArrow":
-		sc.Camera.PanAxis(-panDel, 0)
-		kt.SetProcessed()
-	case "Alt+LeftArrow":
-		sc.Camera.PanTarget(-panDel, 0, 0)
-		kt.SetProcessed()
-	case "RightArrow":
-		sc.Camera.Orbit(-orbDeg, 0)
-		kt.SetProcessed()
-	case "Shift+RightArrow":
-		sc.Camera.Pan(panDel, 0)
-		kt.SetProcessed()
-	case "Control+RightArrow":
-		sc.Camera.PanAxis(panDel, 0)
-		kt.SetProcessed()
-	case "Alt+RightArrow":
-		sc.Camera.PanTarget(panDel, 0, 0)
-		kt.SetProcessed()
-	case "Alt++", "Alt+=":
-		sc.Camera.PanTarget(0, 0, panDel)
-		kt.SetProcessed()
-	case "Alt+-", "Alt+_":
-		sc.Camera.PanTarget(0, 0, -panDel)
-		kt.SetProcessed()
-	case "+", "=":
-		sc.Camera.Zoom(-zoomPct)
-		kt.SetProcessed()
-	case "-", "_":
-		sc.Camera.Zoom(zoomPct)
-		kt.SetProcessed()
+	// case "UpArrow":
+	// 	sc.Camera.Orbit(0, orbDeg)
+	// 	kt.SetProcessed()
+	// case "Shift+UpArrow":
+	// 	sc.Camera.Pan(0, panDel)
+	// 	kt.SetProcessed()
+	// case "Control+UpArrow":
+	// 	sc.Camera.PanAxis(0, panDel)
+	// 	kt.SetProcessed()
+	// case "Alt+UpArrow":
+	// 	sc.Camera.PanTarget(0, panDel, 0)
+	// 	kt.SetProcessed()
+	// case "DownArrow":
+	// 	sc.Camera.Orbit(0, -orbDeg)
+	// 	kt.SetProcessed()
+	// case "Shift+DownArrow":
+	// 	sc.Camera.Pan(0, -panDel)
+	// 	kt.SetProcessed()
+	// case "Control+DownArrow":
+	// 	sc.Camera.PanAxis(0, -panDel)
+	// 	kt.SetProcessed()
+	// case "Alt+DownArrow":
+	// 	sc.Camera.PanTarget(0, -panDel, 0)
+	// 	kt.SetProcessed()
+	// case "LeftArrow":
+	// 	sc.Camera.Orbit(orbDeg, 0)
+	// 	kt.SetProcessed()
+	// case "Shift+LeftArrow":
+	// 	sc.Camera.Pan(-panDel, 0)
+	// 	kt.SetProcessed()
+	// case "Control+LeftArrow":
+	// 	sc.Camera.PanAxis(-panDel, 0)
+	// 	kt.SetProcessed()
+	// case "Alt+LeftArrow":
+	// 	sc.Camera.PanTarget(-panDel, 0, 0)
+	// 	kt.SetProcessed()
+	// case "RightArrow":
+	// 	sc.Camera.Orbit(-orbDeg, 0)
+	// 	kt.SetProcessed()
+	// case "Shift+RightArrow":
+	// 	sc.Camera.Pan(panDel, 0)
+	// 	kt.SetProcessed()
+	// case "Control+RightArrow":
+	// 	sc.Camera.PanAxis(panDel, 0)
+	// 	kt.SetProcessed()
+	// case "Alt+RightArrow":
+	// 	sc.Camera.PanTarget(panDel, 0, 0)
+	// 	kt.SetProcessed()
+	// case "Alt++", "Alt+=":
+	// 	sc.Camera.PanTarget(0, 0, panDel)
+	// 	kt.SetProcessed()
+	// case "Alt+-", "Alt+_":
+	// 	sc.Camera.PanTarget(0, 0, -panDel)
+	// 	kt.SetProcessed()
+	// case "+", "=":
+	// 	sc.Camera.Zoom(-zoomPct)
+	// 	kt.SetProcessed()
+	// case "-", "_":
+	// 	sc.Camera.Zoom(zoomPct)
+	// 	kt.SetProcessed()
 	case " ":
-		sc.Camera.DefaultPose()
-		kt.SetProcessed()
+		err := sc.SetCamera("default")
+		if err != nil {
+			sc.Camera.DefaultPose()
+		}
 	case "w":
+		y := sc.Camera.Pose.Pos.Y
 		sc.Camera.Zoom(-zoomPct)
 		kt.SetProcessed()
+		sc.Camera.Pose.Pos.Y = y
 	case "s":
+		y := sc.Camera.Pose.Pos.Y
 		sc.Camera.Zoom(zoomPct)
 		kt.SetProcessed()
+		sc.Camera.Pose.Pos.Y = y
 	case "a":
 		sc.Camera.Pan(panDel, 0)
 		kt.SetProcessed()
