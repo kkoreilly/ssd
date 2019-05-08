@@ -62,6 +62,8 @@ func startGame() {
 	floor := sc.AddNewObject("floor", floorp.Name())
 	floor.Pose.Pos.Set(0, 0, 0)
 	floor.Mat.Emissive.SetString("green", nil)
+	grtx := gi3d.AddNewTextureFile(&sc.Scene, "ground", "ground.jpg")
+	floor.Mat.SetTexture(&sc.Scene, grtx.Name())
 
 }
 
@@ -95,7 +97,7 @@ func (sc *Scene) NavEvents() {
 		me.SetProcessed()
 		ssc := recv.Embed(KiT_Scene).(*Scene)
 		orbDel := float32(.2)
-		orbDels := orbDel * 0.2
+		orbDels := orbDel * 0.05
 		panDel := float32(.05)
 		//
 		del := me.Where.Sub(me.From)
@@ -189,7 +191,7 @@ func (sc *Scene) NavKeyEvents(kt *key.ChordEvent) {
 	// fmt.Printf(ch)
 	// orbDeg := float32(5)
 	panDel := float32(.1)
-	zoomPct := float32(.05)
+	// zoomPct := float32(.05)
 	switch ch {
 	case "Escape":
 		sc.TrackMouse = !sc.TrackMouse
@@ -262,12 +264,12 @@ func (sc *Scene) NavKeyEvents(kt *key.ChordEvent) {
 		}
 	case "w":
 		y := sc.Camera.Pose.Pos.Y
-		sc.Camera.Zoom(-zoomPct)
+		sc.Camera.Pose.MoveOnAxis(0, 0, -1, .5)
 		kt.SetProcessed()
 		sc.Camera.Pose.Pos.Y = y
 	case "s":
 		y := sc.Camera.Pose.Pos.Y
-		sc.Camera.Zoom(zoomPct)
+		sc.Camera.Pose.MoveOnAxis(0, 0, 1, .5)
 		kt.SetProcessed()
 		sc.Camera.Pose.Pos.Y = y
 	case "a":
