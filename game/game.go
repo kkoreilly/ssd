@@ -17,8 +17,81 @@ type Scene struct {
 	gi3d.Scene
 	TrackMouse bool
 }
+type MapObj struct {
+	ObjType string
+	Pos     mat32.Vec3
+	Scale   mat32.Vec3
+	Color   string
+}
+
+type Map map[string]*MapObj
+
+var DefScale = mat32.Vec3{1, 1, 1}
+var FirstMap = Map{
+	"GreenHill": {"Hill", mat32.Vec3{1, 0, -20}, DefScale, "green"},
+}
 
 var KiT_Scene = kit.Types.AddType(&Scene{}, nil)
+
+func BuildMap(sc *gi3d.Scene, mp Map) {
+
+	for nm, obj := range mp {
+		MakeObj(sc, obj, nm)
+	}
+
+}
+
+func MakeObj(sc *gi3d.Scene, obj *MapObj, nm string) *gi3d.Group {
+	var ogp *gi3d.Group
+	switch obj.ObjType {
+	case "Hill":
+		ogp = gi3d.AddNewGroup(sc, sc, nm)
+		o := gi3d.AddNewObject(sc, ogp, "hill", "Hill")
+		o.Pose.Pos.Set(1, 0, -20)
+		// o.Pose.Scale.Set(1, 10, 1)
+		o.Mat.Color.SetString("green", nil)
+	case "House":
+		ogp = gi3d.AddNewGroup(sc, sc, nm)
+		o := gi3d.AddNewObject(sc, ogp, "house_ground", "HouseFloor")
+		o.Pose.Pos.Set(10, 0, -40)
+		// o.Pose.Scale.Set(10, 0.01, 10)
+		o.Mat.Color.SetString("brown", nil)
+
+		o = gi3d.AddNewObject(sc, ogp, "house_roof", "HouseRoof")
+		o.Pose.Pos.Set(10, 4.995, -40)
+		// o.Pose.Scale.Set(10, 0.01, 10)
+		o.Mat.Color.SetString("brown", nil)
+
+		o = gi3d.AddNewObject(sc, ogp, "house_wall1", "Wall")
+		o.Pose.Pos.Set(4.75, 0, -40)
+		// o.Pose.Scale.Set(0.5, 10, 10)
+		o.Mat.Color.SetString("brown", nil)
+
+		o = gi3d.AddNewObject(sc, ogp, "house_wall2", "Wall")
+		o.Pose.Pos.Set(14.75, 0, -40)
+		// o.Pose.Scale.Set(0.5, 10, 10)
+		o.Mat.Color.SetString("brown", nil)
+
+		o = gi3d.AddNewObject(sc, ogp, "house_wall3", "Wall")
+		o.Pose.Pos.Set(10, 0, -45)
+		// o.Pose.Scale.Set(10, 10, 0.5)
+		o.Mat.Color.SetString("brown", nil)
+	}
+	ogp.Pose.Pos = obj.Pos
+	ogp.Pose.Scale = obj.Scale
+	return ogp
+}
+
+func MakeMeshes(sc *gi3d.Scene) {
+	gi3d.AddNewBox(sc, "Gun", 0.1, 0.1, 1)
+	gi3d.AddNewBox(sc, "Hill", 1, 10, 1)
+	gi3d.AddNewBox(sc, "Table", 5, 2.5, 5)
+	gi3d.AddNewBox(sc, "Center_Blue", 3, 2, 3)
+	gi3d.AddNewBox(sc, "HouseFloor", 10, 0.01, 10)
+	gi3d.AddNewBox(sc, "HouseRoof", 10, 0.01, 10)
+	gi3d.AddNewBox(sc, "Wall", 0.5, 10, 10)
+
+}
 
 func startGame() {
 	scrow := gi.AddNewLayout(signUpTab, "scrow", gi.LayoutHoriz)
@@ -44,26 +117,58 @@ func startGame() {
 	sc.Camera.Pose.Pos.Y = 3
 	sc.Camera.Pose.Pos.Z = 0
 
-	cbm := gi3d.AddNewBox(&sc.Scene, "cube1", 1, 1, 1)
-	center_bluem := gi3d.AddNewBox(&sc.Scene, "center_bluem", 3, 2, 3)
+	MakeMeshes(&sc.Scene)
+	BuildMap(&sc.Scene, FirstMap)
+
+	// center_bluem :=
 	// cbm.Segs.Set(10, 10, 10) // not clear if any diff really..
 
-	fpobj := sc.AddNewGroup("TrackCamera")
-	rcb := fpobj.AddNewObject("red-cube", cbm.Name())
+	fpobj := gi3d.AddNewGroup(&sc.Scene, &sc.Scene, "TrackCamera")
+	rcb := gi3d.AddNewObject(&sc.Scene, fpobj, "red-cube", "Gun")
 	rcb.Pose.Pos.Set(.5, -.5, -3)
-	rcb.Pose.Scale.Set(0.1, 0.1, 1)
+	// rcb.Pose.Scale.Set(0.1, 0.1, 1)
 	rcb.Mat.Color.SetString("red", nil)
 
-	center_blue := sc.AddNewObject("center_blue", center_bluem.Name())
-	center_blue.Pose.Pos.Set(0, 0, 0)
-	center_blue.Mat.Color.SetString("blue", nil)
+	// center_blue := sc.AddNewObject("center_blue", center_bluem.Name())
+	// center_blue.Pose.Pos.Set(0, 0, 0)
+	// center_blue.Mat.Color.SetString("blue", nil)
+	//
+	// green_hill := sc.AddNewObject("green_hill", cbm.Name())
+	// green_hill.Pose.Pos.Set(1, 0, -20)
+	// green_hill.Pose.Scale.Set(1, 10, 1)
+	// green_hill.Mat.Color.SetString("green", nil)
+	//
+	// tbtx := gi3d.AddNewTextureFile(&sc.Scene, "table", "table.jpg")
+	// var posy float32 = 0
+	// var posx float32 = -5
+	// var posz float32 = -20
+	// for r := 0; r < 4; r++ {
+	// 	posx = -5
+	// 	for c := 0; c < 4; c++ {
+	// 		market := sc.AddNewObject(fmt.Sprintf("market%v", c*r), cbm.Name())
+	// 		market.Pose.Pos.Set(posx, posy, posz)
+	// 		market.Pose.Scale.Set(5, 2.5, 5)
+	// 		// market1.Mat.Color.SetString("red", nil)
+	// 		market.Mat.SetTexture(&sc.Scene, tbtx.Name())
+	// 		posx = posx - 6.5
+	// 	}
+	// 	posz = posz - 6.5
+	//
+	// }
+	//
+	// // market1 := sc.AddNewObject("market1", cbm.Name())
+	// // market1.Pose.Pos.Set(-5, 0, -20)
+	// // market1.Pose.Scale.Set(5, 2.5, 5)
+	// // // market1.Mat.Color.SetString("red", nil)
+	// // market1.Mat.SetTexture(&sc.Scene, tbtx.Name())
 
 	floorp := gi3d.AddNewPlane(&sc.Scene, "floor-plane", 100, 100)
-	floor := sc.AddNewObject("floor", floorp.Name())
+	floor := gi3d.AddNewObject(&sc.Scene, &sc.Scene, "floor", floorp.Name())
 	floor.Pose.Pos.Set(0, 0, 0)
-	floor.Mat.Emissive.SetString("green", nil)
+	// floor.Mat.Emissive.SetString("green", nil)
 	grtx := gi3d.AddNewTextureFile(&sc.Scene, "ground", "ground.jpg")
-	floor.Mat.SetTexture(&sc.Scene, grtx.Name())
+	floor.Mat.SetTexture(&sc.Scene, grtx)
+	floor.Mat.Tiling.Repeat.Set(40, 40)
 
 }
 
@@ -198,8 +303,10 @@ func (sc *Scene) NavKeyEvents(kt *key.ChordEvent) {
 		kt.SetProcessed()
 
 	// case "UpArrow":
-	// 	sc.Camera.Orbit(0, orbDeg)
-	// 	kt.SetProcessed()
+	//
+	// 	sc.Camera.Pose.SetEulerRotation(orbDeg, 0, 0)
+	// kt.SetProcessed()
+
 	// case "Shift+UpArrow":
 	// 	sc.Camera.Pan(0, panDel)
 	// 	kt.SetProcessed()
@@ -210,8 +317,8 @@ func (sc *Scene) NavKeyEvents(kt *key.ChordEvent) {
 	// 	sc.Camera.PanTarget(0, panDel, 0)
 	// 	kt.SetProcessed()
 	// case "DownArrow":
-	// 	sc.Camera.Orbit(0, -orbDeg)
-	// 	kt.SetProcessed()
+	// sc.Camera.Orbit(0, -orbDeg)
+	// kt.SetProcessed()
 	// case "Shift+DownArrow":
 	// 	sc.Camera.Pan(0, -panDel)
 	// 	kt.SetProcessed()
@@ -222,8 +329,8 @@ func (sc *Scene) NavKeyEvents(kt *key.ChordEvent) {
 	// 	sc.Camera.PanTarget(0, -panDel, 0)
 	// 	kt.SetProcessed()
 	// case "LeftArrow":
-	// 	sc.Camera.Orbit(orbDeg, 0)
-	// 	kt.SetProcessed()
+	// sc.Camera.Orbit(orbDeg, 0)
+	// kt.SetProcessed()
 	// case "Shift+LeftArrow":
 	// 	sc.Camera.Pan(-panDel, 0)
 	// 	kt.SetProcessed()
@@ -234,8 +341,8 @@ func (sc *Scene) NavKeyEvents(kt *key.ChordEvent) {
 	// 	sc.Camera.PanTarget(-panDel, 0, 0)
 	// 	kt.SetProcessed()
 	// case "RightArrow":
-	// 	sc.Camera.Orbit(-orbDeg, 0)
-	// 	kt.SetProcessed()
+	// sc.Camera.Orbit(-orbDeg, 0)
+	// kt.SetProcessed()
 	// case "Shift+RightArrow":
 	// 	sc.Camera.Pan(panDel, 0)
 	// 	kt.SetProcessed()
