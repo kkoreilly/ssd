@@ -108,6 +108,23 @@ func MakeObj(sc *gi3d.Scene, obj *MapObj, nm string) *gi3d.Group {
 		o = gi3d.AddNewObject(sc, ogp, "house_pillow1", "HousePillowOne")
 		o.Pose.Pos.Set(-4.75, 1.15, -4)
 		o.Mat.SetTextureName(sc, "HousePillow")
+
+		o = gi3d.AddNewObject(sc, ogp, "house_couch_base1", "HouseCouchBaseOne")
+		o.Pose.Pos.Set(2, 0, -3.5)
+		o.Mat.SetTextureName(sc, "HouseCouch")
+
+		o = gi3d.AddNewObject(sc, ogp, "house_couch_top1", "HouseCouchTopOne")
+		o.Pose.Pos.Set(2, 1.5, -4.5)
+		o.Mat.SetTextureName(sc, "HouseCouch")
+
+		o = gi3d.AddNewObject(sc, ogp, "house_window1", "HouseWindowOne")
+		o.Pose.Pos.Set(2, 3.5, -4.8)
+		o.Mat.SetTextureName(sc, "HouseWindow")
+
+		o = gi3d.AddNewObject(sc, ogp, "house_window2", "HouseWindowOne")
+		o.Pose.Pos.Set(-3, 3.5, -4.8)
+		o.Mat.SetTextureName(sc, "HouseWindow")
+
 	case "Center_Blue":
 		ogp = gi3d.AddNewGroup(sc, sc, nm)
 		o := gi3d.AddNewObject(sc, ogp, "center_blue", "Center_Blue")
@@ -138,6 +155,9 @@ func MakeMeshes(sc *gi3d.Scene) {
 	gi3d.AddNewBox(sc, "HouseBedOne", 3, 2, 2)
 	gi3d.AddNewBox(sc, "HouseBlanketOne", 3, 0.1, 2)
 	gi3d.AddNewBox(sc, "HousePillowOne", 0.5, 0.25, 2)
+	gi3d.AddNewBox(sc, "HouseCouchBaseOne", 5, 2, 3)
+	gi3d.AddNewBox(sc, "HouseCouchTopOne", 5, 1, 1)
+	gi3d.AddNewBox(sc, "HouseWindowOne", 1, 1, 0.1)
 
 }
 func MakeTextures(sc *gi3d.Scene) {
@@ -145,6 +165,8 @@ func MakeTextures(sc *gi3d.Scene) {
 	gi3d.AddNewTextureFile(sc, "HouseBed", "bed.png")
 	gi3d.AddNewTextureFile(sc, "HouseBlanket", "blanket.png")
 	gi3d.AddNewTextureFile(sc, "HousePillow", "pillow.png")
+	gi3d.AddNewTextureFile(sc, "HouseCouch", "couch.jpg")
+	gi3d.AddNewTextureFile(sc, "HouseWindow", "window.png")
 }
 func startGame() {
 	scrow := gi.AddNewLayout(signUpTab, "scrow", gi.LayoutHoriz)
