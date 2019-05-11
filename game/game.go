@@ -268,7 +268,7 @@ func (sc *Scene) NavEvents() {
 			ssc.Camera.Pose.SetEulerRotation(cur.X, cur.Y+dx*orbDels, 0)
 
 		}
-		ssc.Win.OSWin.SetMousePos(200, 200)
+
 		ssc.UpdateSig()
 		//
 	})
