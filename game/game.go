@@ -21,17 +21,36 @@ type MapObj struct {
 	ObjType string
 	Pos     mat32.Vec3
 	Scale   mat32.Vec3
-	Color   string
+	// Color   string
 }
 
 type Map map[string]*MapObj
 
 var DefScale = mat32.Vec3{1, 1, 1}
 var FirstMap = Map{
-	"GreenHill": {"Hill", mat32.Vec3{1, 0, -20}, DefScale, "green"},
+	"GreenHill": {"Hill", mat32.Vec3{1, 0, -20}, DefScale},
+	"House1":    {"House", mat32.Vec3{10, 0, -40}, DefScale},
 }
 
 var KiT_Scene = kit.Types.AddType(&Scene{}, nil)
+
+func AddToMap() {
+
+	var posx float32 = -5
+	var posy float32 = 0
+	var posz float32 = -20
+	for r := 0; r < 4; r++ {
+		posx = -5
+		for c := 0; c < 4; c++ {
+			name := fmt.Sprintf("table%v,%v", r, c)
+			pos := mat32.Vec3{posx, posy, posz}
+			FirstMap[name] = &MapObj{"Table", pos, DefScale}
+			posx = posx - 6.5
+		}
+		posz = posz - 6.5
+	}
+
+}
 
 func BuildMap(sc *gi3d.Scene, mp Map) {
 
@@ -47,35 +66,47 @@ func MakeObj(sc *gi3d.Scene, obj *MapObj, nm string) *gi3d.Group {
 	case "Hill":
 		ogp = gi3d.AddNewGroup(sc, sc, nm)
 		o := gi3d.AddNewObject(sc, ogp, "hill", "Hill")
-		o.Pose.Pos.Set(1, 0, -20)
+		o.Pose.Pos.Set(0, 0, 0)
 		// o.Pose.Scale.Set(1, 10, 1)
 		o.Mat.Color.SetString("green", nil)
 	case "House":
 		ogp = gi3d.AddNewGroup(sc, sc, nm)
 		o := gi3d.AddNewObject(sc, ogp, "house_ground", "HouseFloor")
-		o.Pose.Pos.Set(10, 0, -40)
+		o.Pose.Pos.Set(0, 0, 0)
 		// o.Pose.Scale.Set(10, 0.01, 10)
 		o.Mat.Color.SetString("brown", nil)
 
 		o = gi3d.AddNewObject(sc, ogp, "house_roof", "HouseRoof")
-		o.Pose.Pos.Set(10, 4.995, -40)
+		o.Pose.Pos.Set(0, 4.995, 0)
 		// o.Pose.Scale.Set(10, 0.01, 10)
 		o.Mat.Color.SetString("brown", nil)
 
-		o = gi3d.AddNewObject(sc, ogp, "house_wall1", "Wall")
-		o.Pose.Pos.Set(4.75, 0, -40)
+		o = gi3d.AddNewObject(sc, ogp, "house_wall1", "HouseWallOne")
+		o.Pose.Pos.Set(-5.25, 0, 0)
 		// o.Pose.Scale.Set(0.5, 10, 10)
 		o.Mat.Color.SetString("brown", nil)
 
-		o = gi3d.AddNewObject(sc, ogp, "house_wall2", "Wall")
-		o.Pose.Pos.Set(14.75, 0, -40)
+		o = gi3d.AddNewObject(sc, ogp, "house_wall2", "HouseWallOne")
+		o.Pose.Pos.Set(4.75, 0, 0)
 		// o.Pose.Scale.Set(0.5, 10, 10)
 		o.Mat.Color.SetString("brown", nil)
 
-		o = gi3d.AddNewObject(sc, ogp, "house_wall3", "Wall")
-		o.Pose.Pos.Set(10, 0, -45)
+		o = gi3d.AddNewObject(sc, ogp, "house_wall3", "HouseWallTwo")
+		o.Pose.Pos.Set(0, 0, -5)
 		// o.Pose.Scale.Set(10, 10, 0.5)
 		o.Mat.Color.SetString("brown", nil)
+	case "Center_Blue":
+		ogp = gi3d.AddNewGroup(sc, sc, nm)
+		o := gi3d.AddNewObject(sc, ogp, "center_blue", "Center_Blue")
+		o.Pose.Pos.Set(0, 0, 0)
+		o.Mat.Color.SetString("blue", nil)
+	case "Table":
+		ogp = gi3d.AddNewGroup(sc, sc, nm)
+		o := gi3d.AddNewObject(sc, ogp, "table", "Table")
+		o.Pose.Pos.Set(0, 0, 0)
+
+		o.Mat.SetTextureName(sc, "table")
+
 	}
 	ogp.Pose.Pos = obj.Pos
 	ogp.Pose.Scale = obj.Scale
@@ -89,10 +120,13 @@ func MakeMeshes(sc *gi3d.Scene) {
 	gi3d.AddNewBox(sc, "Center_Blue", 3, 2, 3)
 	gi3d.AddNewBox(sc, "HouseFloor", 10, 0.01, 10)
 	gi3d.AddNewBox(sc, "HouseRoof", 10, 0.01, 10)
-	gi3d.AddNewBox(sc, "Wall", 0.5, 10, 10)
+	gi3d.AddNewBox(sc, "HouseWallOne", 0.5, 10, 10)
+	gi3d.AddNewBox(sc, "HouseWallTwo", 10, 10, 0.5)
 
 }
-
+func MakeTextures(sc *gi3d.Scene) {
+	gi3d.AddNewTextureFile(sc, "table", "table.jpg")
+}
 func startGame() {
 	scrow := gi.AddNewLayout(signUpTab, "scrow", gi.LayoutHoriz)
 	scrow.SetStretchMaxWidth()
@@ -117,7 +151,10 @@ func startGame() {
 	sc.Camera.Pose.Pos.Y = 3
 	sc.Camera.Pose.Pos.Z = 0
 
+	AddToMap()
+
 	MakeMeshes(&sc.Scene)
+	MakeTextures(&sc.Scene)
 	BuildMap(&sc.Scene, FirstMap)
 
 	// center_bluem :=
