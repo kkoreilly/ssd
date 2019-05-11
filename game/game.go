@@ -95,6 +95,19 @@ func MakeObj(sc *gi3d.Scene, obj *MapObj, nm string) *gi3d.Group {
 		o.Pose.Pos.Set(0, 0, -5)
 		// o.Pose.Scale.Set(10, 10, 0.5)
 		o.Mat.Color.SetString("brown", nil)
+
+		o = gi3d.AddNewObject(sc, ogp, "house_bed1", "HouseBedOne")
+		o.Pose.Pos.Set(-3.5, 0, -4)
+		// o.Mat.Color.SetString("green", nil)
+		o.Mat.SetTextureName(sc, "HouseBed")
+
+		o = gi3d.AddNewObject(sc, ogp, "house_blanket1", "HouseBlanketOne")
+		o.Pose.Pos.Set(-3.5, 1.05, -4)
+		o.Mat.SetTextureName(sc, "HouseBlanket")
+
+		o = gi3d.AddNewObject(sc, ogp, "house_pillow1", "HousePillowOne")
+		o.Pose.Pos.Set(-4.75, 1.15, -4)
+		o.Mat.SetTextureName(sc, "HousePillow")
 	case "Center_Blue":
 		ogp = gi3d.AddNewGroup(sc, sc, nm)
 		o := gi3d.AddNewObject(sc, ogp, "center_blue", "Center_Blue")
@@ -105,7 +118,7 @@ func MakeObj(sc *gi3d.Scene, obj *MapObj, nm string) *gi3d.Group {
 		o := gi3d.AddNewObject(sc, ogp, "table", "Table")
 		o.Pose.Pos.Set(0, 0, 0)
 
-		o.Mat.SetTextureName(sc, "table")
+		o.Mat.SetTextureName(sc, "Table")
 
 	}
 	ogp.Pose.Pos = obj.Pos
@@ -122,10 +135,16 @@ func MakeMeshes(sc *gi3d.Scene) {
 	gi3d.AddNewBox(sc, "HouseRoof", 10, 0.01, 10)
 	gi3d.AddNewBox(sc, "HouseWallOne", 0.5, 10, 10)
 	gi3d.AddNewBox(sc, "HouseWallTwo", 10, 10, 0.5)
+	gi3d.AddNewBox(sc, "HouseBedOne", 3, 2, 2)
+	gi3d.AddNewBox(sc, "HouseBlanketOne", 3, 0.1, 2)
+	gi3d.AddNewBox(sc, "HousePillowOne", 0.5, 0.25, 2)
 
 }
 func MakeTextures(sc *gi3d.Scene) {
-	gi3d.AddNewTextureFile(sc, "table", "table.jpg")
+	gi3d.AddNewTextureFile(sc, "Table", "table.jpg")
+	gi3d.AddNewTextureFile(sc, "HouseBed", "bed.png")
+	gi3d.AddNewTextureFile(sc, "HouseBlanket", "blanket.png")
+	gi3d.AddNewTextureFile(sc, "HousePillow", "pillow.png")
 }
 func startGame() {
 	scrow := gi.AddNewLayout(signUpTab, "scrow", gi.LayoutHoriz)
