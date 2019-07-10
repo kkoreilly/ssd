@@ -23,7 +23,7 @@ var signUpResult *gi.Label
 var logInResult *gi.Label
 var inspectText *gi.Label
 var tv *gi.TabView
-var SUPERMODE = true
+var SUPERMODE = false
 var signUpTab *gi.Frame
 
 func mainrun() {
