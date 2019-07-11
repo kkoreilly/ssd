@@ -30,7 +30,6 @@ var DefScale = mat32.Vec3{1, 1, 1}
 var FirstMap = Map{
 	"GreenHill": {"Hill", mat32.Vec3{1, 0, -20}, DefScale},
 	"House1":    {"House", mat32.Vec3{10, 0, -40}, DefScale},
-	"House2":    {"House", mat32.Vec3{22, 0, -40}, DefScale},
 }
 
 var KiT_Scene = kit.Types.AddType(&Scene{}, nil)
