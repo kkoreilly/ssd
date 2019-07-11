@@ -5,8 +5,6 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/oswin"
@@ -70,7 +68,7 @@ func mainrun() {
 		if sig == int64(gi.ButtonClicked) {
 			username := signUpText.Text()
 			password := signUpText2.Text()
-			fmt.Printf("User: %v Password: %v \n", username, password)
+			// fmt.Printf("User: %v Password: %v \n", username, password)
 			addUser(username, password)
 		}
 	})
@@ -104,7 +102,7 @@ func mainrun() {
 		if sig == int64(gi.ButtonClicked) {
 			username := logInText.Text()
 			password := logInText2.Text()
-			fmt.Printf("User: %v Password: %v \n", username, password)
+			// fmt.Printf("User: %v Password: %v \n", username, password)
 			logIn(username, password)
 		}
 	})

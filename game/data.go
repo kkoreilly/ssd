@@ -21,7 +21,7 @@ func data() {
 		panic(err)
 	}
 
-	fmt.Printf("Connected!  %T \n", db)
+	// fmt.Printf("Connected!  %T \n", db)
 
 }
 
@@ -48,17 +48,17 @@ func addUser(user string, password string) {
 	for checkResultRows.Next() {
 		gotResults = true
 	}
-	fmt.Printf("Results (Got): %v \n", gotResults)
+	// fmt.Printf("Results (Got): %v \n", gotResults)
 
 	if gotResults == false {
-		fmt.Printf("Username isn't in use, will create user. \n")
+		// fmt.Printf("Username isn't in use, will create user. \n")
 
 		// create user code
 		createAccountStatement :=
 
 			fmt.Sprintf("INSERT INTO users(username, passwd) VALUES ('%v', '%v')", user, password)
 
-		fmt.Printf("STATEMENT: %v \n", createAccountStatement)
+		// fmt.Printf("STATEMENT: %v \n", createAccountStatement)
 
 		_, err := db.Exec(createAccountStatement)
 		if err != nil {
@@ -68,7 +68,7 @@ func addUser(user string, password string) {
 		signUpResult.SetText("<b>Account created</b>")
 
 	} else {
-		fmt.Printf("Failed, username exists. \n")
+		// fmt.Printf("Failed, username exists. \n")
 		signUpResult.SetText("<b>Username exists, failed</b>")
 	}
 
@@ -83,8 +83,8 @@ func initInspect() {
 		var username string
 		var password string
 		err = rows.Scan(&username, &password)
-		fmt.Printf("In rows \n")
-		fmt.Printf("New username: %v New password %v \n", username, password)
+		// fmt.Printf("In rows \n")
+		// fmt.Printf("New username: %v New password %v \n", username, password)
 		newText := fmt.Sprintf("Username: %v, Password: %v            ", username, password)
 		inspectText.SetText(fmt.Sprintf("%v %v", inspectText.Text, newText))
 	}
@@ -106,7 +106,7 @@ func logIn(user string, password string) {
 		in = true
 	}
 	if in == true {
-		fmt.Printf("Found pair, logging in \n")
+		// fmt.Printf("Found pair, logging in \n")
 		tv.DeleteTabIndex(0, true)
 		tv.DeleteTabIndex(0, true)
 		initMainTab()
@@ -114,7 +114,7 @@ func logIn(user string, password string) {
 		tv.SelectTabIndex(0)
 
 	} else {
-		fmt.Printf("Username and password do not match \n")
+		// fmt.Printf("Username and password do not match \n")
 		logInResult.SetText("<b>Username and password do not match</b>")
 	}
 
