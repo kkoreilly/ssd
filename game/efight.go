@@ -1,13 +1,10 @@
-// Copyright (c) 2018, The GoKi Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
+// Copyright (c) 2019, The EFight Authors. All rights reserved.
 
 package main
 
 import (
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gimain"
-	"github.com/goki/gi/oswin"
 	"github.com/goki/ki/ki"
 )
 
@@ -39,9 +36,19 @@ func mainrun() {
 	rec := ki.Node{}
 	rec.InitName(&rec, "rec")
 
+	toprow := gi.AddNewFrame(mfr, "toprow", gi.LayoutVert)
+	toprow.SetStretchMaxWidth()
+
+	toprow.SetProp("background-color", "lightgreen")
+	mainHeader := gi.AddNewLabel(toprow, "mainHeader", "Welcome to EFight version 0.0.0 alpha")
+	mainHeader.SetProp("font-size", "100px")
+	mainHeader.SetProp("text-align", "center")
+	mainHeader.SetProp("font-family", "Times New Roman, serif")
+
 	tv = mfr.AddNewChild(gi.KiT_TabView, "tv").(*gi.TabView)
 	tv.NewTabButton = false
 	tv.SetStretchMaxWidth()
+	tv.SetProp("background-color", "lightgreen")
 
 	signUpTab = tv.AddNewTab(gi.KiT_Frame, "Sign Up").(*gi.Frame)
 	startGame()
@@ -124,25 +131,25 @@ func mainrun() {
 	}
 
 	tv.SelectTabIndex(0)
-
-	// main menu
-	appnm := oswin.TheApp.Name()
-	mmen := win.MainMenu
-	mmen.ConfigMenus([]string{appnm, "Edit", "Window"})
-
-	amen := win.MainMenu.ChildByName(appnm, 0).(*gi.Action)
-	amen.Menu = make(gi.Menu, 0, 10)
-	amen.Menu.AddAppMenu(win)
-
-	emen := win.MainMenu.ChildByName("Edit", 1).(*gi.Action)
-	emen.Menu = make(gi.Menu, 0, 10)
-	emen.Menu.AddCopyCutPaste(win)
-
-	win.OSWin.SetCloseCleanFunc(func(w oswin.Window) {
-		go oswin.TheApp.Quit() // once main window is closed, quit
-	})
-
-	win.MainMenuUpdated()
+	//
+	// 	// main menu
+	// 	appnm := oswin.TheApp.Name()
+	// 	mmen := win.MainMenu
+	// 	mmen.ConfigMenus([]string{appnm, "Edit", "Window"})
+	//
+	// 	amen := win.MainMenu.ChildByName(appnm, 0).(*gi.Action)
+	// 	amen.Menu = make(gi.Menu, 0, 10)
+	// 	amen.Menu.AddAppMenu(win)
+	//
+	// 	emen := win.MainMenu.ChildByName("Edit", 1).(*gi.Action)
+	// 	emen.Menu = make(gi.Menu, 0, 10)
+	// 	emen.Menu.AddCopyCutPaste(win)
+	//
+	// 	win.OSWin.SetCloseCleanFunc(func(w oswin.Window) {
+	// 		go oswin.TheApp.Quit() // once main window is closed, quit
+	// 	})
+	//
+	// win.MainMenuUpdated()
 
 	vp.UpdateEndNoSig(updt)
 

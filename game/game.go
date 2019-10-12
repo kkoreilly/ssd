@@ -1,3 +1,5 @@
+// Copyright (c) 2019, The EFight Authors. All rights reserved.
+
 package main
 
 import (
