@@ -31,6 +31,8 @@ func main() {
 	router := gin.New()
 	router.Use(gin.Logger())
 	router.LoadHTMLGlob("webFiles/*home.html")
+router.LoadHTMLGlob("webFiles/logo.png")
+router.LoadHTMLGlob("webFiles/grass.png")
 	router.Static("/static", "static")
 
 	router.GET("/", func(c *gin.Context) {
