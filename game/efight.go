@@ -20,6 +20,7 @@ var inspectText *gi.Label
 var tv *gi.TabView
 var SUPERMODE = false
 var signUpTab *gi.Frame
+var homeTab *gi.Frame
 
 func mainrun() {
 	data()
@@ -27,7 +28,7 @@ func mainrun() {
 	width := 1024
 	height := 768
 
-	win := gi.NewWindow2D("efight-main", "EFight Home Screen", width, height, true) // pixel sizes
+	win := gi.NewMainWindow("efight-main", "EFight Home Screen", width, height) // pixel sizes
 
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()
@@ -159,7 +160,9 @@ func mainrun() {
 func initMainTab() {
 	updt := tv.UpdateStart()
 	tv.SetFullReRender()
-	homeTab := tv.AddNewTab(gi.KiT_Frame, "Home Tab").(*gi.Frame)
+	rec := ki.Node{}
+	rec.InitName(&rec, "rec")
+	homeTab = tv.AddNewTab(gi.KiT_Frame, "Home Tab").(*gi.Frame)
 
 	homeTab.Lay = gi.LayoutVert
 	homeTab.SetStretchMaxWidth()
@@ -172,7 +175,14 @@ func initMainTab() {
 	mainTitle.Text = "<b>Welcome to EFight, an Energy Based 3D battle game!</b>"
 	playButton := homeTab.AddNewChild(gi.KiT_Button, "playButton").(*gi.Button)
 	playButton.Text = "<b>Play!</b>"
+
 	playButton.SetProp("horizontal-align", gi.AlignCenter)
+
+	playButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(gi.ButtonClicked) {
+		//	startGame()
+		}
+	})
 	homeTab.SetProp("background-color", "lightgreen")
 	// tv.SetStretchMaxWidth()
 	tv.UpdateEnd(updt)

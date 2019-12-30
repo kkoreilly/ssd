@@ -30,12 +30,13 @@ type Map map[string]*MapObj
 
 var DefScale = mat32.Vec3{1, 1, 1}
 var FirstMap = Map{
-	"GreenHill": {"Hill", mat32.Vec3{1, 0, -20}, DefScale},
-	"House1":    {"House", mat32.Vec3{10, 0, -40}, DefScale},
+	"BigComplex1": {"BigComplex", mat32.Vec3{0, 0, -30}, DefScale},
+	// "House1":    {"House", mat32.Vec3{10, 0, -40}, DefScale},
 }
 
 var KiT_Scene = kit.Types.AddType(&Scene{}, nil)
 
+/**
 func AddToMap() {
 
 	var posx float32 = -5
@@ -53,6 +54,7 @@ func AddToMap() {
 	}
 
 }
+**/
 
 func BuildMap(sc *gi3d.Scene, mp Map) {
 
@@ -138,6 +140,12 @@ func MakeObj(sc *gi3d.Scene, obj *MapObj, nm string) *gi3d.Group {
 		o.Pose.Pos.Set(0, 0, 0)
 
 		o.Mat.SetTextureName(sc, "Table")
+	case "BigComplex":
+		ogp = gi3d.AddNewGroup(sc, sc, nm)
+		o := gi3d.AddNewObject(sc, ogp, "bigComplexPlaceholder", "BigComplexPlaceholder")
+		o.Pose.Pos.Set(0, 20, 0)
+		// o.Mat.Color.SetString("red", nil)
+		o.Mat.SetTextureName(sc, "Metal1")
 
 	}
 	ogp.Pose.Pos = obj.Pos
@@ -160,6 +168,7 @@ func MakeMeshes(sc *gi3d.Scene) {
 	gi3d.AddNewBox(sc, "HouseCouchBaseOne", 5, 2, 3)
 	gi3d.AddNewBox(sc, "HouseCouchTopOne", 5, 1, 1)
 	gi3d.AddNewBox(sc, "HouseWindowOne", 1, 1, 0.1)
+	gi3d.AddNewBox(sc, "BigComplexPlaceholder", 40, 40, 40)
 
 }
 func MakeTextures(sc *gi3d.Scene) {
@@ -169,13 +178,14 @@ func MakeTextures(sc *gi3d.Scene) {
 	gi3d.AddNewTextureFile(sc, "HousePillow", "pillow.png")
 	gi3d.AddNewTextureFile(sc, "HouseCouch", "couch.jpg")
 	gi3d.AddNewTextureFile(sc, "HouseWindow", "window.png")
+	gi3d.AddNewTextureFile(sc, "Metal1", "metal1.jpg")
 }
 func startGame() {
-	scrow := gi.AddNewLayout(signUpTab, "scrow", gi.LayoutHoriz)
-	scrow.SetStretchMaxWidth()
-	scrow.SetStretchMaxHeight()
+	gamerow := gi.AddNewLayout(signUpTab, "gamerow", gi.LayoutHoriz)
+	gamerow.SetStretchMaxWidth()
+	gamerow.SetStretchMaxHeight()
 
-	sc := AddNewScene(scrow, "scene")
+	sc := AddNewScene(gamerow, "scene")
 	sc.SetStretchMaxWidth()
 	sc.SetStretchMaxHeight()
 
@@ -194,7 +204,7 @@ func startGame() {
 	sc.Camera.Pose.Pos.Y = 3
 	sc.Camera.Pose.Pos.Z = 0
 
-	AddToMap()
+	// AddToMap()
 
 	MakeMeshes(&sc.Scene)
 	MakeTextures(&sc.Scene)
@@ -242,7 +252,7 @@ func startGame() {
 	// // // market1.Mat.Color.SetString("red", nil)
 	// // market1.Mat.SetTexture(&sc.Scene, tbtx.Name())
 
-	floorp := gi3d.AddNewPlane(&sc.Scene, "floor-plane", 100, 100)
+	floorp := gi3d.AddNewPlane(&sc.Scene, "floor-plane", 1000, 1000)
 	floor := gi3d.AddNewObject(&sc.Scene, &sc.Scene, "floor", floorp.Name())
 	floor.Pose.Pos.Set(0, 0, 0)
 	// floor.Mat.Emissive.SetString("green", nil)
