@@ -4,7 +4,7 @@ package main
 
 import (
 	"fmt"
-
+	"log"
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gi3d"
 	"github.com/goki/gi/mat32"
@@ -13,6 +13,7 @@ import (
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
+	
 )
 
 type Scene struct {
@@ -30,8 +31,9 @@ type Map map[string]*MapObj
 
 var DefScale = mat32.Vec3{1, 1, 1}
 var FirstMap = Map{
-	"BigComplex1": {"BigComplex", mat32.Vec3{0, 0, -30}, DefScale},
+	// "BigComplex1": {"BigComplex", mat32.Vec3{0, 0, -30}, DefScale},
 	// "House1":    {"House", mat32.Vec3{10, 0, -40}, DefScale},
+	"House1": {"House", mat32.Vec3{0,0,-10}, DefScale},
 }
 
 var KiT_Scene = kit.Types.AddType(&Scene{}, nil)
@@ -67,7 +69,30 @@ func BuildMap(sc *gi3d.Scene, mp Map) {
 func MakeObj(sc *gi3d.Scene, obj *MapObj, nm string) *gi3d.Group {
 	var ogp *gi3d.Group
 	switch obj.ObjType {
-	case "Hill":
+	
+	case "House":
+		ogp = gi3d.AddNewGroup(sc, sc, nm)
+
+
+		
+		dw, err := sc.OpenNewObj([]string{"doorWall1.obj"}, ogp)
+		if err != nil {
+			log.Println(err)
+
+		} else {
+			dw.Pose.Pos.Set(0,0,0)
+		}
+
+		ww, err := sc.OpenNewObj([]string{"windowWall1.obj"}, ogp)
+		if err != nil {
+			log.Println(err)
+
+		} else {
+			ww.Pose.Pos.Set(0, 0, -15)
+		}	
+
+		
+	/* case "Hill":
 		ogp = gi3d.AddNewGroup(sc, sc, nm)
 		o := gi3d.AddNewObject(sc, ogp, "hill", "Hill")
 		o.Pose.Pos.Set(0, 0, 0)
@@ -146,15 +171,26 @@ func MakeObj(sc *gi3d.Scene, obj *MapObj, nm string) *gi3d.Group {
 		o.Pose.Pos.Set(0, 20, 0)
 		// o.Mat.Color.SetString("red", nil)
 		o.Mat.SetTextureName(sc, "Metal1")
+	case "TestBed":
+		ogp = gi3d.AddNewGroup(sc, sc, nm)
+		err := sc.OpenObj([]string{"bed1.obj"}, ogp)
+		if err != nil {
+			log.Println(err)
+
+		}
+*/
 
 	}
-	ogp.Pose.Pos = obj.Pos
-	ogp.Pose.Scale = obj.Scale
+	if ogp != nil {
+		ogp.Pose.Pos = obj.Pos
+		ogp.Pose.Scale = obj.Scale
+	}
 	return ogp
 }
 
 func MakeMeshes(sc *gi3d.Scene) {
 	gi3d.AddNewBox(sc, "Gun", 0.1, 0.1, 1)
+/*
 	gi3d.AddNewBox(sc, "Hill", 1, 10, 1)
 	gi3d.AddNewBox(sc, "Table", 5, 2.5, 5)
 	gi3d.AddNewBox(sc, "Center_Blue", 3, 2, 3)
@@ -169,6 +205,7 @@ func MakeMeshes(sc *gi3d.Scene) {
 	gi3d.AddNewBox(sc, "HouseCouchTopOne", 5, 1, 1)
 	gi3d.AddNewBox(sc, "HouseWindowOne", 1, 1, 0.1)
 	gi3d.AddNewBox(sc, "BigComplexPlaceholder", 40, 40, 40)
+*/
 
 }
 func MakeTextures(sc *gi3d.Scene) {
