@@ -75,7 +75,7 @@ func MakeObj(sc *gi3d.Scene, obj *MapObj, nm string) *gi3d.Group {
 
 
 		
-		dw, err := sc.OpenNewObj([]string{"doorWall1.obj"}, ogp)
+		dw, err := sc.OpenNewObj("doorWall1.obj", ogp)
 		if err != nil {
 			log.Println(err)
 
@@ -83,7 +83,7 @@ func MakeObj(sc *gi3d.Scene, obj *MapObj, nm string) *gi3d.Group {
 			dw.Pose.Pos.Set(0,0,0)
 		}
 
-		ww, err := sc.OpenNewObj([]string{"windowWall1.obj"}, ogp)
+		ww, err := sc.OpenNewObj("windowWall1.obj", ogp)
 		if err != nil {
 			log.Println(err)
 
@@ -91,7 +91,33 @@ func MakeObj(sc *gi3d.Scene, obj *MapObj, nm string) *gi3d.Group {
 			ww.Pose.Pos.Set(0, 0, -15)
 		}	
 
+		ww2 := ww.Clone().(*gi3d.Group)
+		sc.AddChild(ww2)
+		ww2.Pose.Pos.Set(0, 0, -25)
+		ww2.Pose.SetAxisRotation(0, 1, 0, -90)
+
+		ww3 := ww2.Clone().(*gi3d.Group)
+		sc.AddChild(ww3)
+		ww3.Pose.Pos.Set(15, 0, -25)
+		ww2.Pose.SetAxisRotation(0, 1, 0, -90)
+
+		fi, err := sc.OpenNewObj("floor1.obj", ogp)
+		if err != nil {
+			log.Println(err)
+
+		} else {
+			fi.Pose.Pos.Set(0, 0, 0)
+		}	
 		
+		cr, err := sc.OpenNewObj("roof1.obj", ogp)
+		if err != nil {
+			log.Println(err)
+
+		} else {
+			cr.Pose.Pos.Set(0, 3.5, 0)
+		}	
+		// fi.Pose.SetAxisRotation(1, 0, 0, -45)
+				
 	/* case "Hill":
 		ogp = gi3d.AddNewGroup(sc, sc, nm)
 		o := gi3d.AddNewObject(sc, ogp, "hill", "Hill")
@@ -190,6 +216,7 @@ func MakeObj(sc *gi3d.Scene, obj *MapObj, nm string) *gi3d.Group {
 
 func MakeMeshes(sc *gi3d.Scene) {
 	gi3d.AddNewBox(sc, "Gun", 0.1, 0.1, 1)
+	gi3d.AddNewBox(sc, "Person", 0.5, 2, 0.5)
 /*
 	gi3d.AddNewBox(sc, "Hill", 1, 10, 1)
 	gi3d.AddNewBox(sc, "Table", 5, 2.5, 5)
@@ -216,6 +243,7 @@ func MakeTextures(sc *gi3d.Scene) {
 	gi3d.AddNewTextureFile(sc, "HouseCouch", "couch.jpg")
 	gi3d.AddNewTextureFile(sc, "HouseWindow", "window.png")
 	gi3d.AddNewTextureFile(sc, "Metal1", "metal1.jpg")
+	gi3d.AddNewTextureFile(sc, "Brick1", "brick.jpg")
 }
 func startGame() {
 	gamerow := gi.AddNewLayout(signUpTab, "gamerow", gi.LayoutHoriz)
@@ -238,7 +266,7 @@ func startGame() {
 
 	// spot := gi3d.AddNewSpotLight(sc, "spot", 1, gi3d.DirectSun)
 	// spot.Pose.Pos.Set(0, 0, 2)
-	sc.Camera.Pose.Pos.Y = 3
+	sc.Camera.Pose.Pos.Y = 2
 	sc.Camera.Pose.Pos.Z = 0
 
 	// AddToMap()
@@ -251,8 +279,8 @@ func startGame() {
 	// cbm.Segs.Set(10, 10, 10) // not clear if any diff really..
 
 	fpobj := gi3d.AddNewGroup(&sc.Scene, &sc.Scene, "TrackCamera")
-	rcb := gi3d.AddNewObject(&sc.Scene, fpobj, "red-cube", "Gun")
-	rcb.Pose.Pos.Set(.5, -.5, -3)
+	rcb := gi3d.AddNewSolid(&sc.Scene, fpobj, "red-cube", "Person")
+	rcb.Pose.Pos.Set(0, -1, -12.5)
 	// rcb.Pose.Scale.Set(0.1, 0.1, 1)
 	rcb.Mat.Color.SetString("red", nil)
 
@@ -290,12 +318,12 @@ func startGame() {
 	// // market1.Mat.SetTexture(&sc.Scene, tbtx.Name())
 
 	floorp := gi3d.AddNewPlane(&sc.Scene, "floor-plane", 1000, 1000)
-	floor := gi3d.AddNewObject(&sc.Scene, &sc.Scene, "floor", floorp.Name())
+	floor := gi3d.AddNewSolid(&sc.Scene, &sc.Scene, "floor", floorp.Name())
 	floor.Pose.Pos.Set(0, 0, 0)
 	// floor.Mat.Emissive.SetString("green", nil)
 	grtx := gi3d.AddNewTextureFile(&sc.Scene, "ground", "ground.jpg")
 	floor.Mat.SetTexture(&sc.Scene, grtx)
-	floor.Mat.Tiling.Repeat.Set(40, 40)
+	floor.Mat.Tiling.Repeat.Set(200, 200)
 
 }
 
@@ -498,12 +526,12 @@ func (sc *Scene) NavKeyEvents(kt *key.ChordEvent) {
 		}
 	case "w":
 		y := sc.Camera.Pose.Pos.Y
-		sc.Camera.Pose.MoveOnAxis(0, 0, -1, .5)
+		sc.Camera.Pose.MoveOnAxis(0, 0, -0.5, .5)
 		kt.SetProcessed()
 		sc.Camera.Pose.Pos.Y = y
 	case "s":
 		y := sc.Camera.Pose.Pos.Y
-		sc.Camera.Pose.MoveOnAxis(0, 0, 1, .5)
+		sc.Camera.Pose.MoveOnAxis(0, 0, 0.5, .5)
 		kt.SetProcessed()
 		sc.Camera.Pose.Pos.Y = y
 	case "a":
@@ -514,7 +542,7 @@ func (sc *Scene) NavKeyEvents(kt *key.ChordEvent) {
 		kt.SetProcessed()
 	case "t":
 		kt.SetProcessed()
-		obj := sc.Child(0).(*gi3d.Object)
+		obj := sc.Child(0).(*gi3d.Solid)
 		fmt.Printf("updated obj: %v\n", obj.PathUnique())
 		obj.UpdateSig()
 		return

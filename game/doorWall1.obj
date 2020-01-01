@@ -6,7 +6,7 @@ mtllib doorWall1.mtl
 
 g Mesh1 Difference Model
 
-usemtl FrontColor
+usemtl Brick_Antique_01
 v 15 3.5 -0
 vt 590.551 137.795
 vn 0 -4.39057e-16 1
