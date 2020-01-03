@@ -22,17 +22,22 @@ func (gm *Game) PhysMakeBrickHouse(par *eve.Group, name string) *eve.Group {
 	thick := float32(0.1) // wall, ceiling, floor
 
 	house := eve.AddNewGroup(par, name)
-	floor := eve.AddNewBox(house, "floor", mat32.Vec3{0, -thick / 2, 0}, mat32.Vec3{width, thick, depth})
+	floor := eve.AddNewBox(house, "floor", mat32.Vec3{0, thick / 2, 0}, mat32.Vec3{width, thick, depth})
+	floor.Color = "grey" // for debugging
 	floor.Vis = "BrickHouse.Floor"
 	bwall := eve.AddNewBox(house, "back-wall", mat32.Vec3{0, height / 2, -depth / 2}, mat32.Vec3{width, height, thick})
+	bwall.Color = "blue"
 	bwall.Vis = "BrickHouse.WinWall"
 	lwall := eve.AddNewBox(house, "left-wall", mat32.Vec3{-width / 2, height / 2, 0}, mat32.Vec3{depth, height, thick})
 	lwall.Initial.SetAxisRotation(0, 1, 0, -90)
+	lwall.Color = "green"
 	lwall.Vis = "BrickHouse.WinWall"
 	rwall := eve.AddNewBox(house, "right-wall", mat32.Vec3{width / 2, height / 2, 0}, mat32.Vec3{depth, height, thick})
 	rwall.Vis = "BrickHouse.WinWall"
 	rwall.Initial.SetAxisRotation(0, 1, 0, -90)
+	rwall.Color = "red"
 	fwall := eve.AddNewBox(house, "front-wall", mat32.Vec3{0, height / 2, depth / 2}, mat32.Vec3{width, height, thick})
+	fwall.Color = "yellow"
 	fwall.Vis = "BrickHouse.DoorWall"
 	return house
 }

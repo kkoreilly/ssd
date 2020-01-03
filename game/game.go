@@ -11,6 +11,7 @@ import (
 	"github.com/emer/eve/evev"
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gi3d"
+	"github.com/goki/gi/giv"
 	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/key"
@@ -189,20 +190,18 @@ func (gm *Game) MakeMeshes() {
 func (gm *Game) MakeWorld() {
 	gm.World = &eve.Group{}
 	gm.World.InitName(gm.World, "World")
-
-	gm.MakeMeshes()
-	gm.MakeLibrary()
 	gm.BuildMap()
+	gm.World.InitWorld() // key to put things in their places!
 }
 
 // MakeView makes the view
 func (gm *Game) MakeView() {
 	sc := &gm.Scene.Scene
+	gm.MakeMeshes()
 	wgp := gi3d.AddNewGroup(sc, sc, "world")
 	gm.View = evev.NewView(gm.World, sc, wgp)
-	// ev.View.InitLibrary() // this makes a basic library based on body shapes, sizes
-	// at this point the library can be updated to configure custom visualizations
-	// for any of the named bodies.
+	// gm.View.InitLibrary() // this makes a basic library based on body shapes, sizes
+	gm.MakeLibrary()
 	gm.View.Sync()
 }
 
@@ -210,6 +209,9 @@ func (gm *Game) Config() {
 	gamerow := gi.AddNewLayout(signUpTab, "gamerow", gi.LayoutHoriz)
 	gamerow.SetStretchMaxWidth()
 	gamerow.SetStretchMaxHeight()
+
+	epbut := gi.AddNewButton(gamerow, "edit-phys")
+	epbut.SetText("Edit Phys")
 
 	sc := AddNewScene(gamerow, "scene")
 	gm.Scene = sc
@@ -235,6 +237,12 @@ func (gm *Game) Config() {
 	gm.MakeWorld()
 
 	gm.MakeView()
+
+	epbut.ButtonSig.Connect(gm.World.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(gi.ButtonClicked) {
+			giv.GoGiEditorDialog(gm.World)
+		}
+	})
 
 	// center_bluem :=
 	// cbm.Segs.Set(10, 10, 10) // not clear if any diff really..
