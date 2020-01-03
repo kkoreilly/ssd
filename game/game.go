@@ -1,10 +1,14 @@
-// Copyright (c) 2019, The EFight Authors. All rights reserved.
+// Copyright (c) 2020, The EFight Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
 
 package main
 
 import (
 	"fmt"
-	"log"
+
+	"github.com/emer/eve/eve"
+	"github.com/emer/eve/evev"
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gi3d"
 	"github.com/goki/gi/mat32"
@@ -13,267 +17,202 @@ import (
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
-	
 )
+
+type Game struct {
+	World   *eve.Group
+	View    *evev.View
+	Scene   *Scene
+	Map     Map
+	MapObjs map[string]bool
+}
+
+// TheGame is the game instance for the current game
+var TheGame *Game
 
 type Scene struct {
 	gi3d.Scene
 	TrackMouse bool
 }
-type MapObj struct {
-	ObjType string
-	Pos     mat32.Vec3
-	Scale   mat32.Vec3
-	// Color   string
-}
-
-type Map map[string]*MapObj
-
-var DefScale = mat32.Vec3{1, 1, 1}
-var FirstMap = Map{
-	// "BigComplex1": {"BigComplex", mat32.Vec3{0, 0, -30}, DefScale},
-	// "House1":    {"House", mat32.Vec3{10, 0, -40}, DefScale},
-	"House1": {"House", mat32.Vec3{0,0,-10}, DefScale},
-	"House2": {"House", mat32.Vec3{0,15,-10}, DefScale},	
-}
 
 var KiT_Scene = kit.Types.AddType(&Scene{}, nil)
 
-/**
-func AddToMap() {
-
-	var posx float32 = -5
-	var posy float32 = 0
-	var posz float32 = -20
-	for r := 0; r < 4; r++ {
-		posx = -5
-		for c := 0; c < 4; c++ {
-			name := fmt.Sprintf("table%v,%v", r, c)
-			pos := mat32.Vec3{posx, posy, posz}
-			FirstMap[name] = &MapObj{"Table", pos, DefScale}
-			posx = posx - 6.5
-		}
-		posz = posz - 6.5
+func (gm *Game) BuildMap() {
+	for nm, obj := range gm.Map {
+		gm.MakeObj(obj, nm)
 	}
-
-}
-**/
-
-func BuildMap(sc *gi3d.Scene, mp Map) {
-
-	for nm, obj := range mp {
-		MakeObj(sc, obj, nm)
-	}
-
 }
 
-func MakeObj(sc *gi3d.Scene, obj *MapObj, nm string) *gi3d.Group {
-	var ogp *gi3d.Group
+func (gm *Game) MakeObj(obj *MapObj, nm string) *eve.Group {
+	var ogp *eve.Group
 	switch obj.ObjType {
-	
 	case "House":
-		ogp = gi3d.AddNewGroup(sc, sc, nm)
+		ogp = eve.AddNewGroup(gm.World, nm)
+		gm.PhysMakeBrickHouse(ogp, nm)
+		/*
+			case "Hill":
+					ogp = gi3d.AddNewGroup(sc, sc, nm)
+					o := gi3d.AddNewObject(sc, ogp, "hill", "Hill")
+					o.Pose.Pos.Set(0, 0, 0)
+					// o.Pose.Scale.Set(1, 10, 1)
+					o.Mat.Color.SetString("green", nil)
+				case "House":
+					ogp = gi3d.AddNewGroup(sc, sc, nm)
+					o := gi3d.AddNewObject(sc, ogp, "house_ground", "HouseFloor")
+					o.Pose.Pos.Set(0, 0, 0)
+					// o.Pose.Scale.Set(10, 0.01, 10)
+					o.Mat.Color.SetString("brown", nil)
 
+					o = gi3d.AddNewObject(sc, ogp, "house_roof", "HouseRoof")
+					o.Pose.Pos.Set(0, 4.995, 0)
+					// o.Pose.Scale.Set(10, 0.01, 10)
+					o.Mat.Color.SetString("brown", nil)
 
-		
-		dw, err := sc.OpenNewObj("doorWall1.obj", ogp)
-		if err != nil {
-			log.Println(err)
+					o = gi3d.AddNewObject(sc, ogp, "house_wall1", "HouseWallOne")
+					o.Pose.Pos.Set(-5.25, 0, 0)
+					// o.Pose.Scale.Set(0.5, 10, 10)
+					o.Mat.Color.SetString("brown", nil)
 
-		} else {
-			dw.Pose.Pos.Set(0,0,0)
-		}
+					o = gi3d.AddNewObject(sc, ogp, "house_wall2", "HouseWallOne")
+					o.Pose.Pos.Set(4.75, 0, 0)
+					// o.Pose.Scale.Set(0.5, 10, 10)
+					o.Mat.Color.SetString("brown", nil)
 
-		ww, err := sc.OpenNewObj("windowWall1.obj", ogp)
-		if err != nil {
-			log.Println(err)
+					o = gi3d.AddNewObject(sc, ogp, "house_wall3", "HouseWallTwo")
+					o.Pose.Pos.Set(0, 0, -5)
+					// o.Pose.Scale.Set(10, 10, 0.5)
+					o.Mat.Color.SetString("brown", nil)
 
-		} else {
-			ww.Pose.Pos.Set(0, 0, -15)
-		}	
+					o = gi3d.AddNewObject(sc, ogp, "house_bed1", "HouseBedOne")
+					o.Pose.Pos.Set(-3.5, 0, -4)
+					// o.Mat.Color.SetString("green", nil)
+					o.Mat.SetTextureName(sc, "HouseBed")
 
-		ww2 := ww.Clone().(*gi3d.Group)
-		ogp.AddChild(ww2)
-		ww2.Pose.Pos.Set(0, 0, -15)
-		ww2.Pose.SetAxisRotation(0, 1, 0, -90)
+					o = gi3d.AddNewObject(sc, ogp, "house_blanket1", "HouseBlanketOne")
+					o.Pose.Pos.Set(-3.5, 1.05, -4)
+					o.Mat.SetTextureName(sc, "HouseBlanket")
 
-		ww3 := ww2.Clone().(*gi3d.Group)
-		ogp.AddChild(ww3)
-		ww3.Pose.Pos.Set(15, 0, -15)
-		ww2.Pose.SetAxisRotation(0, 1, 0, -90)
+					o = gi3d.AddNewObject(sc, ogp, "house_pillow1", "HousePillowOne")
+					o.Pose.Pos.Set(-4.75, 1.15, -4)
+					o.Mat.SetTextureName(sc, "HousePillow")
 
-		fi, err := sc.OpenNewObj("floor1.obj", ogp)
-		if err != nil {
-			log.Println(err)
+					o = gi3d.AddNewObject(sc, ogp, "house_couch_base1", "HouseCouchBaseOne")
+					o.Pose.Pos.Set(2, 0, -3.5)
+					o.Mat.SetTextureName(sc, "HouseCouch")
 
-		} else {
-			fi.Pose.Pos.Set(0, 0, 0)
-		}	
-		
-		cr, err := sc.OpenNewObj("roof1.obj", ogp)
-		if err != nil {
-			log.Println(err)
+					o = gi3d.AddNewObject(sc, ogp, "house_couch_top1", "HouseCouchTopOne")
+					o.Pose.Pos.Set(2, 1.5, -4.5)
+					o.Mat.SetTextureName(sc, "HouseCouch")
 
-		} else {
-			cr.Pose.Pos.Set(0, 3.5, 0)
-		}
+					o = gi3d.AddNewObject(sc, ogp, "house_window1", "HouseWindowOne")
+					o.Pose.Pos.Set(2, 3.5, -4.8)
+					o.Mat.SetTextureName(sc, "HouseWindow")
 
-		rt, err := sc.OpenNewObj("roofTop1.obj", ogp)
-		if err != nil {
-			log.Println(err)
+					o = gi3d.AddNewObject(sc, ogp, "house_window2", "HouseWindowOne")
+					o.Pose.Pos.Set(-3, 3.5, -4.8)
+					o.Mat.SetTextureName(sc, "HouseWindow")
 
-		} else {
-			rt.Pose.Pos.Set(-0.3725, 3.5, 0.3725)
-			rt.Pose.Scale.Set(1.05, 1, 1.05)
-			solidrt := rt.Child(0).Child(0).(*gi3d.Solid)
-			solidrt.Mat.CullBack = false
-		}
+				case "Center_Blue":
+					ogp = gi3d.AddNewGroup(sc, sc, nm)
+					o := gi3d.AddNewObject(sc, ogp, "center_blue", "Center_Blue")
+					o.Pose.Pos.Set(0, 0, 0)
+					o.Mat.Color.SetString("blue", nil)
+				case "Table":
+					ogp = gi3d.AddNewGroup(sc, sc, nm)
+					o := gi3d.AddNewObject(sc, ogp, "table", "Table")
+					o.Pose.Pos.Set(0, 0, 0)
 
-		bb, err := sc.OpenNewObj("bed1.obj", ogp)
-		if err != nil {
-			log.Println(err)
+					o.Mat.SetTextureName(sc, "Table")
+				case "BigComplex":
+					ogp = gi3d.AddNewGroup(sc, sc, nm)
+					o := gi3d.AddNewObject(sc, ogp, "bigComplexPlaceholder", "BigComplexPlaceholder")
+					o.Pose.Pos.Set(0, 20, 0)
+					// o.Mat.Color.SetString("red", nil)
+					o.Mat.SetTextureName(sc, "Metal1")
+				case "TestBed":
+					ogp = gi3d.AddNewGroup(sc, sc, nm)
+					err := sc.OpenObj([]string{"bed1.obj"}, ogp)
+					if err != nil {
+						log.Println(err)
 
-		} else {
-			bb.Pose.Pos.Set(0, 0, -13.5)
-		}
-		
-
-		
-		// fi.Pose.SetAxisRotation(1, 0, 0, -45)
-				
-	/* case "Hill":
-		ogp = gi3d.AddNewGroup(sc, sc, nm)
-		o := gi3d.AddNewObject(sc, ogp, "hill", "Hill")
-		o.Pose.Pos.Set(0, 0, 0)
-		// o.Pose.Scale.Set(1, 10, 1)
-		o.Mat.Color.SetString("green", nil)
-	case "House":
-		ogp = gi3d.AddNewGroup(sc, sc, nm)
-		o := gi3d.AddNewObject(sc, ogp, "house_ground", "HouseFloor")
-		o.Pose.Pos.Set(0, 0, 0)
-		// o.Pose.Scale.Set(10, 0.01, 10)
-		o.Mat.Color.SetString("brown", nil)
-
-		o = gi3d.AddNewObject(sc, ogp, "house_roof", "HouseRoof")
-		o.Pose.Pos.Set(0, 4.995, 0)
-		// o.Pose.Scale.Set(10, 0.01, 10)
-		o.Mat.Color.SetString("brown", nil)
-
-		o = gi3d.AddNewObject(sc, ogp, "house_wall1", "HouseWallOne")
-		o.Pose.Pos.Set(-5.25, 0, 0)
-		// o.Pose.Scale.Set(0.5, 10, 10)
-		o.Mat.Color.SetString("brown", nil)
-
-		o = gi3d.AddNewObject(sc, ogp, "house_wall2", "HouseWallOne")
-		o.Pose.Pos.Set(4.75, 0, 0)
-		// o.Pose.Scale.Set(0.5, 10, 10)
-		o.Mat.Color.SetString("brown", nil)
-
-		o = gi3d.AddNewObject(sc, ogp, "house_wall3", "HouseWallTwo")
-		o.Pose.Pos.Set(0, 0, -5)
-		// o.Pose.Scale.Set(10, 10, 0.5)
-		o.Mat.Color.SetString("brown", nil)
-
-		o = gi3d.AddNewObject(sc, ogp, "house_bed1", "HouseBedOne")
-		o.Pose.Pos.Set(-3.5, 0, -4)
-		// o.Mat.Color.SetString("green", nil)
-		o.Mat.SetTextureName(sc, "HouseBed")
-
-		o = gi3d.AddNewObject(sc, ogp, "house_blanket1", "HouseBlanketOne")
-		o.Pose.Pos.Set(-3.5, 1.05, -4)
-		o.Mat.SetTextureName(sc, "HouseBlanket")
-
-		o = gi3d.AddNewObject(sc, ogp, "house_pillow1", "HousePillowOne")
-		o.Pose.Pos.Set(-4.75, 1.15, -4)
-		o.Mat.SetTextureName(sc, "HousePillow")
-
-		o = gi3d.AddNewObject(sc, ogp, "house_couch_base1", "HouseCouchBaseOne")
-		o.Pose.Pos.Set(2, 0, -3.5)
-		o.Mat.SetTextureName(sc, "HouseCouch")
-
-		o = gi3d.AddNewObject(sc, ogp, "house_couch_top1", "HouseCouchTopOne")
-		o.Pose.Pos.Set(2, 1.5, -4.5)
-		o.Mat.SetTextureName(sc, "HouseCouch")
-
-		o = gi3d.AddNewObject(sc, ogp, "house_window1", "HouseWindowOne")
-		o.Pose.Pos.Set(2, 3.5, -4.8)
-		o.Mat.SetTextureName(sc, "HouseWindow")
-
-		o = gi3d.AddNewObject(sc, ogp, "house_window2", "HouseWindowOne")
-		o.Pose.Pos.Set(-3, 3.5, -4.8)
-		o.Mat.SetTextureName(sc, "HouseWindow")
-
-	case "Center_Blue":
-		ogp = gi3d.AddNewGroup(sc, sc, nm)
-		o := gi3d.AddNewObject(sc, ogp, "center_blue", "Center_Blue")
-		o.Pose.Pos.Set(0, 0, 0)
-		o.Mat.Color.SetString("blue", nil)
-	case "Table":
-		ogp = gi3d.AddNewGroup(sc, sc, nm)
-		o := gi3d.AddNewObject(sc, ogp, "table", "Table")
-		o.Pose.Pos.Set(0, 0, 0)
-
-		o.Mat.SetTextureName(sc, "Table")
-	case "BigComplex":
-		ogp = gi3d.AddNewGroup(sc, sc, nm)
-		o := gi3d.AddNewObject(sc, ogp, "bigComplexPlaceholder", "BigComplexPlaceholder")
-		o.Pose.Pos.Set(0, 20, 0)
-		// o.Mat.Color.SetString("red", nil)
-		o.Mat.SetTextureName(sc, "Metal1")
-	case "TestBed":
-		ogp = gi3d.AddNewGroup(sc, sc, nm)
-		err := sc.OpenObj([]string{"bed1.obj"}, ogp)
-		if err != nil {
-			log.Println(err)
-
-		}
-*/
+					}
+		*/
 
 	}
 	if ogp != nil {
-		ogp.Pose.Pos = obj.Pos
-		ogp.Pose.Scale = obj.Scale
+		ogp.Initial.Pos = obj.Pos
+		// ogp.Initial.Scale = obj.Scale
 	}
 	return ogp
 }
 
-func MakeMeshes(sc *gi3d.Scene) {
+// todo: could have a smarter way of figuring out all the stuff you need
+// to make, or not..
+func (gm *Game) MakeLibrary() {
+	gm.LibMakeBrickHouse()
+}
+
+func (gm *Game) MakeMeshes() {
+	sc := &gm.Scene.Scene
 	gi3d.AddNewBox(sc, "Gun", 0.1, 0.1, 1)
 	gi3d.AddNewBox(sc, "Person", 0.5, 2, 0.5)
-/*
-	gi3d.AddNewBox(sc, "Hill", 1, 10, 1)
-	gi3d.AddNewBox(sc, "Table", 5, 2.5, 5)
-	gi3d.AddNewBox(sc, "Center_Blue", 3, 2, 3)
-	gi3d.AddNewBox(sc, "HouseFloor", 10, 0.01, 10)
-	gi3d.AddNewBox(sc, "HouseRoof", 10, 0.01, 10)
-	gi3d.AddNewBox(sc, "HouseWallOne", 0.5, 10, 10)
-	gi3d.AddNewBox(sc, "HouseWallTwo", 10, 10, 0.5)
-	gi3d.AddNewBox(sc, "HouseBedOne", 3, 2, 2)
-	gi3d.AddNewBox(sc, "HouseBlanketOne", 3, 0.1, 2)
-	gi3d.AddNewBox(sc, "HousePillowOne", 0.5, 0.25, 2)
-	gi3d.AddNewBox(sc, "HouseCouchBaseOne", 5, 2, 3)
-	gi3d.AddNewBox(sc, "HouseCouchTopOne", 5, 1, 1)
-	gi3d.AddNewBox(sc, "HouseWindowOne", 1, 1, 0.1)
-	gi3d.AddNewBox(sc, "BigComplexPlaceholder", 40, 40, 40)
-*/
+	/*
+		gi3d.AddNewBox(sc, "Hill", 1, 10, 1)
+		gi3d.AddNewBox(sc, "Table", 5, 2.5, 5)
+		gi3d.AddNewBox(sc, "Center_Blue", 3, 2, 3)
+		gi3d.AddNewBox(sc, "HouseFloor", 10, 0.01, 10)
+		gi3d.AddNewBox(sc, "HouseRoof", 10, 0.01, 10)
+		gi3d.AddNewBox(sc, "HouseWallOne", 0.5, 10, 10)
+		gi3d.AddNewBox(sc, "HouseWallTwo", 10, 10, 0.5)
+		gi3d.AddNewBox(sc, "HouseBedOne", 3, 2, 2)
+		gi3d.AddNewBox(sc, "HouseBlanketOne", 3, 0.1, 2)
+		gi3d.AddNewBox(sc, "HousePillowOne", 0.5, 0.25, 2)
+		gi3d.AddNewBox(sc, "HouseCouchBaseOne", 5, 2, 3)
+		gi3d.AddNewBox(sc, "HouseCouchTopOne", 5, 1, 1)
+		gi3d.AddNewBox(sc, "HouseWindowOne", 1, 1, 0.1)
+		gi3d.AddNewBox(sc, "BigComplexPlaceholder", 40, 40, 40)
+	*/
+}
 
+// func MakeTextures(sc *gi3d.Scene) {
+// 	gi3d.AddNewTextureFile(sc, "Table", "table.jpg")
+// 	gi3d.AddNewTextureFile(sc, "HouseBed", "bed.png")
+// 	gi3d.AddNewTextureFile(sc, "HouseBlanket", "blanket.png")
+// 	gi3d.AddNewTextureFile(sc, "HousePillow", "pillow.png")
+// 	gi3d.AddNewTextureFile(sc, "HouseCouch", "couch.jpg")
+// 	gi3d.AddNewTextureFile(sc, "HouseWindow", "window.png")
+// 	gi3d.AddNewTextureFile(sc, "Metal1", "metal1.jpg")
+// 	gi3d.AddNewTextureFile(sc, "Brick1", "brick.jpg")
+// }
+
+// MakeWorld constructs a new virtual physics world
+func (gm *Game) MakeWorld() {
+	gm.World = &eve.Group{}
+	gm.World.InitName(gm.World, "World")
+
+	gm.MakeMeshes()
+	gm.MakeLibrary()
+	gm.BuildMap()
 }
-func MakeTextures(sc *gi3d.Scene) {
-	gi3d.AddNewTextureFile(sc, "Table", "table.jpg")
-	gi3d.AddNewTextureFile(sc, "HouseBed", "bed.png")
-	gi3d.AddNewTextureFile(sc, "HouseBlanket", "blanket.png")
-	gi3d.AddNewTextureFile(sc, "HousePillow", "pillow.png")
-	gi3d.AddNewTextureFile(sc, "HouseCouch", "couch.jpg")
-	gi3d.AddNewTextureFile(sc, "HouseWindow", "window.png")
-	gi3d.AddNewTextureFile(sc, "Metal1", "metal1.jpg")
-	gi3d.AddNewTextureFile(sc, "Brick1", "brick.jpg")
+
+// MakeView makes the view
+func (gm *Game) MakeView() {
+	sc := &gm.Scene.Scene
+	wgp := gi3d.AddNewGroup(sc, sc, "world")
+	gm.View = evev.NewView(gm.World, sc, wgp)
+	// ev.View.InitLibrary() // this makes a basic library based on body shapes, sizes
+	// at this point the library can be updated to configure custom visualizations
+	// for any of the named bodies.
+	gm.View.Sync()
 }
-func startGame() {
+
+func (gm *Game) Config() {
 	gamerow := gi.AddNewLayout(signUpTab, "gamerow", gi.LayoutHoriz)
 	gamerow.SetStretchMaxWidth()
 	gamerow.SetStretchMaxHeight()
 
 	sc := AddNewScene(gamerow, "scene")
+	gm.Scene = sc
 	sc.SetStretchMaxWidth()
 	sc.SetStretchMaxHeight()
 
@@ -292,11 +231,10 @@ func startGame() {
 	sc.Camera.Pose.Pos.Y = 2
 	sc.Camera.Pose.Pos.Z = 20
 
-	// AddToMap()
+	gm.Map = FirstMap
+	gm.MakeWorld()
 
-	MakeMeshes(&sc.Scene)
-	MakeTextures(&sc.Scene)
-	BuildMap(&sc.Scene, FirstMap)
+	gm.MakeView()
 
 	// center_bluem :=
 	// cbm.Segs.Set(10, 10, 10) // not clear if any diff really..

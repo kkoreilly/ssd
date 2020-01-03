@@ -52,7 +52,8 @@ func mainrun() {
 	tv.SetProp("background-color", "lightgreen")
 
 	signUpTab = tv.AddNewTab(gi.KiT_Frame, "Sign Up").(*gi.Frame)
-	startGame()
+	TheGame = &Game{}
+	TheGame.Config()
 
 	signUpTab.Lay = gi.LayoutVert
 	signUpTab.SetStretchMaxWidth()
@@ -180,7 +181,7 @@ func initMainTab() {
 
 	playButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
-		//	startGame()
+			//	startGame()
 		}
 	})
 	homeTab.SetProp("background-color", "lightgreen")
