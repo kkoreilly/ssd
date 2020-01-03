@@ -34,6 +34,7 @@ var FirstMap = Map{
 	// "BigComplex1": {"BigComplex", mat32.Vec3{0, 0, -30}, DefScale},
 	// "House1":    {"House", mat32.Vec3{10, 0, -40}, DefScale},
 	"House1": {"House", mat32.Vec3{0,0,-10}, DefScale},
+	"House2": {"House", mat32.Vec3{0,15,-10}, DefScale},	
 }
 
 var KiT_Scene = kit.Types.AddType(&Scene{}, nil)
@@ -92,13 +93,13 @@ func MakeObj(sc *gi3d.Scene, obj *MapObj, nm string) *gi3d.Group {
 		}	
 
 		ww2 := ww.Clone().(*gi3d.Group)
-		sc.AddChild(ww2)
-		ww2.Pose.Pos.Set(0, 0, -25)
+		ogp.AddChild(ww2)
+		ww2.Pose.Pos.Set(0, 0, -15)
 		ww2.Pose.SetAxisRotation(0, 1, 0, -90)
 
 		ww3 := ww2.Clone().(*gi3d.Group)
-		sc.AddChild(ww3)
-		ww3.Pose.Pos.Set(15, 0, -25)
+		ogp.AddChild(ww3)
+		ww3.Pose.Pos.Set(15, 0, -15)
 		ww2.Pose.SetAxisRotation(0, 1, 0, -90)
 
 		fi, err := sc.OpenNewObj("floor1.obj", ogp)
@@ -115,7 +116,29 @@ func MakeObj(sc *gi3d.Scene, obj *MapObj, nm string) *gi3d.Group {
 
 		} else {
 			cr.Pose.Pos.Set(0, 3.5, 0)
-		}	
+		}
+
+		rt, err := sc.OpenNewObj("roofTop1.obj", ogp)
+		if err != nil {
+			log.Println(err)
+
+		} else {
+			rt.Pose.Pos.Set(-0.3725, 3.5, 0.3725)
+			rt.Pose.Scale.Set(1.05, 1, 1.05)
+			solidrt := rt.Child(0).Child(0).(*gi3d.Solid)
+			solidrt.Mat.CullBack = false
+		}
+
+		bb, err := sc.OpenNewObj("bed1.obj", ogp)
+		if err != nil {
+			log.Println(err)
+
+		} else {
+			bb.Pose.Pos.Set(0, 0, -13.5)
+		}
+		
+
+		
 		// fi.Pose.SetAxisRotation(1, 0, 0, -45)
 				
 	/* case "Hill":
@@ -267,7 +290,7 @@ func startGame() {
 	// spot := gi3d.AddNewSpotLight(sc, "spot", 1, gi3d.DirectSun)
 	// spot.Pose.Pos.Set(0, 0, 2)
 	sc.Camera.Pose.Pos.Y = 2
-	sc.Camera.Pose.Pos.Z = 0
+	sc.Camera.Pose.Pos.Z = 20
 
 	// AddToMap()
 

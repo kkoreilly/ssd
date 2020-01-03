@@ -1,0 +1,9 @@
+#
+## Alias OBJ Material File
+# Exported from SketchUp, (c) 2000-2012 Trimble Navigation Limited
+
+newmtl Roofing_Shingles_GAF_Estates
+Ka 0.000000 0.000000 0.000000
+Kd 0.7 0.7 0.7
+Ks 1 1 1
+map_Kd -s 1 1 roofTop.jpg
