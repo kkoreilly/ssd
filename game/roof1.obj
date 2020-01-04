@@ -2,11 +2,11 @@
 # Exported from SketchUp, (c) 2000-2012 Trimble Navigation Limited
 # File units = meters
 
-mtllib roof1.mtl
+mtllib BrickHouse.Ceiling.mtl
 
 g Mesh1 Group1 Model
 
-usemtl White_Roof
+usemtl White_Ceiling
 v 15 0 -15
 vt 590.551 0
 vn 1 0 -0
@@ -55,4 +55,3 @@ vn -1 0 -0
 f 5/6/6 7/3/6 8/2/6
 
 f 7/3/6 5/6/6 6/5/6
-

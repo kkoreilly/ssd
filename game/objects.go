@@ -25,6 +25,9 @@ func (gm *Game) PhysMakeBrickHouse(par *eve.Group, name string) *eve.Group {
 	floor := eve.AddNewBox(house, "floor", mat32.Vec3{0, thick / 2, 0}, mat32.Vec3{width, thick, depth})
 	floor.Color = "grey" // for debugging
 	floor.Vis = "BrickHouse.Floor"
+	ceiling := eve.AddNewBox(house, "ceiling", mat32.Vec3{0, float32(3.5) - thick / 2, 0}, mat32.Vec3{width, thick, depth})
+	ceiling.Color = "grey" // for debugging
+	ceiling.Vis = "BrickHouse.Ceiling"
 	bwall := eve.AddNewBox(house, "back-wall", mat32.Vec3{0, height / 2, -depth / 2}, mat32.Vec3{width, height, thick})
 	bwall.Color = "blue"
 	bwall.Vis = "BrickHouse.WinWall"
@@ -44,27 +47,27 @@ func (gm *Game) PhysMakeBrickHouse(par *eve.Group, name string) *eve.Group {
 
 func (gm *Game) LibMakeBrickHouse() {
 	sc := &gm.Scene.Scene
-	_, err := sc.OpenToLibrary("doorWall1.obj", "BrickHouse.DoorWall")
+	_, err := sc.OpenToLibrary("objs/BrickHouse.DoorWall.obj", "BrickHouse.DoorWall")
 	if err != nil {
 		log.Println(err)
 	}
 
-	_, err = sc.OpenToLibrary("windowWall1.obj", "BrickHouse.WinWall")
+	_, err = sc.OpenToLibrary("objs/BrickHouse.WinWall.obj", "BrickHouse.WinWall")
 	if err != nil {
 		log.Println(err)
 	}
 
-	_, err = sc.OpenToLibrary("floor1.obj", "BrickHouse.Floor")
+	_, err = sc.OpenToLibrary("objs/BrickHouse.Floor.obj", "BrickHouse.Floor")
 	if err != nil {
 		log.Println(err)
 	}
 
-	_, err = sc.OpenToLibrary("roof1.obj", "BrickHouse.Ceiling")
+	_, err = sc.OpenToLibrary("objs/BrickHouse.Ceiling.obj", "BrickHouse.Ceiling")
 	if err != nil {
 		log.Println(err)
 	}
 
-	_, err = sc.OpenToLibrary("roofTop1.obj", "BrickHouse.Roof")
+	_, err = sc.OpenToLibrary("objs/BrickHouse.Roof.obj", "BrickHouse.Roof")
 	if err != nil {
 		log.Println(err)
 		// } else {

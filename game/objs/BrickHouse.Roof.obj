@@ -2,11 +2,11 @@
 # Exported from SketchUp, (c) 2000-2012 Trimble Navigation Limited
 # File units = meters
 
-mtllib floor1.mtl
+mtllib BrickHouse.Roof.mtl
 
 g Mesh1 Group1 Model
 
-usemtl Wood_Floor
+usemtl Roofing_Shingles_GAF_Estates
 v 15 0 -15
 vt 590.551 0
 vn 1 0 -0

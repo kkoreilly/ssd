@@ -20,5 +20,5 @@ var FirstMap = Map{
 	// "BigComplex1": {"BigComplex", mat32.Vec3{0, 0, -30}, DefScale},
 	// "House1":    {"House", mat32.Vec3{10, 0, -40}, DefScale},
 	"House1": {"House", mat32.Vec3{0, 0, -10}, DefScale},
-	"House2": {"House", mat32.Vec3{0, 15, -10}, DefScale},
+	// "House2": {"House", mat32.Vec3{0, 15, -10}, DefScale},
 }
