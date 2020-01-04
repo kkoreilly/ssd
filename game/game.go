@@ -50,6 +50,12 @@ func (gm *Game) MakeObj(obj *MapObj, nm string) *eve.Group {
 	case "House":
 		ogp = eve.AddNewGroup(gm.World, nm)
 		gm.PhysMakeBrickHouse(ogp, nm)
+	case "Block":
+		ogp = eve.AddNewGroup(gm.World, nm)
+		for i := 0; i < 10; i++ {
+			house := gm.PhysMakeBrickHouse(ogp, fmt.Sprintf("%v%v", nm, i))
+			house.Initial.Pos.Set(float32(20 * i), 0, 0)
+		}
 		/*
 			case "Hill":
 					ogp = gi3d.AddNewGroup(sc, sc, nm)
@@ -206,12 +212,10 @@ func (gm *Game) MakeView() {
 }
 
 func (gm *Game) Config() {
-	gamerow := gi.AddNewLayout(signUpTab, "gamerow", gi.LayoutHoriz)
+	gamerow := gi.AddNewLayout(signUpTab, "gamerow", gi.LayoutVert)
 	gamerow.SetStretchMaxWidth()
 	gamerow.SetStretchMaxHeight()
 
-	epbut := gi.AddNewButton(gamerow, "edit-phys")
-	epbut.SetText("Edit Phys")
 
 	sc := AddNewScene(gamerow, "scene")
 	gm.Scene = sc
@@ -237,7 +241,9 @@ func (gm *Game) Config() {
 	gm.MakeWorld()
 
 	gm.MakeView()
-
+	gi.AddNewSpace(gamerow, "space1")
+	epbut := gi.AddNewButton(gamerow, "edit-phys")
+	epbut.SetText("Edit Phys")
 	epbut.ButtonSig.Connect(gm.World.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
 			giv.GoGiEditorDialog(gm.World)

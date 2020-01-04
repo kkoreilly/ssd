@@ -19,6 +19,7 @@ var DefScale = mat32.Vec3{1, 1, 1}
 var FirstMap = Map{
 	// "BigComplex1": {"BigComplex", mat32.Vec3{0, 0, -30}, DefScale},
 	// "House1":    {"House", mat32.Vec3{10, 0, -40}, DefScale},
-	"House1": {"House", mat32.Vec3{0, 0, -10}, DefScale},
-	// "House2": {"House", mat32.Vec3{0, 15, -10}, DefScale},
+	// "House1": {"House", mat32.Vec3{0, 0, -10}, DefScale},
+	// "House2": {"House", mat32.Vec3{20, 0, -10}, DefScale},
+	"Block1": {"Block", mat32.Vec3{-100,0,-10}, DefScale},
 }
