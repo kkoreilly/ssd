@@ -9,6 +9,7 @@ import (
 
 	"github.com/emer/eve/eve"
 	"github.com/goki/gi/mat32"
+	"github.com/goki/gi/gi3d"
 )
 
 // all units are in meters
@@ -20,6 +21,7 @@ func (gm *Game) PhysMakeBrickHouse(par *eve.Group, name string) *eve.Group {
 	depth := float32(15)
 	height := float32(3.5)
 	thick := float32(0.1) // wall, ceiling, floor
+	roofThick := float32(3)
 
 	house := eve.AddNewGroup(par, name)
 	floor := eve.AddNewBox(house, "floor", mat32.Vec3{0, thick / 2, 0}, mat32.Vec3{width, thick, depth})
@@ -42,6 +44,10 @@ func (gm *Game) PhysMakeBrickHouse(par *eve.Group, name string) *eve.Group {
 	fwall := eve.AddNewBox(house, "front-wall", mat32.Vec3{0, height / 2, depth / 2}, mat32.Vec3{width, height, thick})
 	fwall.Color = "yellow"
 	fwall.Vis = "BrickHouse.DoorWall"
+	// Roof Top is Here. Currently uses box for physcis, need to make it into pyramid. Todo: Fix this.
+	roof := eve.AddNewBox(house, "roof", mat32.Vec3{0, float32(5) - thick / 2, 0}, mat32.Vec3{width, roofThick, depth})
+	roof.Color = "grey" // for debugging
+	roof.Vis = "BrickHouse.Roof"
 	return house
 }
 
@@ -67,15 +73,18 @@ func (gm *Game) LibMakeBrickHouse() {
 		log.Println(err)
 	}
 
-	_, err = sc.OpenToLibrary("objs/BrickHouse.Roof.obj", "BrickHouse.Roof")
+	rt, err := sc.OpenToLibrary("objs/BrickHouse.Roof.obj", "BrickHouse.Roof")
 	if err != nil {
 		log.Println(err)
 		// } else {
 		// 	rt.Pose.Pos.Set(-0.3725, 3.5, 0.3725)
 		// 	rt.Pose.Scale.Set(1.05, 1, 1.05)
-		// 	solidrt := rt.Child(0).Child(0).(*gi3d.Solid)
+		// 	solidrt := rt.Child(0).Child(0).(*gi3da.Solid)
 		// 	solidrt.Mat.CullBack = false
 	}
+	solidrt := rt.Child(0).Child(0).(*gi3d.Solid)
+	solidrt.Mat.CullBack = false
+	rt.Pose.Scale.Set(1.05, 1, 1.05)
 
 	// bb, err := sc.OpenNewObj("bed1.obj", ogp)
 	// if err != nil {
