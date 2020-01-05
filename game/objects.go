@@ -34,6 +34,9 @@ func (gm *Game) PhysMakeBrickHouse(par *eve.Group, name string) *eve.Group {
 	bwall := eve.AddNewBox(house, "back-wall", mat32.Vec3{0, height / 2, -depth / 2}, mat32.Vec3{width, height, thick})
 	bwall.Color = "blue"
 	bwall.Vis = "BrickHouse.WinWall"
+	intwall := eve.AddNewBox(house, "int-wall", mat32.Vec3{-6, height / 2, 0}, mat32.Vec3{width, height, thick})
+	intwall.Color = "blue"
+	intwall.Vis = "BrickHouse.BlankWall"
 	lwall := eve.AddNewBox(house, "left-wall", mat32.Vec3{-width / 2, height / 2, 0}, mat32.Vec3{depth, height, thick})
 	lwall.Initial.SetAxisRotation(0, 1, 0, -90)
 	lwall.Color = "green"
@@ -52,15 +55,15 @@ func (gm *Game) PhysMakeBrickHouse(par *eve.Group, name string) *eve.Group {
 	bed1 := eve.AddNewBox(house, "bed1", mat32.Vec3{-6.5, bedHeight / 2, -6.75}, mat32.Vec3{2, bedHeight, 1.5})
 	bed1.Color = "yellow"
 	bed1.Vis = "BrickHouse.Bed"
-	bed2 := eve.AddNewBox(house, "bed2", mat32.Vec3{-6.5, bedHeight / 2, -2.75}, mat32.Vec3{2, bedHeight, 1.5})
-	bed2.Color = "yellow"
-	bed2.Vis = "BrickHouse.Bed"
-	bed3 := eve.AddNewBox(house, "bed3", mat32.Vec3{-6.5, bedHeight / 2, 2.75}, mat32.Vec3{2, bedHeight, 1.5})
+	// bed2 := eve.AddNewBox(house, "bed2", mat32.Vec3{-6.5, bedHeight / 2, -2.75}, mat32.Vec3{2, bedHeight, 1.5})
+	// bed2.Color = "yellow"
+	// bed2.Vis = "BrickHouse.Bed"
+	 bed3 := eve.AddNewBox(house, "bed3", mat32.Vec3{-6.5, bedHeight / 2, 2.75}, mat32.Vec3{2, bedHeight, 1.5})
 	bed3.Color = "yellow"
 	bed3.Vis = "BrickHouse.Bed"
-	bed4 := eve.AddNewBox(house, "bed4", mat32.Vec3{-6.5, bedHeight / 2, 6.75}, mat32.Vec3{2, bedHeight, 1.5})
-	bed4.Color = "yellow"
-	bed4.Vis = "BrickHouse.Bed"
+	// bed4 := eve.AddNewBox(house, "bed4", mat32.Vec3{-6.5, bedHeight / 2, 6.75}, mat32.Vec3{2, bedHeight, 1.5})
+	// bed4.Color = "yellow"
+	// bed4.Vis = "BrickHouse.Bed"
 	return house
 }
 
@@ -75,6 +78,12 @@ func (gm *Game) LibMakeBrickHouse() {
 	if err != nil {
 		log.Println(err)
 	}
+
+	bw, err := sc.OpenToLibrary("objs/BrickHouse.BlankWall.obj", "BrickHouse.BlankWall")
+	if err != nil {
+		log.Println(err)
+	}
+	bw.Pose.Scale.Set(0.2, 1, 1)
 
 	_, err = sc.OpenToLibrary("objs/BrickHouse.Floor.obj", "BrickHouse.Floor")
 	if err != nil {

@@ -255,7 +255,7 @@ func (gm *Game) Config() {
 
 	fpobj := gi3d.AddNewGroup(&sc.Scene, &sc.Scene, "TrackCamera")
 	rcb := gi3d.AddNewSolid(&sc.Scene, fpobj, "red-cube", "Person")
-	rcb.Pose.Pos.Set(0, -1, -12.5)
+	rcb.Pose.Pos.Set(0, -1, -8)
 	// rcb.Pose.Scale.Set(0.1, 0.1, 1)
 	rcb.Mat.Color.SetString("red", nil)
 

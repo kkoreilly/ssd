@@ -43,7 +43,7 @@ func mainrun() {
 	toprow.SetStretchMaxWidth()
 
 	toprow.SetProp("background-color", "lightgreen")
-	mainHeader := gi.AddNewLabel(toprow, "mainHeader", "Welcome to EFight version 0.0.0 alpha")
+	mainHeader := gi.AddNewLabel(toprow, "mainHeader", "Welcome to EFight version 0.0.0 pre-alpha")
 	mainHeader.SetProp("font-size", "100px")
 	mainHeader.SetProp("text-align", "center")
 	mainHeader.SetProp("font-family", "Times New Roman, serif")
