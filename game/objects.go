@@ -22,6 +22,7 @@ func (gm *Game) PhysMakeBrickHouse(par *eve.Group, name string) *eve.Group {
 	height := float32(3.5)
 	thick := float32(0.1) // wall, ceiling, floor
 	roofThick := float32(3)
+	bedHeight := float32(0.6)
 
 	house := eve.AddNewGroup(par, name)
 	floor := eve.AddNewBox(house, "floor", mat32.Vec3{0, thick / 2, 0}, mat32.Vec3{width, thick, depth})
@@ -48,6 +49,18 @@ func (gm *Game) PhysMakeBrickHouse(par *eve.Group, name string) *eve.Group {
 	roof := eve.AddNewBox(house, "roof", mat32.Vec3{0, float32(5) - thick / 2, 0}, mat32.Vec3{width, roofThick, depth})
 	roof.Color = "grey" // for debugging
 	roof.Vis = "BrickHouse.Roof"
+	bed1 := eve.AddNewBox(house, "bed1", mat32.Vec3{-6.5, bedHeight / 2, -6.75}, mat32.Vec3{2, bedHeight, 1.5})
+	bed1.Color = "yellow"
+	bed1.Vis = "BrickHouse.Bed"
+	bed2 := eve.AddNewBox(house, "bed2", mat32.Vec3{-6.5, bedHeight / 2, -2.75}, mat32.Vec3{2, bedHeight, 1.5})
+	bed2.Color = "yellow"
+	bed2.Vis = "BrickHouse.Bed"
+	bed3 := eve.AddNewBox(house, "bed3", mat32.Vec3{-6.5, bedHeight / 2, 2.75}, mat32.Vec3{2, bedHeight, 1.5})
+	bed3.Color = "yellow"
+	bed3.Vis = "BrickHouse.Bed"
+	bed4 := eve.AddNewBox(house, "bed4", mat32.Vec3{-6.5, bedHeight / 2, 6.75}, mat32.Vec3{2, bedHeight, 1.5})
+	bed4.Color = "yellow"
+	bed4.Vis = "BrickHouse.Bed"
 	return house
 }
 
@@ -69,6 +82,11 @@ func (gm *Game) LibMakeBrickHouse() {
 	}
 
 	_, err = sc.OpenToLibrary("objs/BrickHouse.Ceiling.obj", "BrickHouse.Ceiling")
+	if err != nil {
+		log.Println(err)
+	}
+
+	_, err = sc.OpenToLibrary("objs/BrickHouse.Bed.obj", "BrickHouse.Bed")
 	if err != nil {
 		log.Println(err)
 	}
