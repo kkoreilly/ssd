@@ -69,6 +69,19 @@ func (gm *Game) PhysMakeBrickHouse(par *eve.Group, name string) *eve.Group {
   tiwall.Color = "yellow"
 	tiwall.Vis = "BrickHouse.IntWall.Top"
 	tiwall.Initial.SetAxisRotation(0, 1, 0, -90)
+	//Interior Wall 2:
+	liwall1 := eve.AddNewBox(house, "int-wall-left-1", mat32.Vec3{-doorWalllWidth / 4, height / 2, -( 3 * depth) / 8}, mat32.Vec3{3.25, height, thick})
+	liwall1.Color = "yellow"
+	liwall1.Vis = "BrickHouse.IntWall.Left"
+	liwall1.Initial.SetAxisRotation(0, 1, 0, -90)
+	riwall1 := eve.AddNewBox(house, "int-wall-right-1", mat32.Vec3{-doorWalllWidth / 4, height / 2, -1.625}, mat32.Vec3{3.25, height, thick})
+	riwall1.Color = "yellow"
+	riwall1.Vis = "BrickHouse.IntWall.Right"
+	riwall1.Initial.SetAxisRotation(0, 1, 0, -90)
+	tiwall1 := eve.AddNewBox(house, "int-wall-top-1", mat32.Vec3{-doorWalllWidth / 4, 3.25, -depth / 4}, mat32.Vec3{1, 0.5, thick})
+	tiwall1.Color = "yellow"
+	tiwall1.Vis = "BrickHouse.IntWall.Top"
+	tiwall1.Initial.SetAxisRotation(0, 1, 0, -90)
 	// Roof Top is Here. Currently uses box for physcis, need to make it into pyramid. Todo: Fix this.
 	roof := eve.AddNewBox(house, "roof", mat32.Vec3{0, float32(5) - thick/2, 0}, mat32.Vec3{width, roofThick, depth})
 	roof.Color = "grey" // for debugging
