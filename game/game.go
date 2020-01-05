@@ -1,4 +1,4 @@
- // Copyright (c) 2020, The EFight Authors. All rights reserved.
+// Copyright (c) 2020, The EFight Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -34,6 +34,8 @@ var TheGame *Game
 type Scene struct {
 	gi3d.Scene
 	TrackMouse bool
+	CamRotUD   float32 // current camera rotation up / down
+	CamRotLR   float32 // current camera rotation LR
 }
 
 var KiT_Scene = kit.Types.AddType(&Scene{}, nil)
@@ -54,7 +56,7 @@ func (gm *Game) MakeObj(obj *MapObj, nm string) *eve.Group {
 		ogp = eve.AddNewGroup(gm.World, nm)
 		for i := 0; i < 10; i++ {
 			house := gm.PhysMakeBrickHouse(ogp, fmt.Sprintf("%v%v", nm, i))
-			house.Initial.Pos.Set(float32(20 * i), 0, 0)
+			house.Initial.Pos.Set(float32(20*i), 0, 0)
 		}
 		/*
 			case "Hill":
@@ -216,7 +218,6 @@ func (gm *Game) Config() {
 	gamerow.SetStretchMaxWidth()
 	gamerow.SetStretchMaxHeight()
 
-
 	sc := AddNewScene(gamerow, "scene")
 	gm.Scene = sc
 	sc.SetStretchMaxWidth()
@@ -334,10 +335,10 @@ func (sc *Scene) NavEvents() {
 		orbDel := float32(.2)
 		orbDels := orbDel * 0.05
 		panDel := float32(.05)
-		//
 		del := me.Where.Sub(me.From)
 		dx := float32(-del.X)
 		dy := float32(-del.Y)
+		// fmt.Printf("pos: %v  fm: %v del: %v\n", me.Where, me.From, del)
 		switch {
 		case key.HasAllModifierBits(me.Modifiers, key.Shift):
 			ssc.Camera.Pan(dx*panDel, -dy*panDel)
@@ -351,19 +352,12 @@ func (sc *Scene) NavEvents() {
 			} else {
 				dx = 0
 			}
-			cur := ssc.Camera.Pose.EulerRotation()
-			cur.X += dy * orbDels
-			if cur.X > 90 {
-				cur.X = 90
-			} else if cur.X < -90 {
-				cur.X = -90
-			}
-			ssc.Camera.Pose.SetEulerRotation(cur.X, cur.Y+dx*orbDels, 0)
-
+			sc.CamRotUD += dy * orbDels * .2
+			sc.CamRotLR += dx * orbDels * 2
+			ssc.Camera.Pose.SetAxisRotation(0, 1, 0, sc.CamRotLR)
+			ssc.Camera.Pose.RotateOnAxis(1, 0, 0, sc.CamRotUD)
 		}
-
 		ssc.UpdateSig()
-		//
 	})
 	sc.ConnectEvent(oswin.MouseScrollEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.ScrollEvent)
@@ -430,6 +424,11 @@ func (sc *Scene) NavKeyEvents(kt *key.ChordEvent) {
 	switch ch {
 	case "Escape":
 		sc.TrackMouse = !sc.TrackMouse
+		if sc.TrackMouse {
+			sc.Win.OSWin.SetCursorEnabled(false, true) // turn off mouse cursor
+		} else {
+			sc.Win.OSWin.SetCursorEnabled(true, false)
+		}
 		kt.SetProcessed()
 
 	// case "UpArrow":
