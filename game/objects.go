@@ -32,7 +32,7 @@ func (gm *Game) PhysMakeBrickHouse(par *eve.Group, name string) *eve.Group {
 	ceiling := eve.AddNewBox(house, "ceiling", mat32.Vec3{0, float32(3.5) - thick/2, 0}, mat32.Vec3{width, thick, depth})
 	ceiling.Color = "grey" // for debugging
 	ceiling.Vis = "BrickHouse.Ceiling"
-	bwall := eve.AddNewBox(house, "back-wall", mat32.Vec3{0, height / 2, -depth / 2}, mat32.Vec3{width, height, thick})
+	bwall := eve.AddNewBox(house, "back-wall", mat32.Vec3{0, height / 2, -depth / 2}, mat32.Vec3{3, height, thick})
 	bwall.Color = "blue"
 	bwall.Vis = "BrickHouse.WinWall"
 	intwall := eve.AddNewBox(house, "int-wall", mat32.Vec3{-6, height / 2, 0}, mat32.Vec3{width, height, thick})
@@ -55,6 +55,20 @@ func (gm *Game) PhysMakeBrickHouse(par *eve.Group, name string) *eve.Group {
 	tfwall := eve.AddNewBox(house, "front-wall-top", mat32.Vec3{0, 3.25, depth / 2}, mat32.Vec3{1, 0.5, thick})
   tfwall.Color = "yellow"
 	tfwall.Vis = "BrickHouse.DoorWall.Top"
+
+	//Interior Wall 1:
+	liwall := eve.AddNewBox(house, "int-wall-left", mat32.Vec3{-doorWalllWidth / 4, height / 2, ( 3 * depth) / 8}, mat32.Vec3{3.25, height, thick})
+	liwall.Color = "yellow"
+	liwall.Vis = "BrickHouse.IntWall.Left"
+	liwall.Initial.SetAxisRotation(0, 1, 0, -90)
+	riwall := eve.AddNewBox(house, "int-wall-right", mat32.Vec3{-doorWalllWidth / 4, height / 2, 1.625}, mat32.Vec3{3.25, height, thick})
+  riwall.Color = "yellow"
+	riwall.Vis = "BrickHouse.IntWall.Right"
+	riwall.Initial.SetAxisRotation(0, 1, 0, -90)
+	tiwall := eve.AddNewBox(house, "int-wall-top", mat32.Vec3{-doorWalllWidth / 4, 3.25, depth / 4}, mat32.Vec3{1, 0.5, thick})
+  tiwall.Color = "yellow"
+	tiwall.Vis = "BrickHouse.IntWall.Top"
+	tiwall.Initial.SetAxisRotation(0, 1, 0, -90)
 	// Roof Top is Here. Currently uses box for physcis, need to make it into pyramid. Todo: Fix this.
 	roof := eve.AddNewBox(house, "roof", mat32.Vec3{0, float32(5) - thick/2, 0}, mat32.Vec3{width, roofThick, depth})
 	roof.Color = "grey" // for debugging
@@ -102,6 +116,32 @@ func (gm *Game) LibMakeBrickDoorWall() {
 	tws.Mat.Tiling.Repeat.Set(4.0/7.0, 2.0/7.0)
 }
 
+func (gm *Game) LibMakeIntDoorWall() {
+	height := float32(3.5)
+	thick := float32(.1)
+	sc := &gm.Scene.Scene
+	nm := "BrickHouse.IntWall"
+	// left part
+	lnm := nm + ".Left"
+	lwg := sc.NewInLibrary(lnm)
+	lwm := gi3d.AddNewBox(sc, lnm, 3.25, height, thick)
+	lws := gi3d.AddNewSolid(sc, lwg, lnm, lwm.Name())
+	lws.Mat.Color.SetName("white")
+// right part
+	rnm := nm + ".Right"
+	rwg := sc.NewInLibrary(rnm)
+	rwm := gi3d.AddNewBox(sc, rnm, 3.25, height, thick)
+	rws := gi3d.AddNewSolid(sc, rwg, rnm, rwm.Name())
+	rws.Mat.Color.SetName("white")
+// top part
+	tnm := nm + ".Top"
+	twg := sc.NewInLibrary(tnm)
+	twm := gi3d.AddNewBox(sc, tnm, 1, 0.5, thick)
+	tws := gi3d.AddNewSolid(sc, twg, tnm, twm.Name())
+	tws.Mat.Color.SetName("white")
+}
+
+
 func (gm *Game) LibMakeBrickHouse() {
 	sc := &gm.Scene.Scene
 	// _, err := sc.OpenToLibrary("objs/BrickHouse.DoorWall.sobj", "BrickHouse.DoorWall")
@@ -110,6 +150,7 @@ func (gm *Game) LibMakeBrickHouse() {
 	// }
 
 	gm.LibMakeBrickDoorWall()
+	gm.LibMakeIntDoorWall()
 
 	_, err := sc.OpenToLibrary("objs/BrickHouse.WinWall.obj", "BrickHouse.WinWall")
 	if err != nil {
