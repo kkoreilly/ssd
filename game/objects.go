@@ -57,7 +57,7 @@ func (gm *Game) PhysMakeBrickHouse(par *eve.Group, name string) *eve.Group {
 	tfwall.Vis = "BrickHouse.DoorWall.Top"
 
 	//Interior Wall 1:
-	liwall := eve.AddNewBox(house, "int-wall-left", mat32.Vec3{-doorWalllWidth / 4, height / 2, ( 3 * depth) / 8}, mat32.Vec3{3.25, height, thick})
+	liwall := eve.AddNewBox(house, "int-wall-left", mat32.Vec3{-doorWalllWidth / 4, height / 2, ( 3 * depth) / 8 + 0.2}, mat32.Vec3{3.25, height, thick})
 	liwall.Color = "yellow"
 	liwall.Vis = "BrickHouse.IntWall.Left"
 	liwall.Initial.SetAxisRotation(0, 1, 0, -90)
@@ -82,7 +82,7 @@ func (gm *Game) PhysMakeBrickHouse(par *eve.Group, name string) *eve.Group {
 	tiwall1.Color = "yellow"
 	tiwall1.Vis = "BrickHouse.IntWall.Top"
 	tiwall1.Initial.SetAxisRotation(0, 1, 0, -90)
-	// Roof Top is Here. Currently uses box for physcis, need to make it into pyramid. Todo: Fix this.
+	// Roof Top is Here. Currently uses box for physics, need to make it into pyramid. Todo: Fix this.
 	roof := eve.AddNewBox(house, "roof", mat32.Vec3{0, float32(5) - thick/2, 0}, mat32.Vec3{width, roofThick, depth})
 	roof.Color = "grey" // for debugging
 	roof.Vis = "BrickHouse.Roof"
