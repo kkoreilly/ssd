@@ -85,7 +85,7 @@ func initInspect() {
 	for rows.Next() {
 		var username string
 		var password string
-		err = rows.Scan(&username, &password)
+		rows.Scan(&username, &password)
 		// fmt.Printf("In rows \n")
 		// fmt.Printf("New username: %v New password %v \n", username, password)
 		newText := fmt.Sprintf("Username: %v, Password: %v            ", username, password)
