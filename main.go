@@ -35,13 +35,13 @@ func main() {
 	router := gin.New()
 	router.Use(gin.Logger())
 
-router.LoadHTMLGlob("webFiles/*.html")
+	router.LoadHTMLGlob("webFiles/*.html")
 	router.Static("/static", "static")
 
 	router.GET("/", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "home.html", nil)
 	})
-router.GET("/foodwaste", func(c *gin.Context) {
+	router.GET("/foodwaste", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "foodwaste.html", nil)
 	})
 
