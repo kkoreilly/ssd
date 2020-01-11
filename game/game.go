@@ -49,12 +49,15 @@ func (gm *Game) BuildMap() {
 func (gm *Game) MakeObj(obj *MapObj, nm string) *eve.Group {
 	var ogp *eve.Group
 	switch obj.ObjType {
+	case "TheWall":
+		ogp = eve.AddNewGroup(gm.World, nm)
+		gm.PhysMakeTheWall(ogp, nm)
 	case "House":
 		ogp = eve.AddNewGroup(gm.World, nm)
 		gm.PhysMakeBrickHouse(ogp, nm)
 	case "Block":
 		ogp = eve.AddNewGroup(gm.World, nm)
-		for i := 0; i < 10; i++ {
+		for i := 0; i < 8; i++ {
 			house := gm.PhysMakeBrickHouse(ogp, fmt.Sprintf("%v%v", nm, i))
 			house.Initial.Pos.Set(float32(20*i), 0, 0)
 		}
@@ -159,6 +162,7 @@ func (gm *Game) MakeObj(obj *MapObj, nm string) *eve.Group {
 // to make, or not..
 func (gm *Game) MakeLibrary() {
 	gm.LibMakeBrickHouse()
+	gm.LibMakeTheWall()
 }
 
 func (gm *Game) MakeMeshes() {
@@ -208,7 +212,7 @@ func (gm *Game) MakeView() {
 	gm.MakeMeshes()
 	wgp := gi3d.AddNewGroup(sc, sc, "world")
 	gm.View = evev.NewView(gm.World, sc, wgp)
-	// gm.View.InitLibrary() // this makes a basic library based on body shapes, sizes
+	//gm.View.InitLibrary() // this makes a basic library based on body shapes, sizes
 	gm.MakeLibrary()
 	gm.View.Sync()
 }
@@ -293,7 +297,7 @@ func (gm *Game) Config() {
 	// // // market1.Mat.Color.SetString("red", nil)
 	// // market1.Mat.SetTexture(&sc.Scene, tbtx.Name())
 
-	floorp := gi3d.AddNewPlane(&sc.Scene, "floor-plane", 1000, 1000)
+	floorp := gi3d.AddNewPlane(&sc.Scene, "floor-plane", 200, 200)
 	floor := gi3d.AddNewSolid(&sc.Scene, &sc.Scene, "floor", floorp.Name())
 	floor.Pose.Pos.Set(0, 0, 0)
 	// floor.Mat.Emissive.SetString("green", nil)

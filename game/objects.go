@@ -32,10 +32,10 @@ func (gm *Game) PhysMakeBrickHouse(par *eve.Group, name string) *eve.Group {
 	ceiling := eve.AddNewBox(house, "ceiling", mat32.Vec3{0, float32(3.5) - thick/2, 0}, mat32.Vec3{width, thick, depth})
 	ceiling.Color = "grey" // for debugging
 	ceiling.Vis = "BrickHouse.Ceiling"
-	bwall := eve.AddNewBox(house, "back-wall", mat32.Vec3{0, height / 2, -depth / 2}, mat32.Vec3{3, height, thick})
-	bwall.Color = "blue"
+	bwall := eve.AddNewBox(house, "back-wall", mat32.Vec3{0, height / 2, -depth / 2}, mat32.Vec3{width, height, thick})
+	bwall.Color = "purple"
 	bwall.Vis = "BrickHouse.WinWall"
-	intwall := eve.AddNewBox(house, "int-wall", mat32.Vec3{-6, height / 2, 0}, mat32.Vec3{width, height, thick})
+	intwall := eve.AddNewBox(house, "int-wall", mat32.Vec3{-6, height / 2, 0}, mat32.Vec3{3, height, thick})
 	intwall.Color = "blue"
 	intwall.Vis = "BrickHouse.BlankWall"
 	lwall := eve.AddNewBox(house, "left-wall", mat32.Vec3{-width / 2, height / 2, 0}, mat32.Vec3{depth, height, thick})
@@ -101,6 +101,28 @@ func (gm *Game) PhysMakeBrickHouse(par *eve.Group, name string) *eve.Group {
 	return house
 }
 
+func (gm *Game) PhysMakeTheWall(par *eve.Group, name string) *eve.Group {
+	wallg := eve.AddNewGroup(par, name)
+	tw1 := eve.AddNewBox(wallg, "TheWall", mat32.Vec3{-100, 50, 0}, mat32.Vec3{2, 100, 200})
+	tw1.Color = "black"
+	tw1.Vis = "TheWall"
+
+	tw2 := eve.AddNewBox(wallg, "TheWall", mat32.Vec3{100, 50, 0}, mat32.Vec3{2, 100, 200})
+	tw2.Color = "black"
+	tw2.Vis = "TheWall"
+
+	tw3 := eve.AddNewBox(wallg, "TheWall", mat32.Vec3{0, 50, -100}, mat32.Vec3{2, 100, 200})
+	tw3.Color = "black"
+	tw3.Vis = "TheWall"
+	tw3.Initial.SetAxisRotation(0, 1, 0, -90)
+
+	tw4 := eve.AddNewBox(wallg, "TheWall", mat32.Vec3{0, 50, 100}, mat32.Vec3{2, 100, 200})
+	tw4.Color = "black"
+	tw4.Vis = "TheWall"
+	tw4.Initial.SetAxisRotation(0, 1, 0, -90)
+	return wallg
+}
+
 func (gm *Game) LibMakeBrickDoorWall() {
 	height := float32(3.5)
 	thick := float32(.1)
@@ -152,6 +174,15 @@ func (gm *Game) LibMakeIntDoorWall() {
 	twm := gi3d.AddNewBox(sc, tnm, 1, 0.5, thick)
 	tws := gi3d.AddNewSolid(sc, twg, tnm, twm.Name())
 	tws.Mat.Color.SetName("white")
+}
+
+func (gm *Game) LibMakeTheWall() {
+	sc := &gm.Scene.Scene
+	tnm := "TheWall"
+	twg := sc.NewInLibrary(tnm)
+	twm := gi3d.AddNewBox(sc, tnm, 2, 100, 200)
+	tws := gi3d.AddNewSolid(sc, twg, tnm, twm.Name())
+	tws.Mat.Color.SetUInt8(0, 0, 100, 100)
 }
 
 func (gm *Game) LibMakeBrickHouse() {
