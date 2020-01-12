@@ -200,7 +200,7 @@ func (gm *Game) LibMakeTheWall() {
 	// txt1.Mat.Bright = 5 // no dim text -- key if using a background and want it to be bright..
 	txt1.Pose.Scale.SetScalar(6)
 	txt1.Pose.Pos.Set(-20, 18, -98)
-*/
+	*/
 }
 
 func (gm *Game) LibMakeBrickHouse() {

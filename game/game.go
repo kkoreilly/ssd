@@ -305,7 +305,7 @@ func (gm *Game) Config() {
 	floor.Mat.SetTexture(&sc.Scene, grtx)
 	floor.Mat.Tiling.Repeat.Set(200, 200)
 
-gi.FilterLaggyKeyEvents = true // fix key lag
+	gi.FilterLaggyKeyEvents = true // fix key lag
 }
 
 func AddNewScene(parent ki.Ki, name string) *Scene {
