@@ -182,7 +182,25 @@ func (gm *Game) LibMakeTheWall() {
 	twg := sc.NewInLibrary(tnm)
 	twm := gi3d.AddNewBox(sc, tnm, 2, 100, 200)
 	tws := gi3d.AddNewSolid(sc, twg, tnm, twm.Name())
-	tws.Mat.Color.SetUInt8(0, 0, 100, 100)
+	tws.Mat.Color.SetUInt8(0, 0, 0, 0)
+	/* txt := gi3d.AddNewText2D(sc, sc, "text", "Laser Shield - Created and Maintained by The Robot Government")
+	// 	txt.SetProp("background-color", gi.Color{0, 0, 0, 0}) // transparent -- default
+	txt.SetProp("background-color", "black")
+	txt.SetProp("color", "red") // default
+	// txt.SetProp("margin", units.NewPt(4)) // default is 2 px
+	// txt.Mat.Bright = 5 // no dim text -- key if using a background and want it to be bright..
+	txt.Pose.Scale.SetScalar(6)
+	txt.Pose.Pos.Set(-90, 25, -98)
+
+	txt1 := gi3d.AddNewText2D(sc, sc, "text-1", "DO NOT CROSS")
+	// 	txt1.SetProp("background-color", gi.Color{0, 0, 0, 0}) // transparent -- default
+	txt1.SetProp("background-color", "black")
+	txt1.SetProp("color", "red") // default
+	// txt1.SetProp("margin", units.NewPt(4)) // default is 2 px
+	// txt1.Mat.Bright = 5 // no dim text -- key if using a background and want it to be bright..
+	txt1.Pose.Scale.SetScalar(6)
+	txt1.Pose.Pos.Set(-20, 18, -98)
+*/
 }
 
 func (gm *Game) LibMakeBrickHouse() {

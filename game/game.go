@@ -58,7 +58,7 @@ func (gm *Game) MakeObj(obj *MapObj, nm string) *eve.Group {
 	case "Block":
 		ogp = eve.AddNewGroup(gm.World, nm)
 		for i := 0; i < 8; i++ {
-			house := gm.PhysMakeBrickHouse(ogp, fmt.Sprintf("%v%v", nm, i))
+			house := gm.PhysMakeBrickHouse(ogp, fmt.Sprintf("%v-House%v", nm, i))
 			house.Initial.Pos.Set(float32(20*i), 0, 0)
 		}
 		/*
@@ -305,6 +305,7 @@ func (gm *Game) Config() {
 	floor.Mat.SetTexture(&sc.Scene, grtx)
 	floor.Mat.Tiling.Repeat.Set(200, 200)
 
+gi.FilterLaggyKeyEvents = true // fix key lag
 }
 
 func AddNewScene(parent ki.Ki, name string) *Scene {
