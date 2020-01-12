@@ -338,7 +338,7 @@ func (sc *Scene) NavEvents() {
 		me.SetProcessed()
 		ssc := recv.Embed(KiT_Scene).(*Scene)
 		orbDel := float32(.2)
-		orbDels := orbDel * 0.2
+		orbDels := orbDel * 0.3
 		panDel := float32(.05)
 		del := me.Where.Sub(me.From)
 		dx := float32(-del.X)
@@ -357,7 +357,14 @@ func (sc *Scene) NavEvents() {
 			} else {
 				dx = 0
 			}
-			sc.CamRotUD += dy * orbDels * .2
+			sc.CamRotUD += dy * orbDels
+			if sc.CamRotUD > 90 {
+				sc.CamRotUD = 90
+			}
+			if sc.CamRotUD < -90 {
+				sc.CamRotUD = -90
+			}
+
 			sc.CamRotLR += dx * orbDels * 2
 			ssc.Camera.Pose.SetAxisRotation(0, 1, 0, sc.CamRotLR)
 			ssc.Camera.Pose.RotateOnAxis(1, 0, 0, sc.CamRotUD)
