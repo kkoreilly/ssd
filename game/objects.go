@@ -98,6 +98,15 @@ func (gm *Game) PhysMakeBrickHouse(par *eve.Group, name string) *eve.Group {
 	// bed4 := eve.AddNewBox(house, "bed4", mat32.Vec3{-6.5, bedHeight / 2, 6.75}, mat32.Vec3{2, bedHeight, 1.5})
 	// bed4.Color = "yellow"
 	// bed4.Vis = "BrickHouse.Bed"
+
+
+	// Item Spawner
+
+	is1 := eve.AddNewBox(house, "is1", mat32.Vec3{4, 0.1, 0}, mat32.Vec3{4, 0.2, 4})
+	is1.Color = "black"
+	is1.Vis = "ItemSpawner"
+
+
 	return house
 }
 
@@ -121,6 +130,17 @@ func (gm *Game) PhysMakeTheWall(par *eve.Group, name string) *eve.Group {
 	tw4.Vis = "TheWall"
 	tw4.Initial.SetAxisRotation(0, 1, 0, -90)
 	return wallg
+}
+
+func (gm *Game) LibMakeItemSpawner() {
+	sc := &gm.Scene.Scene
+	isnm := "ItemSpawner"
+	iswg := sc.NewInLibrary(isnm)
+	iswm := gi3d.AddNewBox(sc, isnm, 4, 0.2, 4)
+	isws := gi3d.AddNewSolid(sc, iswg, isnm, iswm.Name())
+	// isws.Mat.Color.SetName("black")
+	gi3d.AddNewTextureFile(sc, "spawner", "objs/spawner.png")
+	isws.Mat.Texture = gi3d.TexName("spawner")
 }
 
 func (gm *Game) LibMakeBrickDoorWall() {
@@ -212,6 +232,7 @@ func (gm *Game) LibMakeBrickHouse() {
 
 	gm.LibMakeBrickDoorWall()
 	gm.LibMakeIntDoorWall()
+	gm.LibMakeItemSpawner()
 
 	_, err := sc.OpenToLibrary("objs/BrickHouse.WinWall.obj", "BrickHouse.WinWall")
 	if err != nil {
