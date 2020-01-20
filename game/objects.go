@@ -99,13 +99,11 @@ func (gm *Game) PhysMakeBrickHouse(par *eve.Group, name string) *eve.Group {
 	// bed4.Color = "yellow"
 	// bed4.Vis = "BrickHouse.Bed"
 
-
 	// Item Spawner
 
 	is1 := eve.AddNewBox(house, "is1", mat32.Vec3{4, 0.1, 0}, mat32.Vec3{4, 0.2, 4})
 	is1.Color = "black"
 	is1.Vis = "ItemSpawner"
-
 
 	return house
 }
