@@ -338,7 +338,7 @@ func (sc *Scene) NavEvents() {
 		me.SetProcessed()
 		ssc := recv.Embed(KiT_Scene).(*Scene)
 		orbDel := float32(.2)
-		orbDels := orbDel * 1.5
+		orbDels := orbDel * 1
 		panDel := float32(.05)
 		del := me.Where.Sub(me.From)
 		dx := float32(-del.X)
