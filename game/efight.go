@@ -42,7 +42,7 @@ func mainrun() {
 	toprow := gi.AddNewFrame(mfr, "toprow", gi.LayoutVert)
 	toprow.SetStretchMaxWidth()
 
-	toprow.SetProp("background-color", "lightgreen")
+	toprow.SetProp("background-color", "lightblue")
 	mainHeader := gi.AddNewLabel(toprow, "mainHeader", "Welcome to EFight version 0.0.0 pre-alpha")
 	mainHeader.SetProp("font-size", "100px")
 	mainHeader.SetProp("text-align", "center")
@@ -186,7 +186,7 @@ func initMainTab() {
 			//	startGame()
 		}
 	})
-	homeTab.SetProp("background-color", "lightgreen")
+	homeTab.SetProp("background-color", "lightblue")
 	// tv.SetStretchMaxWidth()
 	tv.UpdateEnd(updt)
 }

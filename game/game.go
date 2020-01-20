@@ -301,9 +301,9 @@ func (gm *Game) Config() {
 	floor := gi3d.AddNewSolid(&sc.Scene, &sc.Scene, "floor", floorp.Name())
 	floor.Pose.Pos.Set(0, 0, 0)
 	// floor.Mat.Emissive.SetString("green", nil)
-	grtx := gi3d.AddNewTextureFile(&sc.Scene, "ground", "ground.jpg")
+	grtx := gi3d.AddNewTextureFile(&sc.Scene, "ground", "objs/grass.jpg")
 	floor.Mat.SetTexture(&sc.Scene, grtx)
-	floor.Mat.Tiling.Repeat.Set(200, 200)
+	floor.Mat.Tiling.Repeat.Set(50, 50)
 
 	gi.FilterLaggyKeyEvents = true // fix key lag
 }
