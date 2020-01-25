@@ -1,4 +1,4 @@
-// Copyright (c) 2020, The EFight Authors. All rights reserved.
+// Copyright (c) 2020, The Singularity Showdown Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -23,14 +23,16 @@ var tv *gi.TabView
 var SUPERMODE = false
 var signUpTab *gi.Frame
 var homeTab *gi.Frame
+var aboutTab *gi.Frame
+var helpTab *gi.Frame
 
 func mainrun() {
-	data()
+	data() // Connect to data base
 
-	width := 1024
-	height := 768
+	width := 1024 // pixel sizes of screen
+	height := 768 // pixel sizes of screen
 
-	win := gi.NewMainWindow("efight-main", "EFight Home Screen", width, height) // pixel sizes
+	win := gi.NewMainWindow("singularity-showdown-main", "Singularity Showdown Home Screen", width, height)
 
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()
@@ -43,19 +45,19 @@ func mainrun() {
 	toprow.SetStretchMaxWidth()
 
 	toprow.SetProp("background-color", "lightblue")
-	mainHeader := gi.AddNewLabel(toprow, "mainHeader", "Welcome to EFight version 0.0.0 pre-alpha")
+	mainHeader := gi.AddNewLabel(toprow, "mainHeader", "Welcome to Singularity Showdown version 0.0.0 pre-alpha")
 	mainHeader.SetProp("font-size", "100px")
 	mainHeader.SetProp("text-align", "center")
 	mainHeader.SetProp("font-family", "Times New Roman, serif")
 
-	tv = mfr.AddNewChild(gi.KiT_TabView, "tv").(*gi.TabView)
+	tv = mfr.AddNewChild(gi.KiT_TabView, "tv").(*gi.TabView) // Create main tab view
 	tv.NewTabButton = false
 	tv.SetStretchMaxWidth()
 	tv.SetProp("background-color", "lightgreen")
 
 	signUpTab = tv.AddNewTab(gi.KiT_Frame, "Sign Up").(*gi.Frame)
-	TheGame = &Game{}
-	TheGame.Config()
+	TheGame = &Game{} // Set up game
+	TheGame.Config() // Set up game
 
 	signUpTab.Lay = gi.LayoutVert
 	signUpTab.SetStretchMaxWidth()
@@ -63,7 +65,7 @@ func mainrun() {
 	signUpTitle := signUpTab.AddNewChild(gi.KiT_Label, "signUpTitle").(*gi.Label)
 	signUpTitle.SetProp("font-size", "x-large")
 	signUpTitle.SetProp("text-align", "center")
-	signUpTitle.Text = "<b>Enter your information to sign up for EFight:</b>"
+	signUpTitle.Text = "<b>Enter your information to sign up for Singularity Showdown:</b>"
 	signUpText := signUpTab.AddNewChild(gi.KiT_TextField, "signUpText").(*gi.TextField)
 	signUpText.SetProp("horizontal-align", gi.AlignCenter)
 	signUpText.Placeholder = "Enter what you want your username to be"
@@ -96,7 +98,7 @@ func mainrun() {
 	logInTitle := logInTab.AddNewChild(gi.KiT_Label, "logInTitle").(*gi.Label)
 	logInTitle.SetProp("font-size", "x-large")
 	logInTitle.SetProp("text-align", "center")
-	logInTitle.Text = "<b>Enter your information to log into EFight:</b>"
+	logInTitle.Text = "<b>Enter your information to log into Singularity Showdown:</b>"
 
 	logInText := logInTab.AddNewChild(gi.KiT_TextField, "logInText").(*gi.TextField)
 	logInText.SetProp("horizontal-align", gi.AlignCenter)
@@ -160,7 +162,7 @@ func mainrun() {
 	win.StartEventLoop()
 }
 
-func initMainTab() {
+func initMainTabs() {
 	updt := tv.UpdateStart()
 	tv.SetFullReRender()
 	rec := ki.Node{}
@@ -175,7 +177,7 @@ func initMainTab() {
 	mainTitle.SetProp("font-size", "x-large")
 	mainTitle.SetProp("font-family", "Times New Roman, serif")
 	mainTitle.SetProp("text-align", "center")
-	mainTitle.Text = "<b>Welcome to EFight, an Energy Based 3D battle game!</b>"
+	mainTitle.Text = "<b>Welcome to Singularity Showdown, a strategic 3D Battle Game</b>"
 	playButton := homeTab.AddNewChild(gi.KiT_Button, "playButton").(*gi.Button)
 	playButton.Text = "<b>Play!</b>"
 
@@ -188,5 +190,12 @@ func initMainTab() {
 	})
 	homeTab.SetProp("background-color", "lightblue")
 	// tv.SetStretchMaxWidth()
+
+	aboutTab = tv.AddNewTab(gi.KiT_Frame, "About Tab").(*gi.Frame)
+
+	aboutTab.Lay = gi.LayoutVert
+	aboutTab.SetStretchMaxWidth()
+	aboutTab.SetStretchMaxHeight()
+
 	tv.UpdateEnd(updt)
 }

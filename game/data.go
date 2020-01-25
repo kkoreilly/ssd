@@ -1,4 +1,4 @@
-// Copyright (c) 2020, The EFight Authors. All rights reserved.
+// Copyright (c) 2020, The Singularity Showdown Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 package main
@@ -112,7 +112,7 @@ func logIn(user string, password string) {
 		// fmt.Printf("Found pair, logging in \n")
 		tv.DeleteTabIndex(0, true)
 		tv.DeleteTabIndex(0, true)
-		initMainTab()
+		initMainTabs()
 
 		tv.SelectTabIndex(0)
 
