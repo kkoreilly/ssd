@@ -57,7 +57,7 @@ func mainrun() {
 
 	signUpTab = tv.AddNewTab(gi.KiT_Frame, "Sign Up").(*gi.Frame)
 	TheGame = &Game{} // Set up game
-	TheGame.Config() // Set up game
+	TheGame.Config()  // Set up game
 
 	signUpTab.Lay = gi.LayoutVert
 	signUpTab.SetStretchMaxWidth()
