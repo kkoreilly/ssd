@@ -17,6 +17,7 @@ import (
 var db *sql.DB
 var USER string
 var PASSWORD string
+var GOLD int
 
 func data() {
 	var str string
@@ -56,7 +57,8 @@ if err != nil {
 
 for findUserResult.Next() {
 findUserResult.Scan(&USER, &PASSWORD, &goldNum)
-resourcesText.SetText(fmt.Sprintf("%v \n \n %v %v", resourcesText.Text, goldNum, name))
+resourcesText.SetText(fmt.Sprintf("%v \n \n You have %v %v", resourcesText.Text, goldNum, name))
+GOLD = goldNum
 }
 }
 func updateResource(name string, value int) {
@@ -65,7 +67,7 @@ _, err := db.Exec(updateResourceStatement)
 if err != nil {
 	panic(err)
 } else {
-	fmt.Printf("Updated resource")
+	// fmt.Printf("Updated resource")
 }
 
 }

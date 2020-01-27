@@ -229,10 +229,22 @@ func initMainTabs() {
 	resourcesText.SetProp("font-size", "30px")
 	resourcesText.SetProp("font-family", "Times New Roman, serif")
 	resourcesText.SetProp("text-align", "left")
-	resourcesText.Text = ""
+	resourcesText.Text = "                                                                                                                                      "
 	resourcesText.Redrawable = true
+
 	// updateResource("gold", 70)
 readResource("gold")
+
+goldButton := gi.AddNewButton(resourcesTab, "goldButton")
+goldButton.Text = "Purchase 100 gold"
+goldButton.SetProp("background-color", "#D4AF37")
+goldButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	if sig == int64(gi.ButtonClicked) {
+		updateResource("gold", GOLD + 100)
+		resourcesText.SetText("")
+		readResource("gold")
+	}
+})
 
 
 	aboutTab = tv.AddNewTab(gi.KiT_Frame, "About").(*gi.Frame)
