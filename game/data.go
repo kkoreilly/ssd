@@ -45,15 +45,22 @@ func data() {
 }
 
 func readResource(name string) {
-findUserStatement := fmt.Sprintf("SELECT * FROM users WHERE username='%v'", USER)
+findUserStatement := fmt.Sprintf("SELECT %v FROM users WHERE username='%v'", name, USER)
 
 findUserResult, err := db.Query(findUserStatement)
+var goldNum int
 
 if err != nil {
 	panic(err)
 }
 
-fmt.Printf("Find User Result: %v \n", findUserResult)
+for findUserResult.Next() {
+findUserResult.Scan(&USER, &PASSWORD, &goldNum)
+resourcesText.SetText(fmt.Sprintf("%v \n \n <b>%v</b>: %v", resourcesText.Text, name, goldNum))
+}
+// fmt.Printf("Find User Result: %v \n", findUserResult)
+
+
 
 }
 

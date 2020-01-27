@@ -27,6 +27,7 @@ var homeTab *gi.Frame
 var aboutTab *gi.Frame
 var playTab *gi.Frame
 var resourcesTab *gi.Frame
+var resourcesText *gi.Label
 
 func mainrun() {
 	data() // Connect to data base
@@ -224,7 +225,7 @@ func initMainTabs() {
 	resourcesTitle.SetProp("text-align", "center")
 	resourcesTitle.Text = "Your Resources:"
 
-	resourcesText := resourcesTab.AddNewChild(gi.KiT_Label, "resourcesText").(*gi.Label)
+	resourcesText = resourcesTab.AddNewChild(gi.KiT_Label, "resourcesText").(*gi.Label)
 	resourcesText.SetProp("font-size", "30px")
 	resourcesText.SetProp("font-family", "Times New Roman, serif")
 	resourcesText.SetProp("text-align", "left")
