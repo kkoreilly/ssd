@@ -218,7 +218,7 @@ func (gm *Game) MakeView() {
 }
 
 func (gm *Game) Config() {
-	gamerow := gi.AddNewLayout(signUpTab, "gamerow", gi.LayoutVert)
+	gamerow := gi.AddNewLayout(playTab, "gamerow", gi.LayoutVert)
 	gamerow.SetStretchMaxWidth()
 	gamerow.SetStretchMaxHeight()
 

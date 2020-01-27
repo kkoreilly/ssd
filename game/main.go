@@ -24,6 +24,7 @@ var SUPERMODE = false
 var signUpTab *gi.Frame
 var homeTab *gi.Frame
 var aboutTab *gi.Frame
+var playTab *gi.Frame
 
 func mainrun() {
 	data() // Connect to data base
@@ -57,12 +58,23 @@ func mainrun() {
 
 
 	signUpTab = tv.AddNewTab(gi.KiT_Frame, "Sign Up").(*gi.Frame)
-	TheGame = &Game{} // Set up game
-	TheGame.Config()  // Set up game
+
 
 	signUpTab.Lay = gi.LayoutVert
 	signUpTab.SetStretchMaxWidth()
 	signUpTab.SetStretchMaxHeight()
+
+	playButton := signUpTab.AddNewChild(gi.KiT_Button, "playButton").(*gi.Button)
+	playButton.Text = "<b>Play (Tester)</b>"
+
+	playButton.SetProp("horizontal-align", gi.AlignCenter)
+
+	playButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(gi.ButtonClicked) {
+			initPlayTab()
+		}
+	})
+
 	signUpTitle := signUpTab.AddNewChild(gi.KiT_Label, "signUpTitle").(*gi.Label)
 	signUpTitle.SetProp("font-size", "x-large")
 	signUpTitle.SetProp("text-align", "center")
@@ -213,5 +225,25 @@ func initMainTabs() {
 	aboutText.Text = "Singularity Showdown is an open source, Strategic 3D Battle Game."
 
 
+	tv.UpdateEnd(updt)
+}
+
+func initPlayTab() {
+	updt := tv.UpdateStart()
+	tv.SetFullReRender()
+
+	rec := ki.Node{}
+	rec.InitName(&rec, "rec")
+
+	playTab = tv.AddNewTab(gi.KiT_Frame, "Game").(*gi.Frame)
+
+	playTab.Lay = gi.LayoutVert
+	playTab.SetStretchMaxWidth()
+	playTab.SetStretchMaxHeight()
+
+	TheGame = &Game{} // Set up game
+	TheGame.Config()  // Set up game
+
+tv.SelectTabIndex(2)
 	tv.UpdateEnd(updt)
 }
