@@ -1,5 +1,5 @@
-# efight
+# Singularity Showdown
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/kplat1/efight)](https://goreportcard.com/report/github.com/kplat1/efight)
+[![Go Report Card](https://goreportcard.com/badge/github.com/kplat1/ssd)](https://goreportcard.com/report/github.com/kplat1/ssd)
 
-EFight, a 3D battle game. Note: EFight is still in development. For more information about EFight, see the [official website](https://kplat1.github.io/game)
+Singularity Showdown, a 3D battle game. Note: Singularity Showdown is still in development. For more information about Singularity Showdown, go to [singularityshowdown.com](https://singularityshowdown.com)
