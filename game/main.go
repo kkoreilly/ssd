@@ -231,6 +231,7 @@ func initMainTabs() {
 	resourcesText.SetProp("text-align", "left")
 	resourcesText.Text = ""
 	resourcesText.Redrawable = true
+	// updateResource("gold", 70)
 readResource("gold")
 
 
