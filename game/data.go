@@ -6,8 +6,11 @@ package main
 import (
 	"database/sql"
 	"fmt"
-"io/ioutil"
-"os"
+	"io/ioutil"
+	"os"
+	"path/filepath"
+	"strings"
+
 	_ "github.com/lib/pq"
 )
 
@@ -17,15 +20,15 @@ func data() {
 	var str string
 	var b []byte
 	home, err := os.UserHomeDir()
-	fn := fmt.Sprintf("%v/dburl/url.txt", home)
+	fn := filepath.Join(filepath.Join(home, "dburl"), "url.txt")
 	b, err = ioutil.ReadFile(fn)
-	    if err != nil {
-				// fmt.Printf("%v \n", err)
-	        str = "example.com"
-	    } else {
-	    str = string(b) // convert content to a 'string'
-		}
-			// fmt.Printf("Test String: %v \n", str)
+	if err != nil {
+		// fmt.Printf("%v \n", err)
+		str = "example.com"
+	} else {
+		str = strings.TrimSpace(string(b)) // convert content to a 'string'
+	}
+	// fmt.Printf("Test String: %v \n", str)
 	db, err = sql.Open("postgres", str)
 	if err != nil {
 		panic(err)
@@ -128,7 +131,7 @@ func logIn(user string, password string) {
 		initMainTabs()
 
 		tv.SelectTabIndex(0)
-			tv.UpdateEnd(updt)
+		tv.UpdateEnd(updt)
 
 	} else {
 		// fmt.Printf("Username and password do not match \n")
