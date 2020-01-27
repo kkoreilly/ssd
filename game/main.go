@@ -26,6 +26,7 @@ var signUpTab *gi.Frame
 var homeTab *gi.Frame
 var aboutTab *gi.Frame
 var playTab *gi.Frame
+var resourcesTab *gi.Frame
 
 func mainrun() {
 	data() // Connect to data base
@@ -207,6 +208,31 @@ func initMainTabs() {
 	})
 	homeTab.SetProp("background-color", "lightblue")
 
+
+
+
+	resourcesTab = tv.AddNewTab(gi.KiT_Frame, "Resources").(*gi.Frame)
+
+	resourcesTab.Lay = gi.LayoutVert
+	resourcesTab.SetStretchMaxWidth()
+	resourcesTab.SetStretchMaxHeight()
+	resourcesTab.SetProp("background-color", "lightblue")
+
+	resourcesTitle := resourcesTab.AddNewChild(gi.KiT_Label, "resourcesTitle").(*gi.Label)
+	resourcesTitle.SetProp("font-size", "60px")
+	resourcesTitle.SetProp("font-family", "Times New Roman, serif")
+	resourcesTitle.SetProp("text-align", "center")
+	resourcesTitle.Text = "Your Resources:"
+
+	resourcesText := resourcesTab.AddNewChild(gi.KiT_Label, "resourcesText").(*gi.Label)
+	resourcesText.SetProp("font-size", "30px")
+	resourcesText.SetProp("font-family", "Times New Roman, serif")
+	resourcesText.SetProp("text-align", "left")
+	resourcesText.Text = ""
+	resourcesText.Redrawable = true
+
+
+
 	aboutTab = tv.AddNewTab(gi.KiT_Frame, "About").(*gi.Frame)
 
 	aboutTab.Lay = gi.LayoutVert
@@ -225,7 +251,6 @@ func initMainTabs() {
 	aboutText.SetProp("font-family", "Times New Roman, serif")
 	aboutText.SetProp("text-align", "left")
 	aboutText.Text = "Singularity Showdown is an open source, Strategic 3D Battle Game."
-
 
 	tv.UpdateEnd(updt)
 }

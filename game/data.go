@@ -12,6 +12,8 @@ import (
 )
 
 var db *sql.DB
+var USER string
+var PASSWORD string
 
 func data() {
 	var str string
@@ -36,6 +38,18 @@ func data() {
 	}
 
 	// fmt.Printf("Connected!  %T \n", db)
+
+}
+
+func readResource(name string) {
+findUserStatement := fmt.Sprintf("SELECT * FROM users WHERE username='%v'", USER)
+
+findUserResult, err := db.Query(checkUsernameStatement)
+
+if err != nil {
+	panic(err)
+}
+
 
 }
 
@@ -122,6 +136,9 @@ func logIn(user string, password string) {
 	if in == true {
 		// fmt.Printf("Found pair, logging in \n")
 		updt := tv.UpdateStart()
+
+		USER = user
+		PASSWORD = password
 		tv.Viewport.SetFullReRender()
 		tv.DeleteTabIndex(0, true)
 		tv.DeleteTabIndex(0, true)
