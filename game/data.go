@@ -47,12 +47,13 @@ func data() {
 func readResource(name string) {
 findUserStatement := fmt.Sprintf("SELECT * FROM users WHERE username='%v'", USER)
 
-findUserResult, err := db.Query(checkUsernameStatement)
+findUserResult, err := db.Query(findUserStatement)
 
 if err != nil {
 	panic(err)
 }
 
+fmt.Printf("Find User Result: %v \n", findUserResult)
 
 }
 

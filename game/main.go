@@ -230,7 +230,7 @@ func initMainTabs() {
 	resourcesText.SetProp("text-align", "left")
 	resourcesText.Text = ""
 	resourcesText.Redrawable = true
-
+readResource("gold")
 
 
 	aboutTab = tv.AddNewTab(gi.KiT_Frame, "About").(*gi.Frame)
