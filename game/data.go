@@ -25,7 +25,7 @@ func data() {
 	    } else {
 	    str = string(b) // convert content to a 'string'
 		}
-			fmt.Printf("Test String: %v \n", str)
+			// fmt.Printf("Test String: %v \n", str)
 	db, err = sql.Open("postgres", str)
 	if err != nil {
 		panic(err)
@@ -44,8 +44,8 @@ func addUser(user string, password string) {
 		username varchar,
 		passwd varchar
 		)`
-	tableResult, err := db.Query(tableCreateStatement)
-	fmt.Printf("Result: %v \n", tableResult)
+	_, err := db.Query(tableCreateStatement)
+	// fmt.Printf("Result: %v \n", tableResult)
 	if err != nil {
 		panic(err)
 	}

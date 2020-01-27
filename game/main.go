@@ -8,6 +8,7 @@ import (
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gimain"
 	"github.com/goki/ki/ki"
+	// "fmt"
 )
 
 func main() {
@@ -20,7 +21,7 @@ var signUpResult *gi.Label
 var logInResult *gi.Label
 var inspectText *gi.Label
 var tv *gi.TabView
-var SUPERMODE = false
+// var SUPERMODE = false
 var signUpTab *gi.Frame
 var homeTab *gi.Frame
 var aboutTab *gi.Frame
@@ -64,17 +65,6 @@ func mainrun() {
 	signUpTab.SetStretchMaxWidth()
 	signUpTab.SetStretchMaxHeight()
 
-	playButton := signUpTab.AddNewChild(gi.KiT_Button, "playButton").(*gi.Button)
-	playButton.Text = "<b>Play (Tester)</b>"
-
-	playButton.SetProp("horizontal-align", gi.AlignCenter)
-
-	playButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(gi.ButtonClicked) {
-			initPlayTab()
-		}
-	})
-
 	signUpTitle := signUpTab.AddNewChild(gi.KiT_Label, "signUpTitle").(*gi.Label)
 	signUpTitle.SetProp("font-size", "x-large")
 	signUpTitle.SetProp("text-align", "center")
@@ -102,6 +92,17 @@ func mainrun() {
 	signUpResult = signUpTab.AddNewChild(gi.KiT_Label, "signUpResult").(*gi.Label)
 	signUpResult.Text = "                                   "
 	signUpResult.Redrawable = true
+
+	playButton := signUpTab.AddNewChild(gi.KiT_Button, "playButton").(*gi.Button)
+	playButton.Text = "<b>Play (Tester)</b>"
+
+	playButton.SetProp("horizontal-align", gi.AlignCenter)
+
+	playButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(gi.ButtonClicked) {
+			initPlayTab()
+		}
+	})
 
 	logInTab := tv.AddNewTab(gi.KiT_Frame, "Log In").(*gi.Frame)
 
@@ -137,17 +138,17 @@ func mainrun() {
 	logInResult.Text = "                                                                                                                                                                                  "
 	logInResult.Redrawable = true
 
-	if SUPERMODE == true {
-
-		inspectTab := tv.AddNewTab(gi.KiT_Frame, "Inspect Tab").(*gi.Frame)
-
-		inspectTab.Lay = gi.LayoutVert
-
-		inspectText = inspectTab.AddNewChild(gi.KiT_Label, "inspectText").(*gi.Label)
-		inspectText.Redrawable = true
-		inspectText.SetStretchMaxWidth()
-		initInspect()
-	}
+	// if SUPERMODE == true {
+	//
+	// 	inspectTab := tv.AddNewTab(gi.KiT_Frame, "Inspect Tab").(*gi.Frame)
+	//
+	// 	inspectTab.Lay = gi.LayoutVert
+	//
+	// 	inspectText = inspectTab.AddNewChild(gi.KiT_Label, "inspectText").(*gi.Label)
+	// 	inspectText.Redrawable = true
+	// 	inspectText.SetStretchMaxWidth()
+	// 	initInspect()
+	// }
 
 	tv.SelectTabIndex(0)
 	tv.ChildByName("tabs", 0).SetProp("background-color", "darkgrey")
@@ -193,14 +194,15 @@ func initMainTabs() {
 	mainTitle.SetProp("font-family", "Times New Roman, serif")
 	mainTitle.SetProp("text-align", "center")
 	mainTitle.Text = "Welcome to Singularity Showdown, a strategic 3D Battle Game"
+
 	playButton := homeTab.AddNewChild(gi.KiT_Button, "playButton").(*gi.Button)
-	playButton.Text = "<b>Play!</b>"
+	playButton.Text = "<b>Play (Tester)</b>"
 
 	playButton.SetProp("horizontal-align", gi.AlignCenter)
 
 	playButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
-			//	startGame()
+			initPlayTab()
 		}
 	})
 	homeTab.SetProp("background-color", "lightblue")
@@ -235,6 +237,14 @@ func initPlayTab() {
 	rec := ki.Node{}
 	rec.InitName(&rec, "rec")
 
+	_, err := tv.TabByNameTry("Game") // check if the game tab already exists -- there will not be an error if it already exists
+
+	if err == nil { // if the tab Game already exists
+		tv.SelectTabByName("Game")
+		tv.UpdateEnd(updt)
+		return // and don't create a new tab
+	}
+
 	playTab = tv.AddNewTab(gi.KiT_Frame, "Game").(*gi.Frame)
 
 	playTab.Lay = gi.LayoutVert
@@ -244,6 +254,6 @@ func initPlayTab() {
 	TheGame = &Game{} // Set up game
 	TheGame.Config()  // Set up game
 
-tv.SelectTabIndex(2)
+tv.SelectTabByName("Game")
 	tv.UpdateEnd(updt)
 }
