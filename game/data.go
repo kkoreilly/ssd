@@ -110,11 +110,14 @@ func logIn(user string, password string) {
 	}
 	if in == true {
 		// fmt.Printf("Found pair, logging in \n")
+		updt := tv.UpdateStart()
+		tv.Viewport.SetFullReRender()
 		tv.DeleteTabIndex(0, true)
 		tv.DeleteTabIndex(0, true)
 		initMainTabs()
 
 		tv.SelectTabIndex(0)
+			tv.UpdateEnd(updt)
 
 	} else {
 		// fmt.Printf("Username and password do not match \n")

@@ -24,7 +24,6 @@ var SUPERMODE = false
 var signUpTab *gi.Frame
 var homeTab *gi.Frame
 var aboutTab *gi.Frame
-var helpTab *gi.Frame
 
 func mainrun() {
 	data() // Connect to data base
@@ -44,16 +43,18 @@ func mainrun() {
 	toprow := gi.AddNewFrame(mfr, "toprow", gi.LayoutVert)
 	toprow.SetStretchMaxWidth()
 
-	toprow.SetProp("background-color", "lightblue")
-	mainHeader := gi.AddNewLabel(toprow, "mainHeader", "Welcome to Singularity Showdown version 0.0.0 pre-alpha")
-	mainHeader.SetProp("font-size", "100px")
+	toprow.SetProp("background-color", "black")
+	mainHeaderText := `<b>Welcome to <span style="color:grey">Singularity</span> <span style="color:red">Showdown</span> version 0.0.0 pre-alpha</b>`
+	mainHeader := gi.AddNewLabel(toprow, "mainHeader", mainHeaderText)
+	mainHeader.SetProp("font-size", "90px")
 	mainHeader.SetProp("text-align", "center")
 	mainHeader.SetProp("font-family", "Times New Roman, serif")
+	mainHeader.SetProp("color", "white")
 
 	tv = mfr.AddNewChild(gi.KiT_TabView, "tv").(*gi.TabView) // Create main tab view
 	tv.NewTabButton = false
 	tv.SetStretchMaxWidth()
-	tv.SetProp("background-color", "lightgreen")
+
 
 	signUpTab = tv.AddNewTab(gi.KiT_Frame, "Sign Up").(*gi.Frame)
 	TheGame = &Game{} // Set up game
@@ -137,6 +138,7 @@ func mainrun() {
 	}
 
 	tv.SelectTabIndex(0)
+	tv.ChildByName("tabs", 0).SetProp("background-color", "darkgrey")
 	//
 	// 	// main menu
 	// 	appnm := oswin.TheApp.Name()
@@ -165,19 +167,20 @@ func mainrun() {
 func initMainTabs() {
 	updt := tv.UpdateStart()
 	tv.SetFullReRender()
+
 	rec := ki.Node{}
 	rec.InitName(&rec, "rec")
-	homeTab = tv.AddNewTab(gi.KiT_Frame, "Home Tab").(*gi.Frame)
+	homeTab = tv.AddNewTab(gi.KiT_Frame, "Home").(*gi.Frame)
 
 	homeTab.Lay = gi.LayoutVert
 	homeTab.SetStretchMaxWidth()
 	homeTab.SetStretchMaxHeight()
 
 	mainTitle := homeTab.AddNewChild(gi.KiT_Label, "mainTitle").(*gi.Label)
-	mainTitle.SetProp("font-size", "x-large")
+	mainTitle.SetProp("font-size", "60px")
 	mainTitle.SetProp("font-family", "Times New Roman, serif")
 	mainTitle.SetProp("text-align", "center")
-	mainTitle.Text = "<b>Welcome to Singularity Showdown, a strategic 3D Battle Game</b>"
+	mainTitle.Text = "Welcome to Singularity Showdown, a strategic 3D Battle Game"
 	playButton := homeTab.AddNewChild(gi.KiT_Button, "playButton").(*gi.Button)
 	playButton.Text = "<b>Play!</b>"
 
@@ -189,13 +192,26 @@ func initMainTabs() {
 		}
 	})
 	homeTab.SetProp("background-color", "lightblue")
-	// tv.SetStretchMaxWidth()
 
-	aboutTab = tv.AddNewTab(gi.KiT_Frame, "About Tab").(*gi.Frame)
+	aboutTab = tv.AddNewTab(gi.KiT_Frame, "About").(*gi.Frame)
 
 	aboutTab.Lay = gi.LayoutVert
 	aboutTab.SetStretchMaxWidth()
 	aboutTab.SetStretchMaxHeight()
+	aboutTab.SetProp("background-color", "lightblue")
+
+	aboutTitle := aboutTab.AddNewChild(gi.KiT_Label, "aboutTitle").(*gi.Label)
+	aboutTitle.SetProp("font-size", "60px")
+	aboutTitle.SetProp("font-family", "Times New Roman, serif")
+	aboutTitle.SetProp("text-align", "center")
+	aboutTitle.Text = "About Singularity Showdown"
+
+	aboutText := aboutTab.AddNewChild(gi.KiT_Label, "aboutText").(*gi.Label)
+	aboutText.SetProp("font-size", "30px")
+	aboutText.SetProp("font-family", "Times New Roman, serif")
+	aboutText.SetProp("text-align", "left")
+	aboutText.Text = "Singularity Showdown is an open source, Strategic 3D Battle Game."
+
 
 	tv.UpdateEnd(updt)
 }
