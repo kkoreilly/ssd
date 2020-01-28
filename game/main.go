@@ -29,6 +29,7 @@ var aboutTab *gi.Frame
 var playTab *gi.Frame
 var resourcesTab *gi.Frame
 var map2dTab *gi.Frame
+var map3dTab *gi.Frame
 var resourcesText *gi.Label
 
 func mainrun() {
@@ -271,6 +272,19 @@ func initMainTabs() {
 	map2dTitle.SetProp("font-family", "Times New Roman, serif")
 	map2dTitle.SetProp("text-align", "center")
 	map2dTitle.Text = "Live Map of the World (2D):"
+
+	map3dTab = tv.AddNewTab(gi.KiT_Frame, "<b>Map (3D)</b>").(*gi.Frame)
+
+	map3dTab.Lay = gi.LayoutVert
+	map3dTab.SetStretchMaxWidth()
+	map3dTab.SetStretchMaxHeight()
+	map3dTab.SetProp("background-color", "lightblue")
+
+	map3dTab := map3dTab.AddNewChild(gi.KiT_Label, "map3dTitle").(*gi.Label)
+	map3dTab.SetProp("font-size", "60px")
+	map3dTab.SetProp("font-family", "Times New Roman, serif")
+	map3dTab.SetProp("text-align", "center")
+	map3dTab.Text = "Live Map of the World (3D):"
 
 	aboutTab = tv.AddNewTab(gi.KiT_Frame, "<b>About</b>").(*gi.Frame)
 
