@@ -45,7 +45,7 @@ func data() {
 
 }
 
-func readResource(name string) {
+func readResources() {
 	findUserStatement := fmt.Sprintf("SELECT * FROM users WHERE username='%v'", USER)
 
 	findUserResult, err := db.Query(findUserStatement)
@@ -57,7 +57,7 @@ func readResource(name string) {
 
 	for findUserResult.Next() {
 		findUserResult.Scan(&USER, &PASSWORD, &goldNum)
-		resourcesText.SetText(fmt.Sprintf("%v \n \n You have %v %v", resourcesText.Text, goldNum, name))
+		goldResourcesText.SetText(fmt.Sprintf("%v \n \n You have %v gold", goldResourcesText.Text, goldNum))
 		GOLD = goldNum
 	}
 }

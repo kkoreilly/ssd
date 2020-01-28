@@ -30,7 +30,7 @@ var playTab *gi.Frame
 var resourcesTab *gi.Frame
 var map2dTab *gi.Frame
 var map3dTab *gi.Frame
-var resourcesText *gi.Label
+var goldResourcesText *gi.Label
 
 func mainrun() {
 	data() // Connect to data base
@@ -223,15 +223,15 @@ func initMainTabs() {
 	resourcesTitle.SetProp("text-align", "center")
 	resourcesTitle.Text = "Your Resources:"
 
-	resourcesText = resourcesTab.AddNewChild(gi.KiT_Label, "resourcesText").(*gi.Label)
-	resourcesText.SetProp("font-size", "30px")
-	resourcesText.SetProp("font-family", "Times New Roman, serif")
-	resourcesText.SetProp("text-align", "left")
-	resourcesText.Text = "                                                                                                                                      "
-	resourcesText.Redrawable = true
+	goldResourcesText = resourcesTab.AddNewChild(gi.KiT_Label, "goldResourcesText").(*gi.Label)
+	goldResourcesText.SetProp("font-size", "30px")
+	goldResourcesText.SetProp("font-family", "Times New Roman, serif")
+	goldResourcesText.SetProp("text-align", "left")
+	goldResourcesText.Text = "                                                                                                                                      "
+	goldResourcesText.Redrawable = true
 
 	// updateResource("gold", 70)
-	readResource("gold")
+	readResources()
 
 	brow := gi.AddNewLayout(resourcesTab, "gbrow", gi.LayoutHoriz)
 	brow.SetProp("spacing", units.NewEx(2))
@@ -244,8 +244,8 @@ func initMainTabs() {
 	goldButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
 			updateResource("gold", GOLD+100)
-			resourcesText.SetText("                                            ")
-			readResource("gold")
+			goldResourcesText.SetText("                                            ")
+			readResources()
 		}
 	})
 
@@ -255,8 +255,8 @@ func initMainTabs() {
 	goldButton1.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
 			updateResource("gold", GOLD+1000)
-			resourcesText.SetText("                                            ")
-			readResource("gold")
+			goldResourcesText.SetText("                                            ")
+			readResources()
 		}
 	})
 
