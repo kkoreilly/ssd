@@ -46,36 +46,33 @@ func data() {
 }
 
 func readResource(name string) {
-findUserStatement := fmt.Sprintf("SELECT * FROM users WHERE username='%v'", USER)
+	findUserStatement := fmt.Sprintf("SELECT * FROM users WHERE username='%v'", USER)
 
-findUserResult, err := db.Query(findUserStatement)
-var goldNum int
+	findUserResult, err := db.Query(findUserStatement)
+	var goldNum int
 
-if err != nil {
-	panic(err)
-}
+	if err != nil {
+		panic(err)
+	}
 
-for findUserResult.Next() {
-findUserResult.Scan(&USER, &PASSWORD, &goldNum)
-resourcesText.SetText(fmt.Sprintf("%v \n \n You have %v %v", resourcesText.Text, goldNum, name))
-GOLD = goldNum
-}
+	for findUserResult.Next() {
+		findUserResult.Scan(&USER, &PASSWORD, &goldNum)
+		resourcesText.SetText(fmt.Sprintf("%v \n \n You have %v %v", resourcesText.Text, goldNum, name))
+		GOLD = goldNum
+	}
 }
 func updateResource(name string, value int) {
-updateResourceStatement := fmt.Sprintf("UPDATE users SET %v = '%v' WHERE username='%v'", name, value, USER)
-_, err := db.Exec(updateResourceStatement)
-if err != nil {
-	panic(err)
-} else {
-	// fmt.Printf("Updated resource")
-}
+	updateResourceStatement := fmt.Sprintf("UPDATE users SET %v = '%v' WHERE username='%v'", name, value, USER)
+	_, err := db.Exec(updateResourceStatement)
+	if err != nil {
+		panic(err)
+	} else {
+		// fmt.Printf("Updated resource")
+	}
 
 }
+
 // fmt.Printf("Find User Result: %v \n", findUserResult)
-
-
-
-
 
 func addUser(user string, password string) {
 	tableCreateStatement := `CREATE TABLE IF NOT EXISTS users (

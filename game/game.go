@@ -16,6 +16,7 @@ import (
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/oswin/mouse"
+	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 )
@@ -247,11 +248,26 @@ func (gm *Game) Config() {
 
 	gm.MakeView()
 	gi.AddNewSpace(gamerow, "space1")
-	epbut := gi.AddNewButton(gamerow, "edit-phys")
+
+	brow := gi.AddNewLayout(playTab, "brow", gi.LayoutHoriz)
+	brow.SetProp("spacing", units.NewEx(2))
+	brow.SetProp("horizontal-align", gi.AlignLeft)
+	brow.SetStretchMaxWidth()
+
+	epbut := gi.AddNewButton(brow, "edit-phys")
 	epbut.SetText("Edit Phys")
 	epbut.ButtonSig.Connect(gm.World.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
 			giv.GoGiEditorDialog(gm.World)
+		}
+	})
+	cgbut := gi.AddNewButton(brow, "close-game")
+	cgbut.SetText("Close Game")
+	cgbut.ButtonSig.Connect(gm.World.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(gi.ButtonClicked) {
+			tabIndex, _ := tv.TabIndexByName("<b>Game</b>")
+			tv.DeleteTabIndex(tabIndex, true)
+			tv.SelectTabIndex(0)
 		}
 	})
 

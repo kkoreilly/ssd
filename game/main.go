@@ -7,8 +7,8 @@ package main
 import (
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gimain"
+	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
-	// "fmt"
 )
 
 func main() {
@@ -21,12 +21,14 @@ var signUpResult *gi.Label
 var logInResult *gi.Label
 var inspectText *gi.Label
 var tv *gi.TabView
+
 // var SUPERMODE = false
 var signUpTab *gi.Frame
 var homeTab *gi.Frame
 var aboutTab *gi.Frame
 var playTab *gi.Frame
 var resourcesTab *gi.Frame
+var map2dTab *gi.Frame
 var resourcesText *gi.Label
 
 func mainrun() {
@@ -59,9 +61,7 @@ func mainrun() {
 	tv.NewTabButton = false
 	tv.SetStretchMaxWidth()
 
-
 	signUpTab = tv.AddNewTab(gi.KiT_Frame, "Sign Up").(*gi.Frame)
-
 
 	signUpTab.Lay = gi.LayoutVert
 	signUpTab.SetStretchMaxWidth()
@@ -185,7 +185,7 @@ func initMainTabs() {
 
 	rec := ki.Node{}
 	rec.InitName(&rec, "rec")
-	homeTab = tv.AddNewTab(gi.KiT_Frame, "Home").(*gi.Frame)
+	homeTab = tv.AddNewTab(gi.KiT_Frame, "<b>Home</b>").(*gi.Frame)
 
 	homeTab.Lay = gi.LayoutVert
 	homeTab.SetStretchMaxWidth()
@@ -209,10 +209,7 @@ func initMainTabs() {
 	})
 	homeTab.SetProp("background-color", "lightblue")
 
-
-
-
-	resourcesTab = tv.AddNewTab(gi.KiT_Frame, "Resources").(*gi.Frame)
+	resourcesTab = tv.AddNewTab(gi.KiT_Frame, "<b>Resources</b>").(*gi.Frame)
 
 	resourcesTab.Lay = gi.LayoutVert
 	resourcesTab.SetStretchMaxWidth()
@@ -233,21 +230,49 @@ func initMainTabs() {
 	resourcesText.Redrawable = true
 
 	// updateResource("gold", 70)
-readResource("gold")
+	readResource("gold")
 
-goldButton := gi.AddNewButton(resourcesTab, "goldButton")
-goldButton.Text = "Purchase 100 gold"
-goldButton.SetProp("background-color", "#D4AF37")
-goldButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-	if sig == int64(gi.ButtonClicked) {
-		updateResource("gold", GOLD + 100)
-		resourcesText.SetText("")
-		readResource("gold")
-	}
-})
+	brow := gi.AddNewLayout(resourcesTab, "gbrow", gi.LayoutHoriz)
+	brow.SetProp("spacing", units.NewEx(2))
+	brow.SetProp("horizontal-align", gi.AlignLeft)
+	brow.SetStretchMaxWidth()
 
+	goldButton := gi.AddNewButton(brow, "goldButton")
+	goldButton.Text = "Purchase 100 gold for just 99 cents"
+	goldButton.SetProp("background-color", "#D4AF37")
+	goldButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(gi.ButtonClicked) {
+			updateResource("gold", GOLD+100)
+			resourcesText.SetText("                                            ")
+			readResource("gold")
+		}
+	})
 
-	aboutTab = tv.AddNewTab(gi.KiT_Frame, "About").(*gi.Frame)
+	goldButton1 := gi.AddNewButton(brow, "goldButton1")
+	goldButton1.Text = "BEST DEAL: Purchase 1000 gold for $8.99"
+	goldButton1.SetProp("background-color", "#D4AF37")
+	goldButton1.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(gi.ButtonClicked) {
+			updateResource("gold", GOLD+1000)
+			resourcesText.SetText("                                            ")
+			readResource("gold")
+		}
+	})
+
+	map2dTab = tv.AddNewTab(gi.KiT_Frame, "<b>Map (2D)</b>").(*gi.Frame)
+
+	map2dTab.Lay = gi.LayoutVert
+	map2dTab.SetStretchMaxWidth()
+	map2dTab.SetStretchMaxHeight()
+	map2dTab.SetProp("background-color", "lightblue")
+
+	map2dTitle := map2dTab.AddNewChild(gi.KiT_Label, "map2dTitle").(*gi.Label)
+	map2dTitle.SetProp("font-size", "60px")
+	map2dTitle.SetProp("font-family", "Times New Roman, serif")
+	map2dTitle.SetProp("text-align", "center")
+	map2dTitle.Text = "Live Map of the World (2D):"
+
+	aboutTab = tv.AddNewTab(gi.KiT_Frame, "<b>About</b>").(*gi.Frame)
 
 	aboutTab.Lay = gi.LayoutVert
 	aboutTab.SetStretchMaxWidth()
@@ -276,15 +301,15 @@ func initPlayTab() {
 	rec := ki.Node{}
 	rec.InitName(&rec, "rec")
 
-	_, err := tv.TabByNameTry("Game") // check if the game tab already exists -- there will not be an error if it already exists
+	_, err := tv.TabByNameTry("<b>Game</b>") // check if the game tab already exists -- there will not be an error if it already exists
 
 	if err == nil { // if the tab Game already exists
-		tv.SelectTabByName("Game")
+		tv.SelectTabByName("<b>Game</b>")
 		tv.UpdateEnd(updt)
 		return // and don't create a new tab
 	}
 
-	playTab = tv.AddNewTab(gi.KiT_Frame, "Game").(*gi.Frame)
+	playTab = tv.AddNewTab(gi.KiT_Frame, "<b>Game</b>").(*gi.Frame)
 
 	playTab.Lay = gi.LayoutVert
 	playTab.SetStretchMaxWidth()
@@ -293,6 +318,6 @@ func initPlayTab() {
 	TheGame = &Game{} // Set up game
 	TheGame.Config()  // Set up game
 
-tv.SelectTabByName("Game")
+	tv.SelectTabByName("<b>Game</b>")
 	tv.UpdateEnd(updt)
 }
