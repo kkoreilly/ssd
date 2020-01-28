@@ -18,6 +18,7 @@ var db *sql.DB
 var USER string
 var PASSWORD string
 var GOLD int
+var LIVES int
 
 func data() {
 	var str string
@@ -50,15 +51,20 @@ func readResources() {
 
 	findUserResult, err := db.Query(findUserStatement)
 	var goldNum int
+	var livesNum int
 
 	if err != nil {
 		panic(err)
 	}
 
 	for findUserResult.Next() {
-		findUserResult.Scan(&USER, &PASSWORD, &goldNum)
+		findUserResult.Scan(&USER, &PASSWORD, &goldNum, &livesNum)
+		// fmt.Printf("Gold: %v \n", goldNum)
+		// fmt.Printf("Lives: %v \n", livesNum)
 		goldResourcesText.SetText(fmt.Sprintf("%v \n \n You have %v gold", goldResourcesText.Text, goldNum))
 		GOLD = goldNum
+		livesResourcesText.SetText(fmt.Sprintf("%v \n \n You have %v lives", livesResourcesText.Text, livesNum))
+		LIVES = livesNum
 	}
 }
 func updateResource(name string, value int) {

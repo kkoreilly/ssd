@@ -31,6 +31,7 @@ var resourcesTab *gi.Frame
 var map2dTab *gi.Frame
 var map3dTab *gi.Frame
 var goldResourcesText *gi.Label
+var livesResourcesText *gi.Label
 
 func mainrun() {
 	data() // Connect to data base
@@ -230,9 +231,6 @@ func initMainTabs() {
 	goldResourcesText.Text = "                                                                                                                                      "
 	goldResourcesText.Redrawable = true
 
-	// updateResource("gold", 70)
-	readResources()
-
 	brow := gi.AddNewLayout(resourcesTab, "gbrow", gi.LayoutHoriz)
 	brow.SetProp("spacing", units.NewEx(2))
 	brow.SetProp("horizontal-align", gi.AlignLeft)
@@ -259,6 +257,28 @@ func initMainTabs() {
 			readResources()
 		}
 	})
+	livesResourcesText = resourcesTab.AddNewChild(gi.KiT_Label, "livesResourcesText").(*gi.Label)
+	livesResourcesText.SetProp("font-size", "30px")
+	livesResourcesText.SetProp("font-family", "Times New Roman, serif")
+	livesResourcesText.SetProp("text-align", "left")
+	livesResourcesText.Text = "                                                                                                                                      "
+	livesResourcesText.Redrawable = true
+
+	livesButton := gi.AddNewButton(resourcesTab, "livesButton")
+	livesButton.Text = "Purchase 10 lives for 10 gold"
+	livesButton.SetProp("background-color", "pink")
+	livesButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(gi.ButtonClicked) {
+			updateResource("gold", GOLD-10)
+			updateResource("lives", LIVES+10)
+			goldResourcesText.SetText("                                            ")
+			livesResourcesText.SetText("                                            ")
+			readResources()
+		}
+	})
+
+	// updateResource("gold", 70)
+	readResources()
 
 	map2dTab = tv.AddNewTab(gi.KiT_Frame, "<b>Map (2D)</b>").(*gi.Frame)
 
