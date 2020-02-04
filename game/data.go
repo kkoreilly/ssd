@@ -79,7 +79,27 @@ func updateResource(name string, value int) {
 }
 
 // fmt.Printf("Find User Result: %v \n", findUserResult)
+func readWorld() {
+	// fmt.Printf("In function \n")
+	readStatement := `SELECT * FROM world`
+	readResult, err := db.Query(readStatement)
+	if err != nil {
+		panic(err)
+	}
+	var name, owner, color string
+	for readResult.Next() {
+		readResult.Scan(&name, &owner, &color)
+		// fmt.Printf("In loop. Name = %v \n", name)
+		tr, has := FirstWorld[name]
+		if !has {
+			// fmt.Printf("Leaving loop")
+			continue
+		}
+		tr.Owner = owner
+		tr.Color = color
 
+	}
+}
 func addUser(user string, password string) {
 	tableCreateStatement := `CREATE TABLE IF NOT EXISTS users (
 		username varchar,
