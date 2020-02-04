@@ -7,6 +7,7 @@ package main
 import (
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gimain"
+	"github.com/goki/gi/svg"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 )
@@ -292,6 +293,19 @@ func initMainTabs() {
 	map2dTitle.SetProp("font-family", "Times New Roman, serif")
 	map2dTitle.SetProp("text-align", "center")
 	map2dTitle.Text = "Live Map of the World (2D):"
+
+	width := 1024 // pixel sizes of screen
+	height := 768 // pixel sizes of screenv
+
+	mapSVG := svg.AddNewSVG(map2dTab, "mapSVG")
+	mapSVG.Fill = true
+	mapSVG.SetProp("background-color", "white")
+	mapSVG.SetProp("width", units.NewPx(float32(width-20)))
+	mapSVG.SetProp("height", units.NewPx(float32(height-100)))
+	mapSVG.SetStretchMaxWidth()
+	mapSVG.SetStretchMaxHeight()
+
+	FirstWorld.RenderSVGs(mapSVG)
 
 	map3dTab = tv.AddNewTab(gi.KiT_Frame, "<b>Map (3D)</b>").(*gi.Frame)
 
