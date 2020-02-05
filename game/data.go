@@ -6,12 +6,13 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"github.com/goki/gi/gi"
+	"github.com/goki/ki/ki"
+	_ "github.com/lib/pq"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
-
-	_ "github.com/lib/pq"
 )
 
 var db *sql.DB
@@ -19,6 +20,9 @@ var USER string
 var PASSWORD string
 var GOLD int
 var LIVES int
+var TEAM string
+var goldNum int
+var livesNum int
 
 func data() {
 	var str string
@@ -46,19 +50,49 @@ func data() {
 
 }
 
+func readTeam() {
+	findUserStatement := fmt.Sprintf("SELECT * FROM users WHERE username='%v'", USER)
+
+	findUserResult, err := db.Query(findUserStatement)
+	if err != nil {
+		panic(err)
+	}
+	findUserResult.Scan(&USER, &PASSWORD, &goldNum, &livesNum, &TEAM)
+	teamMainText.SetText(fmt.Sprintf("<b>Your team is<b>: <i><u>%v</u></i>", TEAM))
+
+}
+func addTeamUpdateButtons() {
+	rec := ki.Node{}
+	rec.InitName(&rec, "rec")
+	findTeamsStatement := "SELECT * FROM teams"
+	findTeamsResult, err := db.Query(findTeamsStatement)
+	if err != nil {
+		panic(err)
+	}
+	for findTeamsResult.Next() {
+		var teamName, color string
+		var numOfPeople int
+		findTeamsResult.Scan(&teamName, &numOfPeople, &color)
+		button := gi.AddNewButton(tbrow, fmt.Sprintf("teamButton%v", teamName))
+		button.Text = fmt.Sprintf("Join the team %v", teamName)
+		button.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			if sig == int64(gi.ButtonClicked) {
+			}
+		})
+
+	}
+}
 func readResources() {
 	findUserStatement := fmt.Sprintf("SELECT * FROM users WHERE username='%v'", USER)
 
 	findUserResult, err := db.Query(findUserStatement)
-	var goldNum int
-	var livesNum int
 
 	if err != nil {
 		panic(err)
 	}
 
 	for findUserResult.Next() {
-		findUserResult.Scan(&USER, &PASSWORD, &goldNum, &livesNum)
+		findUserResult.Scan(&USER, &PASSWORD, &goldNum, &livesNum, &TEAM)
 		// fmt.Printf("Gold: %v \n", goldNum)
 		// fmt.Printf("Lives: %v \n", livesNum)
 		goldResourcesText.SetText(fmt.Sprintf("%v \n \n You have %v gold", goldResourcesText.Text, goldNum))
@@ -97,7 +131,6 @@ func readWorld() {
 		}
 		tr.Owner = owner
 		tr.Color = color
-
 	}
 }
 func addUser(user string, password string) {

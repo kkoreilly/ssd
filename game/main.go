@@ -21,6 +21,7 @@ func main() {
 var signUpResult *gi.Label
 var logInResult *gi.Label
 var inspectText *gi.Label
+var teamMainText *gi.Label
 var tv *gi.TabView
 
 // var SUPERMODE = false
@@ -31,8 +32,10 @@ var playTab *gi.Frame
 var resourcesTab *gi.Frame
 var map2dTab *gi.Frame
 var map3dTab *gi.Frame
+var teamTab *gi.Frame
 var goldResourcesText *gi.Label
 var livesResourcesText *gi.Label
+var tbrow *gi.Layout
 
 func mainrun() {
 	data() // Connect to data base
@@ -314,11 +317,42 @@ func initMainTabs() {
 	map3dTab.SetStretchMaxHeight()
 	map3dTab.SetProp("background-color", "lightblue")
 
-	map3dTab := map3dTab.AddNewChild(gi.KiT_Label, "map3dTitle").(*gi.Label)
-	map3dTab.SetProp("font-size", "60px")
-	map3dTab.SetProp("font-family", "Times New Roman, serif")
-	map3dTab.SetProp("text-align", "center")
-	map3dTab.Text = "Live Map of the World (3D):"
+	map3dTitle := map3dTab.AddNewChild(gi.KiT_Label, "map3dTitle").(*gi.Label)
+	map3dTitle.SetProp("font-size", "60px")
+	map3dTitle.SetProp("font-family", "Times New Roman, serif")
+	map3dTitle.SetProp("text-align", "center")
+	map3dTitle.Text = "Live Map of the World (3D):"
+
+	teamTab = tv.AddNewTab(gi.KiT_Frame, "<b>Your Team</b>").(*gi.Frame)
+
+	teamTab.Lay = gi.LayoutVert
+	teamTab.SetStretchMaxWidth()
+	teamTab.SetStretchMaxHeight()
+	teamTab.SetProp("background-color", "lightblue")
+
+	teamTitle := teamTab.AddNewChild(gi.KiT_Label, "teamTitle").(*gi.Label)
+	teamTitle.SetProp("font-size", "60px")
+	teamTitle.SetProp("font-family", "Times New Roman, serif")
+	teamTitle.SetProp("text-align", "center")
+	teamTitle.Text = "<b>Your Team</b>"
+
+	teamMainText = teamTab.AddNewChild(gi.KiT_Label, "teamMainText").(*gi.Label)
+	teamMainText.SetProp("font-size", "30px")
+	teamMainText.SetProp("font-family", "Times New Roman, serif")
+	// teamMainText.SetProp("text-align", "center")
+	teamMainText.Text = ""
+	teamMainText.Redrawable = true
+	readTeam()
+
+	if TEAM == "" {
+		teamMainText.SetText(teamMainText.Text + "\n\n<b>Since you have no team right now, you must join a team. Click one of the buttons below to join a team. <u><i>IMPORTANT: Once you choose a team, you cannot change it. Choose wisely</i></u>.")
+		gi.AddNewSpace(teamTab, "space1")
+		tbrow = gi.AddNewLayout(teamTab, "tbrow", gi.LayoutHoriz)
+		tbrow.SetProp("spacing", units.NewEx(2))
+		tbrow.SetProp("horizontal-align", gi.AlignLeft)
+		tbrow.SetStretchMaxWidth()
+		addTeamUpdateButtons()
+	}
 
 	aboutTab = tv.AddNewTab(gi.KiT_Frame, "<b>About</b>").(*gi.Frame)
 
