@@ -344,15 +344,19 @@ func initMainTabs() {
 	teamMainText.Redrawable = true
 	readTeam()
 
+	//if TEAM == "" { // when uncommented -- you can not switch teams. When commented, you can switch teams
 	if TEAM == "" {
-		teamMainText.SetText(teamMainText.Text + "\n\n<b>Since you have no team right now, you must join a team. Click one of the buttons below to join a team. <u><i>IMPORTANT: Once you choose a team, you cannot change it. Choose wisely</i></u>.")
-		gi.AddNewSpace(teamTab, "space1")
-		tbrow = gi.AddNewLayout(teamTab, "tbrow", gi.LayoutHoriz)
-		tbrow.SetProp("spacing", units.NewEx(2))
-		tbrow.SetProp("horizontal-align", gi.AlignLeft)
-		tbrow.SetStretchMaxWidth()
-		addTeamUpdateButtons()
+		teamMainText.SetText(teamMainText.Text + "\n\n<b>Since you have no team right now, you must join a team. Click one of the buttons below to join a team</b>.")
+	} else {
+		teamMainText.SetText(teamMainText.Text + "\n\n<b>Click one of the buttons below to switch your team<b>.")
 	}
+	gi.AddNewSpace(teamTab, "space1")
+	tbrow = gi.AddNewLayout(teamTab, "tbrow", gi.LayoutHoriz)
+	tbrow.SetProp("spacing", units.NewEx(2))
+	tbrow.SetProp("horizontal-align", gi.AlignLeft)
+	tbrow.SetStretchMaxWidth()
+	addTeamUpdateButtons()
+	//}
 
 	aboutTab = tv.AddNewTab(gi.KiT_Frame, "<b>About</b>").(*gi.Frame)
 

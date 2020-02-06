@@ -77,10 +77,27 @@ func addTeamUpdateButtons() {
 		button.Text = fmt.Sprintf("Join the team %v", teamName)
 		button.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			if sig == int64(gi.ButtonClicked) {
+				joinTeam(teamName)
 			}
 		})
 
 	}
+}
+func joinTeam(name string) {
+	joinTeamStatement := fmt.Sprintf("UPDATE users SET %v = '%v' WHERE username='%v'", "team", name, USER)
+	fmt.Printf("%v \n", joinTeamStatement)
+
+	result, err := db.Exec(joinTeamStatement)
+	fmt.Printf("%v \n", result)
+
+	if err != nil {
+		fmt.Printf("Error")
+		panic(err)
+	}
+	TEAM = name
+	readTeam()
+	teamMainText.SetText(teamMainText.Text + "\n\n<b>Click one of the buttons below to switch your team<b>.")
+
 }
 func readResources() {
 	findUserStatement := fmt.Sprintf("SELECT * FROM users WHERE username='%v'", USER)
