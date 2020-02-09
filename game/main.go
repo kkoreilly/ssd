@@ -5,6 +5,7 @@
 package main
 
 import (
+	// "fmt"
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/svg"
@@ -36,6 +37,8 @@ var teamTab *gi.Frame
 var goldResourcesText *gi.Label
 var livesResourcesText *gi.Label
 var tbrow *gi.Layout
+var win *gi.Window
+var currentTrainingMap string
 
 func mainrun() {
 	data() // Connect to data base
@@ -43,7 +46,7 @@ func mainrun() {
 	width := 1024 // pixel sizes of screen
 	height := 768 // pixel sizes of screen
 
-	win := gi.NewMainWindow("singularity-showdown-main", "Singularity Showdown Home Screen", width, height)
+	win = gi.NewMainWindow("singularity-showdown-main", "Singularity Showdown Home Screen", width, height)
 
 	vp := win.WinViewport2D()
 	updt := vp.UpdateStart()
@@ -204,7 +207,7 @@ func initMainTabs() {
 	mainTitle.Text = "Welcome to Singularity Showdown, a strategic 3D Battle Game"
 
 	playButton := homeTab.AddNewChild(gi.KiT_Button, "playButton").(*gi.Button)
-	playButton.Text = "<b>Play (Tester)</b>"
+	playButton.Text = "<b>Play (Tester Mode)</b>"
 
 	playButton.SetProp("horizontal-align", gi.AlignCenter)
 
@@ -213,6 +216,32 @@ func initMainTabs() {
 			initPlayTab()
 		}
 	})
+	trow := gi.AddNewLayout(homeTab, "trainingRow", gi.LayoutHoriz)
+	trow.SetProp("spacing", units.NewEx(2))
+	trow.SetProp("horizontal-align", gi.AlignLeft)
+	trow.SetStretchMaxWidth()
+
+	trainingText := gi.AddNewLabel(trow, "trainingRowText", "Practice and level up in Training Mode:")
+	trainingText.SetProp("font-size", "30px")
+
+	trainingDropdown := gi.AddNewMenuButton(trow, "trainingDropdown")
+	trainingDropdown.SetText("Choose a map to train in")
+	trainingDropdown.Menu.AddAction(gi.ActOpts{Label: "Training Map 1"},
+		win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			currentTrainingMap = "TrainingMap1"
+			trainingDropdown.SetText("Training Map 1")
+		})
+
+	trainingPlayButton := trow.AddNewChild(gi.KiT_Button, "trainingPlayButton").(*gi.Button)
+	trainingPlayButton.Text = "<b>Play in Training Mode</b>"
+	trainingPlayButton.SetProp("background-color", "orange")
+
+	trainingPlayButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(gi.ButtonClicked) {
+			initPlayTab()
+		}
+	})
+
 	homeTab.SetProp("background-color", "lightblue")
 
 	resourcesTab = tv.AddNewTab(gi.KiT_Frame, "<b>Resources</b>").(*gi.Frame)
