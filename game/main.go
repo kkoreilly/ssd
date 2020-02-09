@@ -230,11 +230,17 @@ func initMainTabs() {
 	trainingDropdown.SetText("Choose a map to train in")
 
 	for _, value := range AllMaps {
-		trainingDropdown.Menu.AddAction(gi.ActOpts{Label: value.Name},
+		var value1 = value.Name
+		var value2 = value.MapData
+		// fmt.Printf("Value (0): %v \n", value.Name)
+		trainingDropdown.Menu.AddAction(gi.ActOpts{Label: value1},
 			win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-				currentMap = value.MapData // Set the correct map for this dropdown
-				currentMapString = value.Name
-				trainingDropdown.SetText(value.Name)
+				// fmt.Printf("Value (1): %v \n", value.Name)
+				// fmt.Printf("Value (2): %v \n", value1)
+				currentMap = value2 // Set the correct map for this dropdown
+				currentMapString = value1
+				trainingDropdown.SetText(value1)
+				// fmt.Printf("Value: %v \n", value1)
 			})
 	}
 

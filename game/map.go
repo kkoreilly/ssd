@@ -25,6 +25,10 @@ var FirstMap = Map{
 	"TheWall1": {"TheWall", mat32.Vec3{0, 0, 0}, DefScale},
 }
 
+var SecondMap = Map{
+	"House1": {"House", mat32.Vec3{0, 5, -10}, DefScale},
+}
+
 type MapInfo struct {
 	Name    string
 	MapData Map
@@ -33,5 +37,6 @@ type MapInfo struct {
 type Maps map[string]*MapInfo
 
 var AllMaps = Maps{
-	"FirstMap": {"Training Map 1", FirstMap},
+	"FirstMap":  {"Training Map 1", FirstMap},
+	"SecondMap": {"Training Map 2", SecondMap},
 }
