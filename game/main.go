@@ -39,6 +39,8 @@ var livesResourcesText *gi.Label
 var tbrow *gi.Layout
 var win *gi.Window
 var currentTrainingMap string
+var currentMap Map
+var currentMapString string
 
 func mainrun() {
 	data() // Connect to data base
@@ -226,11 +228,15 @@ func initMainTabs() {
 
 	trainingDropdown := gi.AddNewMenuButton(trow, "trainingDropdown")
 	trainingDropdown.SetText("Choose a map to train in")
-	trainingDropdown.Menu.AddAction(gi.ActOpts{Label: "Training Map 1"},
-		win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-			currentTrainingMap = "TrainingMap1"
-			trainingDropdown.SetText("Training Map 1")
-		})
+
+	for _, value := range AllMaps {
+		trainingDropdown.Menu.AddAction(gi.ActOpts{Label: value.Name},
+			win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+				currentMap = value.MapData // Set the correct map for this dropdown
+				currentMapString = value.Name
+				trainingDropdown.SetText(value.Name)
+			})
+	}
 
 	trainingPlayButton := trow.AddNewChild(gi.KiT_Button, "trainingPlayButton").(*gi.Button)
 	trainingPlayButton.Text = "<b>Play in Training Mode</b>"
@@ -429,6 +435,11 @@ func initPlayTab() {
 	playTab.Lay = gi.LayoutVert
 	playTab.SetStretchMaxWidth()
 	playTab.SetStretchMaxHeight()
+
+	playTitleText := gi.AddNewLabel(playTab, "playTitleText", "Welcome to")
+	playTitleText.SetText("Welcome to " + currentMapString)
+	playTitleText.SetProp("text-align", "center")
+	playTitleText.SetProp("font-size", "40px")
 
 	TheGame = &Game{} // Set up game
 	TheGame.Config()  // Set up game

@@ -24,3 +24,14 @@ var FirstMap = Map{
 	"Block1":   {"Block", mat32.Vec3{-80, 0, -10}, DefScale},
 	"TheWall1": {"TheWall", mat32.Vec3{0, 0, 0}, DefScale},
 }
+
+type MapInfo struct {
+	Name    string
+	MapData Map
+}
+
+type Maps map[string]*MapInfo
+
+var AllMaps = Maps{
+	"FirstMap": {"Training Map 1", FirstMap},
+}

@@ -243,7 +243,7 @@ func (gm *Game) Config() {
 	sc.Camera.Pose.Pos.Y = 2
 	sc.Camera.Pose.Pos.Z = 20
 
-	gm.Map = FirstMap
+	gm.Map = currentMap
 	gm.MakeWorld()
 
 	gm.MakeView()
