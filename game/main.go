@@ -208,16 +208,16 @@ func initMainTabs() {
 	mainTitle.SetProp("text-align", "center")
 	mainTitle.Text = "Welcome to Singularity Showdown, a strategic 3D Battle Game"
 
-	playButton := homeTab.AddNewChild(gi.KiT_Button, "playButton").(*gi.Button)
-	playButton.Text = "<b>Play (Tester Mode)</b>"
-
-	playButton.SetProp("horizontal-align", gi.AlignCenter)
-
-	playButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(gi.ButtonClicked) {
-			initPlayTab()
-		}
-	})
+	// playButton := homeTab.AddNewChild(gi.KiT_Button, "playButton").(*gi.Button)
+	// playButton.Text = "<b>Play (Tester Mode)</b>"
+	//
+	// playButton.SetProp("horizontal-align", gi.AlignCenter)
+	//
+	// playButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	// 	if sig == int64(gi.ButtonClicked) {
+	// 		initPlayTab()
+	// 	}
+	// })
 	trow := gi.AddNewLayout(homeTab, "trainingRow", gi.LayoutHoriz)
 	trow.SetProp("spacing", units.NewEx(2))
 	trow.SetProp("horizontal-align", gi.AlignLeft)
@@ -422,6 +422,10 @@ func initPlayTab() {
 	rec := ki.Node{}
 	rec.InitName(&rec, "rec")
 
+	if currentMapString == "" { // if no map selected to join
+		tv.UpdateEnd(updt)
+		return // then don't create the game
+	}
 	_, err := tv.TabByNameTry("<b>Game</b>") // check if the game tab already exists -- there will not be an error if it already exists
 
 	if err == nil { // if the tab Game already exists
