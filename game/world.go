@@ -17,6 +17,8 @@ var FirstWorld = World{
 	"Alaska": {"Alaska", "team2", "blue", ""},
 	"USA":    {"USA", "team1", "red", ""},
 	"Canada": {"Canada", "team3", "green", ""},
+	"Brazil": {"Brazil", "team4", "purple", ""},
+	"SouthAmerica": {"SouthAmerica", "team5", "orange", ""},
 }
 
 func (wr *World) RenderSVGs(sv *svg.SVG) {
