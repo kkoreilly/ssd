@@ -14,11 +14,12 @@ type Territory struct {
 type World map[string]*Territory
 
 var FirstWorld = World{
-	"Alaska": {"Alaska", "team2", "blue", ""},
-	"USA":    {"USA", "team1", "red", ""},
-	"Canada": {"Canada", "team3", "green", ""},
-	"Brazil": {"Brazil", "team4", "purple", ""},
-	"SouthAmerica": {"SouthAmerica", "team5", "orange", ""},
+	"Alaska":         {"Alaska", "team2", "red", ""},
+	"USA":            {"USA", "team1", "blue", ""},
+	"Canada":         {"Canada", "team3", "green", ""},
+	"Brazil":         {"Brazil", "team4", "purple", ""},
+	"SouthAmerica":   {"SouthAmerica", "team5", "orange", ""},
+	"CentralAmerica": {"CentralAmerica", "team6", "yellow", ""},
 }
 
 func (wr *World) RenderSVGs(sv *svg.SVG) {
