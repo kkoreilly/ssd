@@ -1,3 +1,7 @@
+// Copyright (c) 2020, The Singularity Showdown Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package main
 
 import (
@@ -20,6 +24,9 @@ var FirstWorld = World{
 	"Brazil":         {"Brazil", "team4", "purple", ""},
 	"SouthAmerica":   {"SouthAmerica", "team5", "orange", ""},
 	"CentralAmerica": {"CentralAmerica", "team6", "yellow", ""},
+	"WestAfrica":     {"WestAfrica", "team7", "pink", ""},
+	"EastAfrica":     {"EastAfrica", "team8", "gold", ""},
+	"Russia":         {"Russia", "team9", "silver", ""},
 }
 
 func (wr *World) RenderSVGs(sv *svg.SVG) {
@@ -27,7 +34,13 @@ func (wr *World) RenderSVGs(sv *svg.SVG) {
 	sv.DeleteChildren(true)
 	sv.Norm = true
 	sv.ViewBox.Size.Set(2754, 1398)
+	sv.ViewBox.Min.X = -30
+	sv.ViewBox.Min.Y = 61
 	readWorld()
+	// Create ocean:
+	op := svg.AddNewPath(sv, "Ocean", FirstSVG["Ocean"].Data)
+	op.SetProp("fill", "lightblue")
+
 	for _, t := range *wr {
 		p := svg.AddNewPath(sv, t.Name, FirstSVG[t.Name].Data)
 		p.SetProp("fill", t.Color)
