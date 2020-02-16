@@ -73,7 +73,13 @@ func addTeamUpdateButtons() {
 		var teamName, color string
 		var numOfPeople int
 		findTeamsResult.Scan(&teamName, &numOfPeople, &color)
-		button := gi.AddNewButton(tbrow, fmt.Sprintf("teamButton%v", teamName))
+		var button *gi.Button
+		if strings.Contains(teamName, "robot") {
+			button = gi.AddNewButton(tbrowR, fmt.Sprintf("teamButton%v", teamName))
+		} else if strings.Contains(teamName, "human") {
+			button = gi.AddNewButton(tbrowH, fmt.Sprintf("teamButton%v", teamName))
+		}
+
 		button.Text = fmt.Sprintf("Join the team %v", teamName)
 		button.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			if sig == int64(gi.ButtonClicked) {

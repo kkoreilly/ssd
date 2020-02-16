@@ -25,7 +25,7 @@ var FirstWorld = World{
 	"SouthAmerica":   {"SouthAmerica", "team5", "orange", ""},
 	"CentralAmerica": {"CentralAmerica", "team6", "yellow", ""},
 	"WestAfrica":     {"WestAfrica", "team7", "pink", ""},
-	"EastAfrica":     {"EastAfrica", "team8", "gold", ""},
+	"EastAfrica":     {"EastAfrica", "team8", "lightgreen", ""},
 	"Russia":         {"Russia", "team9", "maroon", ""},
 	"ChinaRegion":    {"ChinaRegion", "team10", "violet", ""},
 	"WestEurope":     {"WestEurope", "team1", "blue", ""},
@@ -55,6 +55,6 @@ func (wr *World) RenderSVGs(sv *svg.SVG) {
 		p.SetProp("fill", t.Color)
 	}
 	antText := svg.AddNewText(sv, "antText", 1377, 1390, "Neutral")
-	antText.Width = 1000
+	antText.SetProp("font-size", "30px")
 	sv.UpdateEnd(updt)
 }

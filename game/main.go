@@ -32,11 +32,13 @@ var aboutTab *gi.Frame
 var playTab *gi.Frame
 var resourcesTab *gi.Frame
 var map2dTab *gi.Frame
-var map3dTab *gi.Frame
+
+// var map3dTab *gi.Frame // to be added later
 var teamTab *gi.Frame
 var goldResourcesText *gi.Label
 var livesResourcesText *gi.Label
-var tbrow *gi.Layout
+var tbrowH *gi.Layout
+var tbrowR *gi.Layout
 var win *gi.Window
 var currentTrainingMap string
 var currentMap Map
@@ -100,6 +102,21 @@ func mainrun() {
 			password := signUpText2.Text()
 			// fmt.Printf("User: %v Password: %v \n", username, password)
 			addUser(username, password)
+		}
+	})
+
+	byPassButton := signUpTab.AddNewChild(gi.KiT_Button, "byPassButton").(*gi.Button)
+	byPassButton.Text = "<b>Log in with tester account</b>"
+	byPassButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(gi.ButtonClicked) {
+			USER = "tester"
+			PASSWORD = "1234"
+
+			tv.DeleteTabIndex(0, true)
+			tv.DeleteTabIndex(0, true)
+			initMainTabs()
+
+			tv.SelectTabIndex(0)
 		}
 	})
 
@@ -352,18 +369,18 @@ func initMainTabs() {
 
 	FirstWorld.RenderSVGs(mapSVG)
 
-	map3dTab = tv.AddNewTab(gi.KiT_Frame, "<b>Map (3D)</b>").(*gi.Frame)
-
-	map3dTab.Lay = gi.LayoutVert
-	map3dTab.SetStretchMaxWidth()
-	map3dTab.SetStretchMaxHeight()
-	map3dTab.SetProp("background-color", "lightblue")
-
-	map3dTitle := map3dTab.AddNewChild(gi.KiT_Label, "map3dTitle").(*gi.Label)
-	map3dTitle.SetProp("font-size", "60px")
-	map3dTitle.SetProp("font-family", "Times New Roman, serif")
-	map3dTitle.SetProp("text-align", "center")
-	map3dTitle.Text = "Live Map of the World (3D):"
+	// map3dTab = tv.AddNewTab(gi.KiT_Frame, "<b>Map (3D)</b>").(*gi.Frame)
+	//
+	// map3dTab.Lay = gi.LayoutVert
+	// map3dTab.SetStretchMaxWidth()
+	// map3dTab.SetStretchMaxHeight()
+	// map3dTab.SetProp("background-color", "lightblue")
+	//
+	// map3dTitle := map3dTab.AddNewChild(gi.KiT_Label, "map3dTitle").(*gi.Label)
+	// map3dTitle.SetProp("font-size", "60px")
+	// map3dTitle.SetProp("font-family", "Times New Roman, serif")
+	// map3dTitle.SetProp("text-align", "center")
+	// map3dTitle.Text = "Live Map of the World (3D):"
 
 	teamTab = tv.AddNewTab(gi.KiT_Frame, "<b>Your Team</b>").(*gi.Frame)
 
@@ -393,10 +410,22 @@ func initMainTabs() {
 		teamMainText.SetText(teamMainText.Text + "\n\n<b>Click one of the buttons below to switch your team<b>.")
 	}
 	gi.AddNewSpace(teamTab, "space1")
-	tbrow = gi.AddNewLayout(teamTab, "tbrow", gi.LayoutHoriz)
-	tbrow.SetProp("spacing", units.NewEx(2))
-	tbrow.SetProp("horizontal-align", gi.AlignLeft)
-	tbrow.SetStretchMaxWidth()
+	tbrowH = gi.AddNewLayout(teamTab, "tbrowH", gi.LayoutHoriz)
+	tbrowH.SetProp("spacing", units.NewEx(2))
+	tbrowH.SetProp("horizontal-align", gi.AlignLeft)
+	tbrowH.SetStretchMaxWidth()
+	tbrowHText := gi.AddNewLabel(tbrowH, "tBrowHText", "<b>Join a human team:</b>")
+	tbrowHText.SetProp("font-size", "30px")
+
+	gi.AddNewSpace(teamTab, "space2")
+
+	tbrowR = gi.AddNewLayout(teamTab, "tbrowR", gi.LayoutHoriz)
+	tbrowR.SetProp("spacing", units.NewEx(2))
+	tbrowR.SetProp("horizontal-align", gi.AlignLeft)
+	tbrowR.SetStretchMaxWidth()
+
+	tbrowRText := gi.AddNewLabel(tbrowR, "tBrowRText", "<b>Join a robot team:</b>")
+	tbrowRText.SetProp("font-size", "30px")
 	addTeamUpdateButtons()
 	//}
 
