@@ -27,6 +27,15 @@ var FirstWorld = World{
 	"WestAfrica":     {"WestAfrica", "team7", "pink", ""},
 	"EastAfrica":     {"EastAfrica", "team8", "gold", ""},
 	"Russia":         {"Russia", "team9", "silver", ""},
+	"ChinaRegion":    {"ChinaRegion", "team10", "black", ""},
+	"WestEurope":     {"WestEurope", "team1", "blue", ""},
+	"NothernEurope":  {"NorthernEurope", "team2", "red", ""},
+	"EastEurope":     {"EastEurope", "team3", "green", ""},
+	"MiddleEast":     {"MiddleEast", "team4", "purple", ""},
+	"Australia":      {"Australia", "team5", "orange", ""},
+	"SouthEastAsia":  {"SouthEastAsia", "team6", "yellow", ""},
+	"SouthWestAsia":  {"SouthWestAsia", "team7", "pink", ""},
+	"Antarctica":     {"Antarctica", "none", "white", ""},
 }
 
 func (wr *World) RenderSVGs(sv *svg.SVG) {
@@ -45,5 +54,7 @@ func (wr *World) RenderSVGs(sv *svg.SVG) {
 		p := svg.AddNewPath(sv, t.Name, FirstSVG[t.Name].Data)
 		p.SetProp("fill", t.Color)
 	}
+	antText := svg.AddNewText(sv, "antText", 1377, 1390, "Neutral")
+	antText.Width = 1000
 	sv.UpdateEnd(updt)
 }
