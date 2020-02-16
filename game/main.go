@@ -70,6 +70,7 @@ func mainrun() {
 
 	tv = mfr.AddNewChild(gi.KiT_TabView, "tv").(*gi.TabView) // Create main tab view
 	tv.NewTabButton = false
+	tv.NoDeleteTabs = true
 	tv.SetStretchMaxWidth()
 
 	signUpTab = tv.AddNewTab(gi.KiT_Frame, "Sign Up").(*gi.Frame)
