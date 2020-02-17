@@ -6,13 +6,14 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"github.com/goki/gi/gi"
-	"github.com/goki/ki/ki"
-	_ "github.com/lib/pq"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/goki/gi/gi"
+	"github.com/goki/ki/ki"
+	_ "github.com/lib/pq"
 )
 
 var db *sql.DB
@@ -108,8 +109,15 @@ func addKeyItems() {
 			continue
 		}
 		keyItemText.SetProp("font-size", "20px")
-		keyItemText.SetProp("color", color)
-		keyItemText.SetProp("background-color", "black")
+		keyItemText.SetProp("background-color", color)
+		clr := gi.Color{}
+		clr.SetString(color, nil)
+		if clr.IsDark() {
+			keyItemText.SetProp("color", "white")
+		} else {
+			keyItemText.SetProp("color", "black")
+		}
+		keyItemText.Redrawable = true
 	}
 	findTeamsStatement = "SELECT * FROM teams"
 	findTeamsResult, err = db.Query(findTeamsStatement)
@@ -127,8 +135,15 @@ func addKeyItems() {
 			continue
 		}
 		keyItemText.SetProp("font-size", "20px")
-		keyItemText.SetProp("color", color)
-		keyItemText.SetProp("background-color", "black")
+		keyItemText.SetProp("background-color", color)
+		clr := gi.Color{}
+		clr.SetString(color, nil)
+		if clr.IsDark() {
+			keyItemText.SetProp("color", "white")
+		} else {
+			keyItemText.SetProp("color", "black")
+		}
+		keyItemText.Redrawable = true
 	}
 }
 func joinTeam(name string) {
