@@ -441,7 +441,7 @@ func initMainTabs() {
 				"SouthWestAsiaSouthEastAsia": {"SouthWestAsia", "SouthEastAsia", "battle"},
 				"NorthAsiaSouthEastAsia":     {"NorthAsia", "SouthEastAsia", "battle"},
 				"SouthEastAsiaAustralia":     {"SouthEastAsia", "Australia", "battle"},
-				"CanadaEastEurope":           {"Canada", "EastEurope", "battle"},
+				"CanadaWestEurope":           {"Canada", "WestEurope", "battle"},
 			}
 			// fmt.Printf("First World: %v Origin: %v \n", FirstWorld["USA"].Color, OriginFirstWorld["USA"].Color)
 			simulateText.SetText("")

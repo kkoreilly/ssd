@@ -71,7 +71,7 @@ var FirstWorldBorders = Borders{
 	"SouthWestAsiaSouthEastAsia": {"SouthWestAsia", "SouthEastAsia", "battle"},
 	"NorthAsiaSouthEastAsia":     {"NorthAsia", "SouthEastAsia", "battle"},
 	"SouthEastAsiaAustralia":     {"SouthEastAsia", "Australia", "battle"},
-	"CanadaEastEurope":           {"Canada", "EastEurope", "battle"},
+	"CanadaWestEurope":           {"Canada", "WestEurope", "battle"},
 }
 
 func (wr *World) RenderSVGs(sv *svg.SVG) {
