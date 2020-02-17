@@ -96,7 +96,6 @@ func (wr *World) RenderSVGs(sv *svg.SVG) {
 }
 
 func (bd *Borders) simulateMap(fullSim bool) {
-	updt := map2dTab.UpdateStart()
 	for i := 0; 1 < 2; i++ {
 		for _, b := range *bd { // do the battles
 			if b.Owner == "battle" { // if there is a battle to be had, randomly decide the battle
@@ -115,6 +114,7 @@ func (bd *Borders) simulateMap(fullSim bool) {
 					FirstWorldBorders[b.Territory1+b.Territory2].Owner = winTeam
 					// fmt.Printf("(team2 type) Team %v wins and takes the territory %v \n", winTeam, FirstWorld[b.Territory2].Name)
 				}
+				FirstWorld.RenderSVGs(mapSVG)
 			}
 
 		}
@@ -145,17 +145,15 @@ func (bd *Borders) simulateMap(fullSim bool) {
 				curCountSimulation += 1
 				continue
 			} else {
-				map2dTab.UpdateEnd(updt)
 				curCountSimulation += 1
 				return
 			}
 		} else {
 			curCountSimulation += 1
+			updt := map2dTab.UpdateStart()
 			simulateText.SetText(fmt.Sprintf("Amount of weeks taken: %v", curCountSimulation))
 			map2dTab.UpdateEnd(updt)
 			return
 		}
 	}
-
-	map2dTab.UpdateEnd(updt)
 }

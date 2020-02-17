@@ -375,7 +375,6 @@ func initMainTabs() {
 	simulateButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
 			FirstWorldBorders.simulateMap(true)
-			FirstWorld.RenderSVGs(mapSVG)
 		}
 	})
 	simulateButton1 := gi.AddNewButton(map2dTab, "simulateButton1")
