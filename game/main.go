@@ -397,8 +397,51 @@ func initMainTabs() {
 	resetButton.Text = "Reset"
 	resetButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
-			FirstWorld = OriginFirstWorld
-			FirstWorldBorders = OriginFirstWorldBorders
+			FirstWorld = World{
+				"Alaska":         {"Alaska", "human2", "green", ""},
+				"Canada":         {"Canada", "human2", "green", ""},
+				"USA":            {"USA", "human1", "blue", ""},
+				"CentralAmerica": {"CentralAmerica", "human1", "blue", ""},
+				"Brazil":         {"Brazil", "human3", "purple", ""},
+				"SouthAmerica":   {"SouthAmerica", "human3", "purple", ""},
+				"WestAfrica":     {"WestAfrica", "human4", "pink", ""},
+				"EastAfrica":     {"EastAfrica", "human4", "pink", ""},
+				"Russia":         {"Russia", "human5", "lightgreen", ""},
+				"NorthAsia":      {"NorthAsia", "human5", "lightgreen", ""},
+				"WestEurope":     {"WestEurope", "robot1", "red", ""},
+				"NorthernEurope": {"NorthernEurope", "robot1", "red", ""},
+				"EastEurope":     {"EastEurope", "robot2", "orange", ""},
+				"MiddleEast":     {"MiddleEast", "robot2", "orange", ""},
+				"Australia":      {"Australia", "robot3", "yellow", ""},
+				"SouthEastAsia":  {"SouthEastAsia", "robot4", "violet", ""},
+				"SouthWestAsia":  {"SouthWestAsia", "robot5", "maroon", ""},
+				"Antarctica":     {"Antarctica", "none", "white", ""},
+			}
+			FirstWorldBorders = Borders{
+				"AlaskaRussia":               {"Alaska", "Russia", "battle"},
+				"AlaskaCanada":               {"Alaska", "Canada", "human2"},
+				"CanadaUSA":                  {"Canada", "USA", "battle"},
+				"USACentralAmerica":          {"USA", "CentralAmerica", "human1"},
+				"CentralAmericaSouthAmerica": {"CentralAmerica", "SouthAmerica", "battle"},
+				"SouthAmericaBrazil":         {"SouthAmerica", "Brazil", "human3"},
+				"WestAfricaEastAfrica":       {"WestAfrica", "EastAfrica", "human4"},
+				"WestAfricaWestEurope":       {"WestAfrica", "WestEurope", "battle"},
+				"WestEuropeNorthernEurope":   {"WestEurope", "NorthernEurope", "robot1"},
+				"WestEuropeEastEurope":       {"WestEurope", "EastEurope", "battle"},
+				"EastEuropeMiddleEast":       {"EastEurope", "MiddleEast", "robot2"},
+				"EastAfricaMiddleEast":       {"EastAfrica", "MiddleEast", "battle"},
+				"NorthernEuropeRussia":       {"NorthernEurope", "Russia", "battle"},
+				"EastEuropeRussia":           {"EastEurope", "Russia", "battle"},
+				"MiddleEastRussia":           {"MiddleEast", "Russia", "battle"},
+				"MiddleEastSouthWestAsia":    {"MiddleEast", "SouthWestAsia", "battle"},
+				"SouthWestAsiaRussia":        {"SouthWestAsia", "Russia", "battle"},
+				"SouthWestAsiaNorthAsia":     {"SouthWestAsia", "NorthAsia", "battle"},
+				"NorthAsiaRussia":            {"NorthAsia", "Russia", "human5"},
+				"SouthWestAsiaSouthEastAsia": {"SouthWestAsia", "SouthEastAsia", "battle"},
+				"NorthAsiaSouthEastAsia":     {"NorthAsia", "SouthEastAsia", "battle"},
+				"SouthEastAsiaAustralia":     {"SouthEastAsia", "Australia", "battle"},
+			}
+			// fmt.Printf("First World: %v Origin: %v \n", FirstWorld["USA"].Color, OriginFirstWorld["USA"].Color)
 			simulateText.SetText("")
 			FirstWorld.RenderSVGs(mapSVG)
 		}
