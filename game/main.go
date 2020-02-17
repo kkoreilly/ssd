@@ -369,6 +369,7 @@ func initMainTabs() {
 	keyMainText.SetProp("font-size", "30px")
 
 	addKeyItems()
+	InitStrength()
 
 	simulateButton := gi.AddNewButton(map2dTab, "simulateButton")
 	simulateButton.Text = "Simulate (Full)"
@@ -396,6 +397,7 @@ func initMainTabs() {
 	resetButton.Text = "Reset"
 	resetButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
+			InitStrength()
 			curCountSimulation = 0
 			FirstWorld = World{
 				"Alaska":         {"Alaska", "human2", "green", ""},

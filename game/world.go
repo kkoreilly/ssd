@@ -27,6 +27,19 @@ type Borders map[string]*Border
 
 var curCountSimulation int
 
+var TeamStrength = map[string]float32{
+	"human1": 0,
+	"human2": 0,
+	"human3": 0,
+	"human4": 0,
+	"human5": 0,
+	"robot1": 0,
+	"robot2": 0,
+	"robot3": 0,
+	"robot4": 0,
+	"robot5": 0,
+}
+
 var FirstWorld = World{
 	"Alaska":         {"Alaska", "human2", "green", ""},
 	"Canada":         {"Canada", "human2", "green", ""},
@@ -74,6 +87,14 @@ var FirstWorldBorders = Borders{
 	"CanadaWestEurope":           {"Canada", "WestEurope", "battle"},
 }
 
+func InitStrength() {
+	for k, _ := range TeamStrength {
+		randNum := rand.Float32()
+		TeamStrength[k] = randNum
+		// fmt.Printf("Team Strength for team %v: %v \n", k, TeamStrength[k])
+	}
+}
+
 func (wr *World) RenderSVGs(sv *svg.SVG) {
 	updt := sv.UpdateStart()
 	sv.DeleteChildren(true)
@@ -100,18 +121,25 @@ func (bd *Borders) simulateMap(fullSim bool) {
 		for _, b := range *bd { // do the battles
 			if b.Owner == "battle" { // if there is a battle to be had, randomly decide the battle
 				randNum := rand.Float32()
+				// fmt.Printf("Team 1 strength: %v Total Strength: %v \n", TeamStrength[FirstWorld[b.Territory1].Owner], (TeamStrength[FirstWorld[b.Territory1].Owner] + TeamStrength[FirstWorld[b.Territory2].Owner]))
+				probNum := TeamStrength[FirstWorld[b.Territory1].Owner] / (TeamStrength[FirstWorld[b.Territory1].Owner] + TeamStrength[FirstWorld[b.Territory2].Owner])
+				// fmt.Printf("Rand Num: %v Prob Num: %v \n", randNum, probNum)
 				// fmt.Printf("Random Number: %v \n", randNum)
-				if randNum >= 0.5 { // team1 wins the battle
+				if randNum >= probNum { // team1 wins the battle
 					winTeam := FirstWorld[b.Territory1].Owner // get the winning team
 					FirstWorld[b.Territory2].Owner = winTeam  // set the losing team's territory to be owned by the winning team
 					FirstWorld[b.Territory2].Color = FirstWorld[b.Territory1].Color
 					FirstWorldBorders[b.Territory1+b.Territory2].Owner = winTeam
+					TeamStrength[FirstWorld[b.Territory1].Owner] += 0.5
+					TeamStrength[FirstWorld[b.Territory2].Owner] -= 0.5
 					// fmt.Printf("(team1 type) Team %v wins and takes the territory %v \n", winTeam, FirstWorld[b.Territory2].Name)
 				} else { // team2 wins the battle
 					winTeam := FirstWorld[b.Territory2].Owner // get the winning team
 					FirstWorld[b.Territory1].Owner = winTeam  // set the losing team's territory to be owned by the winning team
 					FirstWorld[b.Territory1].Color = FirstWorld[b.Territory2].Color
 					FirstWorldBorders[b.Territory1+b.Territory2].Owner = winTeam
+					TeamStrength[FirstWorld[b.Territory2].Owner] += 0.5
+					TeamStrength[FirstWorld[b.Territory1].Owner] -= 0.5
 					// fmt.Printf("(team2 type) Team %v wins and takes the territory %v \n", winTeam, FirstWorld[b.Territory2].Name)
 				}
 				FirstWorld.RenderSVGs(mapSVG)
