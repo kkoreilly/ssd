@@ -397,6 +397,7 @@ func initMainTabs() {
 	resetButton.Text = "Reset"
 	resetButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
+			curCountSimulation = 0
 			FirstWorld = World{
 				"Alaska":         {"Alaska", "human2", "green", ""},
 				"Canada":         {"Canada", "human2", "green", ""},

@@ -25,6 +25,8 @@ type Border struct {
 type World map[string]*Territory
 type Borders map[string]*Border
 
+var curCountSimulation int
+
 var FirstWorld = World{
 	"Alaska":         {"Alaska", "human2", "green", ""},
 	"Canada":         {"Canada", "human2", "green", ""},
@@ -139,13 +141,16 @@ func (bd *Borders) simulateMap(fullSim bool) {
 
 		if y {
 			if fullSim {
+				curCountSimulation += 1
 				continue
 			} else {
 				map2dTab.UpdateEnd(updt)
+				curCountSimulation += 1
 				return
 			}
 		} else {
-			simulateText.SetText(fmt.Sprintf("Amount of weeks taken: %v", i))
+			curCountSimulation += 1
+			simulateText.SetText(fmt.Sprintf("Amount of weeks taken: %v", curCountSimulation))
 			map2dTab.UpdateEnd(updt)
 			return
 		}
