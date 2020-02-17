@@ -44,6 +44,8 @@ var win *gi.Window
 var currentTrainingMap string
 var currentMap Map
 var currentMapString string
+var simulateText *gi.Label
+var mapSVG *svg.SVG
 
 func mainrun() {
 	data() // Connect to data base
@@ -368,10 +370,47 @@ func initMainTabs() {
 
 	addKeyItems()
 
+	simulateButton := gi.AddNewButton(map2dTab, "simulateButton")
+	simulateButton.Text = "Simulate (Full)"
+	simulateButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(gi.ButtonClicked) {
+			FirstWorldBorders.simulateMap(true)
+			FirstWorld.RenderSVGs(mapSVG)
+		}
+	})
+	simulateButton1 := gi.AddNewButton(map2dTab, "simulateButton1")
+	simulateButton1.Text = "Simulate (Step)"
+	simulateButton1.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(gi.ButtonClicked) {
+			FirstWorldBorders.simulateMap(false)
+			FirstWorld.RenderSVGs(mapSVG)
+		}
+	})
+	// renderButton := gi.AddNewButton(map2dTab, "renderButton")
+	// renderButton.Text = "Render SVGS"
+	// renderButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	// 	if sig == int64(gi.ButtonClicked) {
+	// 		FirstWorld.RenderSVGs(mapSVG)
+	// 	}
+	// })
+	resetButton := gi.AddNewButton(map2dTab, "resetButton")
+	resetButton.Text = "Reset"
+	resetButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(gi.ButtonClicked) {
+			FirstWorld = OriginFirstWorld
+			FirstWorldBorders = OriginFirstWorldBorders
+			simulateText.SetText("")
+			FirstWorld.RenderSVGs(mapSVG)
+		}
+	})
+	simulateText = gi.AddNewLabel(map2dTab, "simulateText", "                                                                            ")
+	simulateText.SetProp("font-size", "20px")
+	simulateText.Redrawable = true
+
 	// width := 1024 // pixel sizes of screen
 	// height := 768 // pixel sizes of screen
 
-	mapSVG := svg.AddNewSVG(map2dTab, "mapSVG")
+	mapSVG = svg.AddNewSVG(map2dTab, "mapSVG")
 	mapSVG.Fill = true
 	mapSVG.SetProp("background-color", "white")
 	// mapSVG.SetProp("width", units.NewPx(float32(width-20)))

@@ -112,9 +112,9 @@ func addKeyItems() {
 		keyItemText.SetProp("background-color", color)
 		clr := gi.Color{}
 		clr.SetString(color, nil)
-		if clr.IsDark() {
+		if clr.IsDark() || color == "red" || color == "blue" { // if dark, text is white
 			keyItemText.SetProp("color", "white")
-		} else {
+		} else { // else, text is black
 			keyItemText.SetProp("color", "black")
 		}
 		keyItemText.Redrawable = true
@@ -138,9 +138,9 @@ func addKeyItems() {
 		keyItemText.SetProp("background-color", color)
 		clr := gi.Color{}
 		clr.SetString(color, nil)
-		if clr.IsDark() {
+		if clr.IsDark() || color == "red" || color == "blue" { // if dark, text is white
 			keyItemText.SetProp("color", "white")
-		} else {
+		} else { // else, text is black
 			keyItemText.SetProp("color", "black")
 		}
 		keyItemText.Redrawable = true
