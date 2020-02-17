@@ -39,6 +39,7 @@ var goldResourcesText *gi.Label
 var livesResourcesText *gi.Label
 var tbrowH *gi.Layout
 var tbrowR *gi.Layout
+var keyRow *gi.Frame
 var win *gi.Window
 var currentTrainingMap string
 var currentMap Map
@@ -356,8 +357,19 @@ func initMainTabs() {
 	map2dTitle.SetProp("text-align", "center")
 	map2dTitle.Text = "Live Map of the World (2D):"
 
+	keyRow = gi.AddNewFrame(map2dTab, "keyRow", gi.LayoutHoriz)
+	keyRow.SetProp("spacing", units.NewEx(2))
+	keyRow.SetProp("horizontal-align", gi.AlignLeft)
+	keyRow.SetProp("background-color", "white")
+	keyRow.SetStretchMaxWidth()
+
+	keyMainText := gi.AddNewLabel(keyRow, "keyMainText", "<b>Team Key:</b>")
+	keyMainText.SetProp("font-size", "30px")
+
+	addKeyItems()
+
 	width := 1024 // pixel sizes of screen
-	height := 768 // pixel sizes of screenv
+	height := 768 // pixel sizes of screen
 
 	mapSVG := svg.AddNewSVG(map2dTab, "mapSVG")
 	mapSVG.Fill = true

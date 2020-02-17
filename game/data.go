@@ -89,6 +89,48 @@ func addTeamUpdateButtons() {
 
 	}
 }
+func addKeyItems() {
+	// the ordering of doing this twice and the if statements will make the key be in the correct order
+	// todo: make this code more efficient
+	findTeamsStatement := "SELECT * FROM teams"
+	findTeamsResult, err := db.Query(findTeamsStatement)
+	if err != nil {
+		panic(err)
+	}
+	for findTeamsResult.Next() {
+		var teamName, color string
+		var numOfPeople int
+		findTeamsResult.Scan(&teamName, &numOfPeople, &color)
+		var keyItemText *gi.Label
+		if strings.Contains(teamName, "human") {
+			keyItemText = gi.AddNewLabel(keyRow, "keyItemText", fmt.Sprintf("<b>%v:</b> %v", teamName, color))
+		} else if strings.Contains(teamName, "robot") {
+			continue
+		}
+		keyItemText.SetProp("font-size", "20px")
+		keyItemText.SetProp("color", color)
+		keyItemText.SetProp("background-color", "black")
+	}
+	findTeamsStatement = "SELECT * FROM teams"
+	findTeamsResult, err = db.Query(findTeamsStatement)
+	if err != nil {
+		panic(err)
+	}
+	for findTeamsResult.Next() {
+		var teamName, color string
+		var numOfPeople int
+		findTeamsResult.Scan(&teamName, &numOfPeople, &color)
+		var keyItemText *gi.Label
+		if strings.Contains(teamName, "robot") {
+			keyItemText = gi.AddNewLabel(keyRow, "keyItemText", fmt.Sprintf("<b>%v:</b> %v", teamName, color))
+		} else if strings.Contains(teamName, "human") {
+			continue
+		}
+		keyItemText.SetProp("font-size", "20px")
+		keyItemText.SetProp("color", color)
+		keyItemText.SetProp("background-color", "black")
+	}
+}
 func joinTeam(name string) {
 	joinTeamStatement := fmt.Sprintf("UPDATE users SET %v = '%v' WHERE username='%v'", "team", name, USER)
 	fmt.Printf("%v \n", joinTeamStatement)
