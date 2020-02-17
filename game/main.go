@@ -368,14 +368,14 @@ func initMainTabs() {
 
 	addKeyItems()
 
-	width := 1024 // pixel sizes of screen
-	height := 768 // pixel sizes of screen
+	// width := 1024 // pixel sizes of screen
+	// height := 768 // pixel sizes of screen
 
 	mapSVG := svg.AddNewSVG(map2dTab, "mapSVG")
 	mapSVG.Fill = true
 	mapSVG.SetProp("background-color", "white")
-	mapSVG.SetProp("width", units.NewPx(float32(width-20)))
-	mapSVG.SetProp("height", units.NewPx(float32(height-100)))
+	// mapSVG.SetProp("width", units.NewPx(float32(width-20)))
+	// mapSVG.SetProp("height", units.NewPx(float32(height-100)))
 	mapSVG.SetStretchMaxWidth()
 	mapSVG.SetStretchMaxHeight()
 
