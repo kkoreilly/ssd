@@ -178,10 +178,10 @@ func (bd *Borders) simulateMap(fullSim bool) {
 			}
 		} else {
 			curCountSimulation += 1
-			updt := map2dTab.UpdateStart()
+			updt := simulationTab.UpdateStart()
 			simulateText.SetText(fmt.Sprintf("Amount of weeks taken: %v", curCountSimulation))
-			map2dTab.SetFullReRender()
-			map2dTab.UpdateEnd(updt)
+			simulationTab.SetFullReRender()
+			simulationTab.UpdateEnd(updt)
 			return
 		}
 	}

@@ -140,7 +140,8 @@ func addKeyItems() {
 		clr.SetString(color, nil)
 		if clr.IsDark() || color == "red" || color == "blue" { // if dark, text is white
 			keyItemText.SetProp("color", "white")
-		} else { // else, text is black
+		}
+		if !clr.IsDark() || color == "yellow" || color == "orange" && color != "red" && color != "blue" { // else, text is black
 			keyItemText.SetProp("color", "black")
 		}
 		keyItemText.Redrawable = true

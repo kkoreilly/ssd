@@ -31,7 +31,8 @@ var homeTab *gi.Frame
 var aboutTab *gi.Frame
 var playTab *gi.Frame
 var resourcesTab *gi.Frame
-var map2dTab *gi.Frame
+var simulationTab *gi.Frame
+var simulationControlsTab *gi.Frame
 
 // var map3dTab *gi.Frame // to be added later
 var teamTab *gi.Frame
@@ -346,20 +347,32 @@ func initMainTabs() {
 	// updateResource("gold", 70)
 	readResources()
 
-	map2dTab = tv.AddNewTab(gi.KiT_Frame, "<b>Map (2D)</b>").(*gi.Frame)
+	simulationControlsTab = tv.AddNewTab(gi.KiT_Frame, "<b>Simulation Settings</b>").(*gi.Frame)
+	simulationControlsTab.Lay = gi.LayoutVert
+	simulationControlsTab.SetStretchMaxWidth()
+	simulationControlsTab.SetStretchMaxHeight()
+	simulationControlsTab.SetProp("background-color", "lightblue")
 
-	map2dTab.Lay = gi.LayoutVert
-	map2dTab.SetStretchMaxWidth()
-	map2dTab.SetStretchMaxHeight()
-	map2dTab.SetProp("background-color", "lightblue")
+	simulationControlsTitle := simulationControlsTab.AddNewChild(gi.KiT_Label, "simulationControlsTitle").(*gi.Label)
+	simulationControlsTitle.SetProp("font-size", "60px")
+	simulationControlsTitle.SetProp("font-family", "Times New Roman, serif")
+	simulationControlsTitle.SetProp("text-align", "center")
+	simulationControlsTitle.Text = "Simulation Settings"
 
-	map2dTitle := map2dTab.AddNewChild(gi.KiT_Label, "map2dTitle").(*gi.Label)
-	map2dTitle.SetProp("font-size", "60px")
-	map2dTitle.SetProp("font-family", "Times New Roman, serif")
-	map2dTitle.SetProp("text-align", "center")
-	map2dTitle.Text = "Live Map of the World (2D):"
+	simulationTab = tv.AddNewTab(gi.KiT_Frame, "<b>Simulation</b>").(*gi.Frame)
 
-	keyRow = gi.AddNewFrame(map2dTab, "keyRow", gi.LayoutHoriz)
+	simulationTab.Lay = gi.LayoutVert
+	simulationTab.SetStretchMaxWidth()
+	simulationTab.SetStretchMaxHeight()
+	simulationTab.SetProp("background-color", "lightblue")
+
+	simulationTitle := simulationTab.AddNewChild(gi.KiT_Label, "simulationTitle").(*gi.Label)
+	simulationTitle.SetProp("font-size", "60px")
+	simulationTitle.SetProp("font-family", "Times New Roman, serif")
+	simulationTitle.SetProp("text-align", "center")
+	simulationTitle.Text = "Simulation of the World"
+
+	keyRow = gi.AddNewFrame(simulationTab, "keyRow", gi.LayoutHoriz)
 	keyRow.SetProp("spacing", units.NewEx(2))
 	keyRow.SetProp("horizontal-align", gi.AlignLeft)
 	keyRow.SetProp("background-color", "white")
@@ -370,15 +383,20 @@ func initMainTabs() {
 
 	addKeyItems()
 	InitStrength()
+	simulationBrow := gi.AddNewFrame(simulationTab, "simulationBrow", gi.LayoutHoriz)
+	simulationBrow.SetProp("spacing", units.NewEx(2))
+	simulationBrow.SetProp("horizontal-align", gi.AlignLeft)
+	simulationBrow.SetProp("background-color", "white")
+	simulationBrow.SetStretchMaxWidth()
 
-	simulateButton := gi.AddNewButton(map2dTab, "simulateButton")
+	simulateButton := gi.AddNewButton(simulationBrow, "simulateButton")
 	simulateButton.Text = "Simulate (Full)"
 	simulateButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
 			FirstWorldBorders.simulateMap(true)
 		}
 	})
-	simulateButton1 := gi.AddNewButton(map2dTab, "simulateButton1")
+	simulateButton1 := gi.AddNewButton(simulationBrow, "simulateButton1")
 	simulateButton1.Text = "Simulate (Step)"
 	simulateButton1.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
@@ -386,14 +404,14 @@ func initMainTabs() {
 			FirstWorld.RenderSVGs(mapSVG)
 		}
 	})
-	// renderButton := gi.AddNewButton(map2dTab, "renderButton")
+	// renderButton := gi.AddNewButton(simulationTab, "renderButton")
 	// renderButton.Text = "Render SVGS"
 	// renderButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 	// 	if sig == int64(gi.ButtonClicked) {
 	// 		FirstWorld.RenderSVGs(mapSVG)
 	// 	}
 	// })
-	resetButton := gi.AddNewButton(map2dTab, "resetButton")
+	resetButton := gi.AddNewButton(simulationBrow, "resetButton")
 	resetButton.Text = "Reset"
 	resetButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
@@ -449,14 +467,14 @@ func initMainTabs() {
 			FirstWorld.RenderSVGs(mapSVG)
 		}
 	})
-	simulateText = gi.AddNewLabel(map2dTab, "simulateText", "                                                                            ")
+	simulateText = gi.AddNewLabel(simulationTab, "simulateText", "                                                                            ")
 	simulateText.SetProp("font-size", "20px")
 	simulateText.Redrawable = true
 
 	// width := 1024 // pixel sizes of screen
 	// height := 768 // pixel sizes of screen
 
-	mapSVG = svg.AddNewSVG(map2dTab, "mapSVG")
+	mapSVG = svg.AddNewSVG(simulationTab, "mapSVG")
 	mapSVG.Fill = true
 	mapSVG.SetProp("background-color", "white")
 	// mapSVG.SetProp("width", units.NewPx(float32(width-20)))
