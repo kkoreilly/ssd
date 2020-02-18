@@ -28,16 +28,16 @@ type Borders map[string]*Border
 var curCountSimulation int
 
 var TeamStrength = map[string]float32{
-	"human1": 0,
-	"human2": 0,
-	"human3": 0,
-	"human4": 0,
-	"human5": 0,
-	"robot1": 0,
-	"robot2": 0,
-	"robot3": 0,
-	"robot4": 0,
-	"robot5": 0,
+	"human1": 1,
+	"human2": 1,
+	"human3": 1,
+	"human4": 1,
+	"human5": 1,
+	"robot1": 1,
+	"robot2": 1,
+	"robot3": 1,
+	"robot4": 1,
+	"robot5": 1,
 }
 
 var FirstWorld = World{
@@ -88,6 +88,7 @@ var FirstWorldBorders = Borders{
 }
 
 func InitStrength() {
+	// fmt.Printf("init strength \n")
 	for k, _ := range TeamStrength {
 		randNum := rand.Float32()
 		TeamStrength[k] = randNum
@@ -117,6 +118,7 @@ func (wr *World) RenderSVGs(sv *svg.SVG) {
 }
 
 func (bd *Borders) simulateMap(fullSim bool) {
+	// fmt.Printf("Human1 value: %v \n", TeamStrength["human1"])
 	for i := 0; 1 < 2; i++ {
 		for _, b := range *bd { // do the battles
 			if b.Owner == "battle" { // if there is a battle to be had, randomly decide the battle
@@ -125,7 +127,7 @@ func (bd *Borders) simulateMap(fullSim bool) {
 				probNum := TeamStrength[FirstWorld[b.Territory1].Owner] / (TeamStrength[FirstWorld[b.Territory1].Owner] + TeamStrength[FirstWorld[b.Territory2].Owner])
 				// fmt.Printf("Rand Num: %v Prob Num: %v \n", randNum, probNum)
 				// fmt.Printf("Random Number: %v \n", randNum)
-				if randNum >= probNum { // team1 wins the battle
+				if randNum <= probNum { // team1 wins the battle
 					winTeam := FirstWorld[b.Territory1].Owner // get the winning team
 					FirstWorld[b.Territory2].Owner = winTeam  // set the losing team's territory to be owned by the winning team
 					FirstWorld[b.Territory2].Color = FirstWorld[b.Territory1].Color

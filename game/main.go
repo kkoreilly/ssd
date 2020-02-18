@@ -8,6 +8,7 @@ import (
 	// "fmt"
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gimain"
+	"github.com/goki/gi/giv"
 	"github.com/goki/gi/svg"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
@@ -359,6 +360,19 @@ func initMainTabs() {
 	simulationControlsTitle.SetProp("text-align", "center")
 	simulationControlsTitle.Text = "Simulation Settings"
 
+	simulationRandomButton := gi.AddNewButton(simulationControlsTab, "simulationRandomButton")
+	simulationRandomButton.Text = "Randomly choose strength"
+	simulationRandomButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(gi.ButtonClicked) {
+			InitStrength()
+		}
+	})
+
+	mv := giv.AddNewMapView(simulationControlsTab, "mv")
+	mv.SetMap(&TeamStrength)
+	mv.SetStretchMaxWidth()
+	mv.SetStretchMaxHeight()
+
 	simulationTab = tv.AddNewTab(gi.KiT_Frame, "<b>Simulation</b>").(*gi.Frame)
 
 	simulationTab.Lay = gi.LayoutVert
@@ -382,7 +396,7 @@ func initMainTabs() {
 	keyMainText.SetProp("font-size", "30px")
 
 	addKeyItems()
-	InitStrength()
+	// InitStrength()
 	simulationBrow := gi.AddNewFrame(simulationTab, "simulationBrow", gi.LayoutHoriz)
 	simulationBrow.SetProp("spacing", units.NewEx(2))
 	simulationBrow.SetProp("horizontal-align", gi.AlignLeft)
@@ -415,7 +429,7 @@ func initMainTabs() {
 	resetButton.Text = "Reset"
 	resetButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
-			InitStrength()
+			// InitStrength()
 			curCountSimulation = 0
 			FirstWorld = World{
 				"Alaska":         {"Alaska", "human2", "green", ""},
