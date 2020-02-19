@@ -49,6 +49,7 @@ var currentMap Map
 var currentMapString string
 var simulateText *gi.Label
 var mapSVG *svg.SVG
+var comebacks = false
 
 func mainrun() {
 	data() // Connect to data base
@@ -376,6 +377,19 @@ func initMainTabs() {
 			InitStrength()
 		}
 	})
+	gi.AddNewSpace(simulationControlsTab, "space2")
+	comebackCheckbox := gi.AddNewCheckBox(simulationControlsTab, "comebackCheckbox")
+	comebackCheckbox.Text = "Have more comebacks"
+	comebackCheckbox.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(gi.ButtonClicked) {
+			if comebacks {
+				comebacks = false
+			} else {
+				comebacks = true
+			}
+		}
+	})
+	gi.AddNewSpace(simulationControlsTab, "space3")
 
 	mv := giv.AddNewMapView(simulationControlsTab, "mv")
 	mv.SetMap(&TeamStrength)

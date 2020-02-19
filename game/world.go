@@ -155,6 +155,22 @@ func (bd *Borders) simulateMap(fullSim bool) {
 				b.Owner = "battle"
 			}
 		}
+
+		if comebacks {
+			// fmt.Printf("Comebacks! \n")
+			teams := make(map[string]int)
+			for _, d := range FirstWorld {
+				if d.Owner == "none" {
+					continue
+				}
+				teams[d.Owner] = teams[d.Owner] + 1
+			}
+			for k, _ := range teams {
+				if teams[k] == 1 {
+					TeamStrength[k] = TeamStrength[k] + 20
+				}
+			}
+		}
 		// Now we did the battles, check if one team has won
 		var x = ""
 		var y = false
