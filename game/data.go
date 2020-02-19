@@ -103,21 +103,28 @@ func addKeyItems() {
 		var numOfPeople int
 		findTeamsResult.Scan(&teamName, &numOfPeople, &color)
 		var keyItemText *gi.Label
+		var keyItemText1 *gi.Label
 		if strings.Contains(teamName, "human") {
 			keyItemText = gi.AddNewLabel(keyRow, "keyItemText", fmt.Sprintf("<b>%v:</b> %v", teamName, color))
+			keyItemText1 = gi.AddNewLabel(keyRow1, "keyItemText1", fmt.Sprintf("<b>%v:</b> %v", teamName, color))
 		} else if strings.Contains(teamName, "robot") {
 			continue
 		}
 		keyItemText.SetProp("font-size", "20px")
 		keyItemText.SetProp("background-color", color)
+		keyItemText1.SetProp("font-size", "20px")
+		keyItemText1.SetProp("background-color", color)
 		clr := gi.Color{}
 		clr.SetString(color, nil)
 		if clr.IsDark() || color == "red" || color == "blue" { // if dark, text is white
 			keyItemText.SetProp("color", "white")
+			keyItemText1.SetProp("color", "white")
 		} else { // else, text is black
 			keyItemText.SetProp("color", "black")
+			keyItemText1.SetProp("color", "black")
 		}
 		keyItemText.Redrawable = true
+		keyItemText1.Redrawable = true
 	}
 	findTeamsStatement = "SELECT * FROM teams"
 	findTeamsResult, err = db.Query(findTeamsStatement)
@@ -129,22 +136,29 @@ func addKeyItems() {
 		var numOfPeople int
 		findTeamsResult.Scan(&teamName, &numOfPeople, &color)
 		var keyItemText *gi.Label
+		var keyItemText1 *gi.Label
 		if strings.Contains(teamName, "robot") {
 			keyItemText = gi.AddNewLabel(keyRow, "keyItemText", fmt.Sprintf("<b>%v:</b> %v", teamName, color))
+			keyItemText1 = gi.AddNewLabel(keyRow1, "keyItemText1", fmt.Sprintf("<b>%v:</b> %v", teamName, color))
 		} else if strings.Contains(teamName, "human") {
 			continue
 		}
 		keyItemText.SetProp("font-size", "20px")
 		keyItemText.SetProp("background-color", color)
+		keyItemText1.SetProp("font-size", "20px")
+		keyItemText1.SetProp("background-color", color)
 		clr := gi.Color{}
 		clr.SetString(color, nil)
 		if clr.IsDark() || color == "red" || color == "blue" { // if dark, text is white
 			keyItemText.SetProp("color", "white")
+			keyItemText1.SetProp("color", "white")
 		}
 		if !clr.IsDark() || color == "yellow" || color == "orange" && color != "red" && color != "blue" { // else, text is black
 			keyItemText.SetProp("color", "black")
+			keyItemText1.SetProp("color", "black")
 		}
 		keyItemText.Redrawable = true
+		keyItemText1.Redrawable = true
 	}
 }
 func joinTeam(name string) {

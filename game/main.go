@@ -42,6 +42,7 @@ var livesResourcesText *gi.Label
 var tbrowH *gi.Layout
 var tbrowR *gi.Layout
 var keyRow *gi.Frame
+var keyRow1 *gi.Frame
 var win *gi.Window
 var currentTrainingMap string
 var currentMap Map
@@ -360,6 +361,14 @@ func initMainTabs() {
 	simulationControlsTitle.SetProp("text-align", "center")
 	simulationControlsTitle.Text = "Simulation Settings"
 
+	keyRow1 = gi.AddNewFrame(simulationControlsTab, "keyRow1", gi.LayoutHoriz)
+	keyRow1.SetProp("spacing", units.NewEx(2))
+	keyRow1.SetProp("horizontal-align", gi.AlignLeft)
+	keyRow1.SetProp("background-color", "white")
+	keyRow1.SetStretchMaxWidth()
+
+	keyMainText1 := gi.AddNewLabel(keyRow1, "keyMainText1", "<b>Team Key:</b>")
+	keyMainText1.SetProp("font-size", "30px")
 	simulationRandomButton := gi.AddNewButton(simulationControlsTab, "simulationRandomButton")
 	simulationRandomButton.Text = "Randomly choose strength"
 	simulationRandomButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {

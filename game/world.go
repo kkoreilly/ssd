@@ -92,6 +92,7 @@ func InitStrength() {
 	for k, _ := range TeamStrength {
 		randNum := rand.Float32()
 		TeamStrength[k] = randNum
+		simulationControlsTab.SetFullReRender()
 		// fmt.Printf("Team Strength for team %v: %v \n", k, TeamStrength[k])
 	}
 }
