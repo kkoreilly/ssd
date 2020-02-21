@@ -61,6 +61,27 @@ var FirstWorld = World{
 	"Antarctica":     {"Antarctica", "none", "white", ""},
 }
 
+var FirstWorldLive = World{
+	"Alaska":         {"Alaska", "human2", "green", ""},
+	"Canada":         {"Canada", "human2", "green", ""},
+	"USA":            {"USA", "human1", "blue", ""},
+	"CentralAmerica": {"CentralAmerica", "human1", "blue", ""},
+	"Brazil":         {"Brazil", "human3", "purple", ""},
+	"SouthAmerica":   {"SouthAmerica", "human3", "purple", ""},
+	"WestAfrica":     {"WestAfrica", "human4", "pink", ""},
+	"EastAfrica":     {"EastAfrica", "human4", "pink", ""},
+	"Russia":         {"Russia", "human5", "lightgreen", ""},
+	"NorthAsia":      {"NorthAsia", "human5", "lightgreen", ""},
+	"WestEurope":     {"WestEurope", "robot1", "red", ""},
+	"NorthernEurope": {"NorthernEurope", "robot1", "red", ""},
+	"EastEurope":     {"EastEurope", "robot2", "orange", ""},
+	"MiddleEast":     {"MiddleEast", "robot2", "orange", ""},
+	"Australia":      {"Australia", "robot3", "yellow", ""},
+	"SouthEastAsia":  {"SouthEastAsia", "robot4", "violet", ""},
+	"SouthWestAsia":  {"SouthWestAsia", "robot5", "maroon", ""},
+	"Antarctica":     {"Antarctica", "none", "white", ""},
+}
+
 var FirstWorldBorders = Borders{
 	"AlaskaRussia":               {"Alaska", "Russia", "battle"},
 	"AlaskaCanada":               {"Alaska", "Canada", "human2"},
@@ -104,7 +125,7 @@ func (wr *World) RenderSVGs(sv *svg.SVG) {
 	sv.ViewBox.Size.Set(2754, 1398)
 	sv.ViewBox.Min.X = -30
 	sv.ViewBox.Min.Y = 61
-	// readWorld()
+	readWorld()
 	// Create ocean:
 	op := svg.AddNewPath(sv, "Ocean", FirstSVG["Ocean"].Data)
 	op.SetProp("fill", "lightblue")

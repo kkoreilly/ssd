@@ -104,9 +104,11 @@ func addKeyItems() {
 		findTeamsResult.Scan(&teamName, &numOfPeople, &color)
 		var keyItemText *gi.Label
 		var keyItemText1 *gi.Label
+		var keyItemTextM *gi.Label
 		if strings.Contains(teamName, "human") {
 			keyItemText = gi.AddNewLabel(keyRow, "keyItemText", fmt.Sprintf("<b>%v:</b> %v", teamName, color))
 			keyItemText1 = gi.AddNewLabel(keyRow1, "keyItemText1", fmt.Sprintf("<b>%v:</b> %v", teamName, color))
+			keyItemTextM = gi.AddNewLabel(keyRowM, "keyItemTextM", fmt.Sprintf("<b>%v:</b> %v", teamName, color))
 		} else if strings.Contains(teamName, "robot") {
 			continue
 		}
@@ -114,17 +116,22 @@ func addKeyItems() {
 		keyItemText.SetProp("background-color", color)
 		keyItemText1.SetProp("font-size", "20px")
 		keyItemText1.SetProp("background-color", color)
+		keyItemTextM.SetProp("font-size", "20px")
+		keyItemTextM.SetProp("background-color", color)
 		clr := gi.Color{}
 		clr.SetString(color, nil)
 		if clr.IsDark() || color == "red" || color == "blue" { // if dark, text is white
 			keyItemText.SetProp("color", "white")
 			keyItemText1.SetProp("color", "white")
+			keyItemTextM.SetProp("color", "white")
 		} else { // else, text is black
 			keyItemText.SetProp("color", "black")
 			keyItemText1.SetProp("color", "black")
+			keyItemTextM.SetProp("color", "black")
 		}
 		keyItemText.Redrawable = true
 		keyItemText1.Redrawable = true
+		keyItemTextM.Redrawable = true
 	}
 	findTeamsStatement = "SELECT * FROM teams"
 	findTeamsResult, err = db.Query(findTeamsStatement)
@@ -137,9 +144,11 @@ func addKeyItems() {
 		findTeamsResult.Scan(&teamName, &numOfPeople, &color)
 		var keyItemText *gi.Label
 		var keyItemText1 *gi.Label
+		var keyItemTextM *gi.Label
 		if strings.Contains(teamName, "robot") {
 			keyItemText = gi.AddNewLabel(keyRow, "keyItemText", fmt.Sprintf("<b>%v:</b> %v", teamName, color))
 			keyItemText1 = gi.AddNewLabel(keyRow1, "keyItemText1", fmt.Sprintf("<b>%v:</b> %v", teamName, color))
+			keyItemTextM = gi.AddNewLabel(keyRowM, "keyItemText1", fmt.Sprintf("<b>%v:</b> %v", teamName, color))
 		} else if strings.Contains(teamName, "human") {
 			continue
 		}
@@ -147,18 +156,23 @@ func addKeyItems() {
 		keyItemText.SetProp("background-color", color)
 		keyItemText1.SetProp("font-size", "20px")
 		keyItemText1.SetProp("background-color", color)
+		keyItemTextM.SetProp("font-size", "20px")
+		keyItemTextM.SetProp("background-color", color)
 		clr := gi.Color{}
 		clr.SetString(color, nil)
 		if clr.IsDark() || color == "red" || color == "blue" { // if dark, text is white
 			keyItemText.SetProp("color", "white")
 			keyItemText1.SetProp("color", "white")
+			keyItemTextM.SetProp("color", "white")
 		}
 		if !clr.IsDark() || color == "yellow" || color == "orange" && color != "red" && color != "blue" { // else, text is black
 			keyItemText.SetProp("color", "black")
 			keyItemText1.SetProp("color", "black")
+			keyItemTextM.SetProp("color", "black")
 		}
 		keyItemText.Redrawable = true
 		keyItemText1.Redrawable = true
+		keyItemTextM.Redrawable = true
 	}
 }
 func joinTeam(name string) {
@@ -219,7 +233,7 @@ func readWorld() {
 	for readResult.Next() {
 		readResult.Scan(&name, &owner, &color)
 		// fmt.Printf("In loop. Name = %v \n", name)
-		tr, has := FirstWorld[name]
+		tr, has := FirstWorldLive[name]
 		if !has {
 			// fmt.Printf("Leaving loop")
 			continue

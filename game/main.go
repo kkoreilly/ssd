@@ -34,6 +34,7 @@ var playTab *gi.Frame
 var resourcesTab *gi.Frame
 var simulationTab *gi.Frame
 var simulationControlsTab *gi.Frame
+var map2dTab *gi.Frame
 
 // var map3dTab *gi.Frame // to be added later
 var teamTab *gi.Frame
@@ -43,11 +44,13 @@ var tbrowH *gi.Layout
 var tbrowR *gi.Layout
 var keyRow *gi.Frame
 var keyRow1 *gi.Frame
+var keyRowM *gi.Frame
 var win *gi.Window
 var currentTrainingMap string
 var currentMap Map
 var currentMapString string
 var simulateText *gi.Label
+var simMapSVG *svg.SVG
 var mapSVG *svg.SVG
 var comebacks = false
 
@@ -350,6 +353,38 @@ func initMainTabs() {
 	// updateResource("gold", 70)
 	readResources()
 
+	map2dTab = tv.AddNewTab(gi.KiT_Frame, "<b>Live Map of the World</b>").(*gi.Frame)
+
+	map2dTab.Lay = gi.LayoutVert
+	map2dTab.SetStretchMaxWidth()
+	map2dTab.SetStretchMaxHeight()
+	map2dTab.SetProp("background-color", "lightblue")
+
+	map2dTitle := map2dTab.AddNewChild(gi.KiT_Label, "map2dTitle").(*gi.Label)
+	map2dTitle.SetProp("font-size", "60px")
+	map2dTitle.SetProp("font-family", "Times New Roman, serif")
+	map2dTitle.SetProp("text-align", "center")
+	map2dTitle.Text = "Live Map of the World"
+
+	keyRowM = gi.AddNewFrame(map2dTab, "keyRowM", gi.LayoutHoriz)
+	keyRowM.SetProp("spacing", units.NewEx(2))
+	keyRowM.SetProp("horizontal-align", gi.AlignLeft)
+	keyRowM.SetProp("background-color", "white")
+	keyRowM.SetStretchMaxWidth()
+
+	mapSVG = svg.AddNewSVG(map2dTab, "mapSVG")
+	mapSVG.Fill = true
+	mapSVG.SetProp("background-color", "white")
+	// simMapSVG.SetProp("width", units.NewPx(float32(width-20)))
+	// simMapSVG.SetProp("height", units.NewPx(float32(height-100)))
+	mapSVG.SetStretchMaxWidth()
+	mapSVG.SetStretchMaxHeight()
+
+	FirstWorldLive.RenderSVGs(mapSVG)
+
+	keyMainTextM := gi.AddNewLabel(keyRowM, "keyMainTextM", "<b>Team Key:</b>")
+	keyMainTextM.SetProp("font-size", "30px")
+
 	simulationControlsTab = tv.AddNewTab(gi.KiT_Frame, "<b>Simulation Settings</b>").(*gi.Frame)
 	simulationControlsTab.Lay = gi.LayoutVert
 	simulationControlsTab.SetStretchMaxWidth()
@@ -438,14 +473,14 @@ func initMainTabs() {
 	simulateButton1.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
 			FirstWorldBorders.simulateMap(false)
-			FirstWorld.RenderSVGs(mapSVG)
+			FirstWorld.RenderSVGs(simMapSVG)
 		}
 	})
 	// renderButton := gi.AddNewButton(simulationTab, "renderButton")
 	// renderButton.Text = "Render SVGS"
 	// renderButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 	// 	if sig == int64(gi.ButtonClicked) {
-	// 		FirstWorld.RenderSVGs(mapSVG)
+	// 		FirstWorld.RenderSVGs(simMapSVG)
 	// 	}
 	// })
 	resetButton := gi.AddNewButton(simulationBrow, "resetButton")
@@ -501,7 +536,7 @@ func initMainTabs() {
 			}
 			// fmt.Printf("First World: %v Origin: %v \n", FirstWorld["USA"].Color, OriginFirstWorld["USA"].Color)
 			simulateText.SetText("")
-			FirstWorld.RenderSVGs(mapSVG)
+			FirstWorld.RenderSVGs(simMapSVG)
 		}
 	})
 
@@ -570,7 +605,7 @@ func initMainTabs() {
 			}
 			// fmt.Printf("First World: %v Origin: %v \n", FirstWorld["USA"].Color, OriginFirstWorld["USA"].Color)
 			simulateText.SetText("")
-			FirstWorld.RenderSVGs(mapSVG)
+			FirstWorld.RenderSVGs(simMapSVG)
 		}
 	})
 	simulateText = gi.AddNewLabel(simulationTab, "simulateText", "                                                                            ")
@@ -580,15 +615,15 @@ func initMainTabs() {
 	// width := 1024 // pixel sizes of screen
 	// height := 768 // pixel sizes of screen
 
-	mapSVG = svg.AddNewSVG(simulationTab, "mapSVG")
-	mapSVG.Fill = true
-	mapSVG.SetProp("background-color", "white")
-	// mapSVG.SetProp("width", units.NewPx(float32(width-20)))
-	// mapSVG.SetProp("height", units.NewPx(float32(height-100)))
-	mapSVG.SetStretchMaxWidth()
-	mapSVG.SetStretchMaxHeight()
+	simMapSVG = svg.AddNewSVG(simulationTab, "simMapSVG")
+	simMapSVG.Fill = true
+	simMapSVG.SetProp("background-color", "white")
+	// simMapSVG.SetProp("width", units.NewPx(float32(width-20)))
+	// simMapSVG.SetProp("height", units.NewPx(float32(height-100)))
+	simMapSVG.SetStretchMaxWidth()
+	simMapSVG.SetStretchMaxHeight()
 
-	FirstWorld.RenderSVGs(mapSVG)
+	FirstWorld.RenderSVGs(simMapSVG)
 
 	// map3dTab = tv.AddNewTab(gi.KiT_Frame, "<b>Map (3D)</b>").(*gi.Frame)
 	//
