@@ -141,6 +141,8 @@ func (wr *World) RenderSVGs(sv *svg.SVG) {
 
 func (bd *Borders) simulateMap(fullSim bool) {
 	// fmt.Printf("Human1 value: %v \n", TeamStrength["human1"])
+	// updt := simulationTab.UpdateStart()
+	// defer simulationTab.UpdateEnd(updt)
 	for i := 0; 1 < 2; i++ {
 		for _, b := range *bd { // do the battles
 			if b.Owner == "battle" { // if there is a battle to be had, randomly decide the battle

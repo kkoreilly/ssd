@@ -108,6 +108,10 @@ func initBorders() {
 	}
 }
 func createBattleJoinLayouts() {
+
+	// updt := homeTab.UpdateStart()
+	// defer homeTab.UpdateEnd(updt)
+	// homeTab.SetFullReRender()
 	statement := "SELECT * FROM borders"
 	rows, err := db.Query(statement)
 	if err != nil {
@@ -124,12 +128,25 @@ func createBattleJoinLayouts() {
 		if (FirstWorld[territory1].Owner != FirstWorld[territory2].Owner) && (team1 == TEAM || team2 == TEAM) {
 			joinLayout := gi.AddNewFrame(homeTab, "joinLayout", gi.LayoutVert)
 			joinLayout.SetStretchMaxWidth()
+			scoreText := gi.AddNewLabel(joinLayout, "scoreText", fmt.Sprintf("<b>%v             -                %v</b>", team1points, team2points))
+			scoreText.SetProp("font-size", "35px")
+			scoreText.SetProp("text-align", "center")
 			teamsText := gi.AddNewLabel(joinLayout, "teamsText", "Team "+team1+"           vs.             Team "+team2)
 			teamsText.SetProp("font-size", "30px")
 			teamsText.SetProp("text-align", "center")
 			territoriesText := gi.AddNewLabel(joinLayout, "territoriesText", territory1+"   vs.  "+territory2)
 			territoriesText.SetProp("font-size", "25px")
 			territoriesText.SetProp("text-align", "center")
+			joinBattleButton := gi.AddNewButton(joinLayout, "joinBattleButton")
+			joinBattleButton.Text = "Create a 1v1 Battle in this Battlefield"
+			joinBattleButton.SetProp("font-size", "30px")
+			joinBattleButton.SetProp("horizontal-align", gi.AlignCenter)
+			rec := ki.Node{}
+			rec.InitName(&rec, "rec")
+			joinBattleButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+				if sig == int64(gi.ButtonClicked) {
+				}
+			})
 		}
 	}
 	teamNoJoinTitle := gi.AddNewLabel(homeTab, "teamNoJoinTitle", "<b>Other Battles:</b>")
@@ -146,6 +163,9 @@ func createBattleJoinLayouts() {
 		if FirstWorld[territory1].Owner != FirstWorld[territory2].Owner && (team1 != TEAM && team2 != TEAM) {
 			joinLayout := gi.AddNewFrame(homeTab, "joinLayout", gi.LayoutVert)
 			joinLayout.SetStretchMaxWidth()
+			scoreText := gi.AddNewLabel(joinLayout, "scoreText", fmt.Sprintf("<b>%v             -                %v</b>", team1points, team2points))
+			scoreText.SetProp("font-size", "35px")
+			scoreText.SetProp("text-align", "center")
 			teamsText := gi.AddNewLabel(joinLayout, "teamsText", "Team "+team1+"           vs.             Team "+team2)
 			teamsText.SetProp("font-size", "30px")
 			teamsText.SetProp("text-align", "center")
