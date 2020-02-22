@@ -318,6 +318,26 @@ func joinTeam(name string) {
 
 }
 
+func getPositions() {
+	for 1 < 2 {
+		// fmt.Printf("Working 1 \n")
+		getStatement := "SELECT * FROM players"
+		rows, err := db.Query(getStatement)
+
+		if err != nil {
+			panic(err)
+		}
+		for rows.Next() {
+			// fmt.Printf("Working 2 \n")
+			var username, battleName string
+			var posX, posY, posZ float32
+			var points int
+			rows.Scan(&username, &posX, &posY, &posZ, &battleName, &points)
+			go makeOtherPlayer(posX, posY, posZ)
+		}
+	}
+}
+
 func readResources() {
 	findUserStatement := fmt.Sprintf("SELECT * FROM users WHERE username='%v'", USER)
 

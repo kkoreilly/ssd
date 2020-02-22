@@ -325,6 +325,8 @@ func (gm *Game) Config() {
 	floor.Mat.Tiling.Repeat.Set(50, 50)
 
 	gi.FilterLaggyKeyEvents = true // fix key lag
+
+	go getPositions()
 }
 
 func AddNewScene(parent ki.Ki, name string) *Scene {
@@ -332,7 +334,15 @@ func AddNewScene(parent ki.Ki, name string) *Scene {
 	sc.Defaults()
 	return sc
 }
-
+func makeOtherPlayer(posX, posY, posZ float32) {
+	// fmt.Printf("Working 3 \n")
+	sc := &TheGame.Scene.Scene
+	var opo *gi3d.Solid
+	opo = gi3d.AddNewSolid(sc, sc, "Person", "Person")
+	opo.Pose.Pos.Set(posX, posY, posZ)
+	opo.Mat.Color.SetString("blue", nil)
+	// fmt.Printf("Working 4 \n")
+}
 func (sc *Scene) Render2D() {
 	if sc.PushBounds() {
 		if !sc.NoNav {
