@@ -120,6 +120,7 @@ func InitStrength() {
 
 func (wr *World) RenderSVGs(sv *svg.SVG) {
 	updt := sv.UpdateStart()
+	fmt.Printf("Update Value: %v \n", updt)
 	sv.DeleteChildren(true)
 	sv.Norm = true
 	sv.ViewBox.Size.Set(2754, 1398)

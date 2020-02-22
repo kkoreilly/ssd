@@ -464,7 +464,7 @@ func initMainTabs() {
 	simulateButton.Text = "Simulate (Full)"
 	simulateButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
-			FirstWorldBorders.simulateMap(true)
+			go FirstWorldBorders.simulateMap(true)
 		}
 	})
 	simulateButton1 := gi.AddNewButton(simulationBrow, "simulateButton1")
