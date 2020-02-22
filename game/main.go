@@ -6,6 +6,7 @@ package main
 
 import (
 	// "fmt"
+	// "time"
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/giv"
@@ -324,9 +325,13 @@ func initMainTabs() {
 	goldButton1.SetProp("background-color", "#D4AF37")
 	goldButton1.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
+			// t0 := time.Now()
 			updateResource("gold", GOLD+1000)
 			goldResourcesText.SetText("                                            ")
 			readResources()
+			// t1 := time.Now()
+			// d := t1.Sub(t0)
+			// fmt.Printf("Time to update: %v \n", d.Milliseconds())
 		}
 	})
 	livesResourcesText = resourcesTab.AddNewChild(gi.KiT_Label, "livesResourcesText").(*gi.Label)

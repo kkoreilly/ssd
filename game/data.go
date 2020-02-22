@@ -107,6 +107,13 @@ func initBorders() {
 		}
 	}
 }
+func joinPlayersTable(battleName string) {
+	statement := fmt.Sprintf("INSERT INTO players(username, posX, posY, posZ, battleName) VALUES ('%v', '%v', '%v', '%v', '%v')", USER, 0, 1, 0, battleName)
+	_, err := db.Exec(statement)
+	if err != nil {
+		panic(err)
+	}
+}
 func createBattleJoinLayouts() {
 
 	// updt := homeTab.UpdateStart()
@@ -145,6 +152,10 @@ func createBattleJoinLayouts() {
 			rec.InitName(&rec, "rec")
 			joinBattleButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				if sig == int64(gi.ButtonClicked) {
+					currentMapString = "Training Map 1"
+					currentMap = FirstMap
+					initPlayTab()
+					joinPlayersTable(territory1 + territory2)
 				}
 			})
 		}
@@ -336,6 +347,13 @@ func updateResource(name string, value int) {
 	}
 
 }
+func removePlayer() {
+	statement := fmt.Sprintf("DELETE FROM players WHERE username='%v'", USER)
+	_, err := db.Exec(statement)
+	if err != nil {
+		panic(err)
+	}
+}
 
 // fmt.Printf("Find User Result: %v \n", findUserResult)
 func readWorld() {
@@ -356,6 +374,13 @@ func readWorld() {
 		}
 		tr.Owner = owner
 		tr.Color = color
+	}
+}
+func updatePosition(axis string, value float32) {
+	statement := fmt.Sprintf("UPDATE players SET %v = '%v' WHERE username='%v'", axis, value, USER)
+	_, err := db.Exec(statement)
+	if err != nil {
+		panic(err)
 	}
 }
 func addUser(user string, password string) {

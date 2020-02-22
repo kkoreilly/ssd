@@ -31,6 +31,8 @@ type Game struct {
 
 // TheGame is the game instance for the current game
 var TheGame *Game
+var rcb *gi3d.Solid
+var fpobj *gi3d.Group
 
 type Scene struct {
 	gi3d.Scene
@@ -268,14 +270,15 @@ func (gm *Game) Config() {
 			tabIndex, _ := tv.TabIndexByName("<b>Game</b>")
 			tv.DeleteTabIndex(tabIndex, true)
 			tv.SelectTabIndex(0)
+			go removePlayer()
 		}
 	})
 
 	// center_bluem :=
 	// cbm.Segs.Set(10, 10, 10) // not clear if any diff really..
 
-	fpobj := gi3d.AddNewGroup(&sc.Scene, &sc.Scene, "TrackCamera")
-	rcb := gi3d.AddNewSolid(&sc.Scene, fpobj, "red-cube", "Person")
+	fpobj = gi3d.AddNewGroup(&sc.Scene, &sc.Scene, "TrackCamera")
+	rcb = gi3d.AddNewSolid(&sc.Scene, fpobj, "red-cube", "Person")
 	rcb.Pose.Pos.Set(0, -1, -8)
 	// rcb.Pose.Scale.Set(0.1, 0.1, 1)
 	rcb.Mat.Color.SetString("red", nil)
@@ -531,17 +534,21 @@ func (sc *Scene) NavKeyEvents(kt *key.ChordEvent) {
 		sc.Camera.Pose.MoveOnAxis(0, 0, -0.5, .5)
 		kt.SetProcessed()
 		sc.Camera.Pose.Pos.Y = y
+		go updatePosition("posZ", rcb.Pose.Pos.Z+fpobj.Pose.Pos.Z)
 	case "s":
 		y := sc.Camera.Pose.Pos.Y
 		sc.Camera.Pose.MoveOnAxis(0, 0, 0.5, .5)
 		kt.SetProcessed()
 		sc.Camera.Pose.Pos.Y = y
+		go updatePosition("posZ", rcb.Pose.Pos.Z+fpobj.Pose.Pos.Z)
 	case "a":
 		sc.Camera.Pan(panDel, 0)
 		kt.SetProcessed()
+		go updatePosition("posX", rcb.Pose.Pos.X+fpobj.Pose.Pos.X)
 	case "d":
 		sc.Camera.Pan(-panDel, 0)
 		kt.SetProcessed()
+		go updatePosition("posX", rcb.Pose.Pos.X+fpobj.Pose.Pos.X)
 	case "t":
 		kt.SetProcessed()
 		obj := sc.Child(0).(*gi3d.Solid)
