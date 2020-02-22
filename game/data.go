@@ -90,6 +90,101 @@ func addTeamUpdateButtons() {
 
 	}
 }
+func initBorders() {
+	for _, d := range FirstWorldBorders {
+		territory1 := d.Territory1
+		territory2 := d.Territory2
+		team1 := FirstWorld[territory1].Owner
+		team2 := FirstWorld[territory2].Owner
+		// activeString := "false"
+		// if d.Owner == "battle" {
+		// 	activeString = "true"
+		// }
+		statement := fmt.Sprintf("INSERT INTO borders(territory1, territory2, team1, team2) VALUES ('%v', '%v', '%v', '%v')", territory1, territory2, team1, team2)
+		_, err := db.Exec(statement)
+		if err != nil {
+			panic(err)
+		}
+	}
+}
+func createBattleJoinLayouts() {
+	statement := "SELECT * FROM borders"
+	rows, err := db.Query(statement)
+	if err != nil {
+		panic(err)
+	}
+	teamJoinTitle := gi.AddNewLabel(homeTab, "teamJoinTitle", "<b>Battles that you can join:</b>")
+	teamJoinTitle.SetProp("text-align", "center")
+	teamJoinTitle.SetProp("font-size", "40px")
+	for rows.Next() {
+		var territory1, territory2, team1, team2 string
+		var team1points, team2points int
+		rows.Scan(&territory1, &territory2, &team1, &team2, &team1points, &team2points)
+		// fmt.Printf("TEAM Global var: %v \n", TEAM)
+		if (FirstWorld[territory1].Owner != FirstWorld[territory2].Owner) && (team1 == TEAM || team2 == TEAM) {
+			joinLayout := gi.AddNewFrame(homeTab, "joinLayout", gi.LayoutVert)
+			joinLayout.SetStretchMaxWidth()
+			teamsText := gi.AddNewLabel(joinLayout, "teamsText", "Team "+team1+"           vs.             Team "+team2)
+			teamsText.SetProp("font-size", "30px")
+			teamsText.SetProp("text-align", "center")
+			territoriesText := gi.AddNewLabel(joinLayout, "territoriesText", territory1+"   vs.  "+territory2)
+			territoriesText.SetProp("font-size", "25px")
+			territoriesText.SetProp("text-align", "center")
+		}
+	}
+	teamNoJoinTitle := gi.AddNewLabel(homeTab, "teamNoJoinTitle", "<b>Other Battles:</b>")
+	teamNoJoinTitle.SetProp("text-align", "center")
+	teamNoJoinTitle.SetProp("font-size", "40px")
+	rows, err = db.Query(statement)
+	if err != nil {
+		panic(err)
+	}
+	for rows.Next() {
+		var territory1, territory2, team1, team2 string
+		var team1points, team2points int
+		rows.Scan(&territory1, &territory2, &team1, &team2, &team1points, &team2points)
+		if FirstWorld[territory1].Owner != FirstWorld[territory2].Owner && (team1 != TEAM && team2 != TEAM) {
+			joinLayout := gi.AddNewFrame(homeTab, "joinLayout", gi.LayoutVert)
+			joinLayout.SetStretchMaxWidth()
+			teamsText := gi.AddNewLabel(joinLayout, "teamsText", "Team "+team1+"           vs.             Team "+team2)
+			teamsText.SetProp("font-size", "30px")
+			teamsText.SetProp("text-align", "center")
+			territoriesText := gi.AddNewLabel(joinLayout, "territoriesText", territory1+"   vs.  "+territory2)
+			territoriesText.SetProp("font-size", "25px")
+			territoriesText.SetProp("text-align", "center")
+		}
+
+	}
+}
+func setActive() {
+	for _, d := range FirstWorldBorders {
+		activeString := "f"
+		if d.Owner == "battle" {
+			activeString = "t"
+		}
+		fmt.Printf("Active string: %v \n", activeString)
+
+		statement := fmt.Sprintf("UPDATE borders SET active='t'")
+		_, err := db.Exec(statement)
+		if err != nil {
+			panic(err)
+		}
+	}
+	rowsB, err := db.Query("SELECT * FROM borders")
+	if err != nil {
+		panic(err)
+	}
+	for rowsB.Next() {
+		var t string
+		var active string
+		rowsB.Scan(t, t, t, t, t, t, &active)
+		// fmt.Printf("Active: %v \n", active)
+		// fmt.Printf("In rows \n")
+		// fmt.Printf("\n \n USER: %v TEAM: %v \n \n", username, team)
+		// fmt.Printf("<b>Username:</b> %v        <b>Password:</b> %v        <b>Gold:</b> %v        <b>Lives:</b> %v        <b>Team:</b> %v\n \n", username, password, gold, lives, team)
+		fmt.Printf("Active result: %v \n", active)
+	}
+}
 func addKeyItems() {
 	// the ordering of doing this twice and the if statements will make the key be in the correct order
 	// todo: make this code more efficient
@@ -191,6 +286,7 @@ func joinTeam(name string) {
 	teamMainText.SetText(teamMainText.Text + "\n\n<b>Click one of the buttons below to switch your team<b>.")
 
 }
+
 func readResources() {
 	findUserStatement := fmt.Sprintf("SELECT * FROM users WHERE username='%v'", USER)
 

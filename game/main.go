@@ -55,8 +55,7 @@ var mapSVG *svg.SVG
 var comebacks = false
 
 func mainrun() {
-	data() // Connect to data base
-
+	data()        // Connect to data base
 	width := 1024 // pixel sizes of screen
 	height := 768 // pixel sizes of screen
 
@@ -703,7 +702,7 @@ func initMainTabs() {
 	aboutText.SetProp("font-family", "Times New Roman, serif")
 	aboutText.SetProp("text-align", "left")
 	aboutText.Text = "Singularity Showdown is an open source, Strategic 3D Battle Game."
-
+	createBattleJoinLayouts()
 	tv.UpdateEnd(updt)
 }
 
