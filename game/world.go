@@ -26,6 +26,7 @@ type World map[string]*Territory
 type Borders map[string]*Border
 
 var curCountSimulation int
+var stopSimulation = false
 
 var TeamStrength = map[string]float32{
 	"human1": 1,
@@ -120,7 +121,7 @@ func InitStrength() {
 
 func (wr *World) RenderSVGs(sv *svg.SVG) {
 	updt := sv.UpdateStart()
-	fmt.Printf("Update Value: %v \n", updt)
+	// fmt.Printf("Update Value: %v \n", updt)
 	sv.DeleteChildren(true)
 	sv.Norm = true
 	sv.ViewBox.Size.Set(2754, 1398)
@@ -146,6 +147,9 @@ func (bd *Borders) simulateMap(fullSim bool) {
 	// defer simulationTab.UpdateEnd(updt)
 	for i := 0; 1 < 2; i++ {
 		for _, b := range *bd { // do the battles
+			if stopSimulation {
+				return
+			}
 			if b.Owner == "battle" { // if there is a battle to be had, randomly decide the battle
 				randNum := rand.Float32()
 				// fmt.Printf("Team 1 strength: %v Total Strength: %v \n", TeamStrength[FirstWorld[b.Territory1].Owner], (TeamStrength[FirstWorld[b.Territory1].Owner] + TeamStrength[FirstWorld[b.Territory2].Owner]))
@@ -169,7 +173,7 @@ func (bd *Borders) simulateMap(fullSim bool) {
 					TeamStrength[FirstWorld[b.Territory1].Owner] -= 0.5
 					// fmt.Printf("(team2 type) Team %v wins and takes the territory %v \n", winTeam, FirstWorld[b.Territory2].Name)
 				}
-				FirstWorld.RenderSVGs(mapSVG)
+				FirstWorld.RenderSVGs(simMapSVG)
 			}
 
 		}

@@ -464,6 +464,7 @@ func initMainTabs() {
 	simulateButton.Text = "Simulate (Full)"
 	simulateButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
+			stopSimulation = false
 			go FirstWorldBorders.simulateMap(true)
 		}
 	})
@@ -605,6 +606,13 @@ func initMainTabs() {
 			// fmt.Printf("First World: %v Origin: %v \n", FirstWorld["USA"].Color, OriginFirstWorld["USA"].Color)
 			simulateText.SetText("")
 			FirstWorld.RenderSVGs(simMapSVG)
+		}
+	})
+	stopSimulationButton := gi.AddNewButton(simulationBrow, "stopSimulationButton")
+	stopSimulationButton.Text = "Stop Simulation"
+	stopSimulationButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(gi.ButtonClicked) {
+			stopSimulation = true
 		}
 	})
 	simulateText = gi.AddNewLabel(simulationTab, "simulateText", "                                                                            ")

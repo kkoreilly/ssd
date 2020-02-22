@@ -111,7 +111,7 @@ func createBattleJoinLayouts() {
 
 	// updt := homeTab.UpdateStart()
 	// defer homeTab.UpdateEnd(updt)
-	// homeTab.SetFullReRender()
+	homeTab.SetFullReRender()
 	statement := "SELECT * FROM borders"
 	rows, err := db.Query(statement)
 	if err != nil {
