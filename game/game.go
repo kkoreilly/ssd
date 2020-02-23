@@ -54,6 +54,7 @@ var KiT_Scene = kit.Types.AddType(&Scene{}, nil)
 
 func (gm *Game) BuildMap() {
 	for nm, obj := range gm.Map {
+		// fmt.Printf("Object type: %v \n", obj.ObjType)
 		gm.MakeObj(obj, nm)
 	}
 }
@@ -76,10 +77,12 @@ func (gm *Game) MakeObj(obj *MapObj, nm string) *eve.Group {
 	case "FirstPerson":
 		ogp = eve.AddNewGroup(gm.World, nm)
 		gm.PhysMakePerson(ogp, nm)
-
+		rcb = ogp
 	case "OppPerson":
+		// fmt.Printf("Making Opp person \n")
 		ogp = eve.AddNewGroup(gm.World, nm)
 		gm.PhysMakePerson(ogp, nm)
+		// fmt.Printf("Object: %v", ogp)
 	}
 	/*
 		case "Hill":
@@ -294,8 +297,8 @@ func (gm *Game) Config() {
 	// center_bluem :=
 	// cbm.Segs.Set(10, 10, 10) // not clear if any diff really..
 	// fpobj = gm.MakeObj(&MapObj{"FirstPerson", mat32.Vec3{0,0,0}, mat32.Vec3{1,1,1}}, "FirstPerson")
-	rcb = gm.MakeObj(&MapObj{"FirstPerson", mat32.Vec3{0, 0, 10}, mat32.Vec3{1, 1, 1}}, "FirstPerson")
-	gm.World.InitWorld()
+	// rcb = gm.MakeObj(&MapObj{"FirstPerson", mat32.Vec3{0, 0, 10}, mat32.Vec3{1, 1, 1}}, "FirstPerson")
+	// gm.World.InitWorld()
 	// rcb = gi3d.AddNewSolid(&sc.Scene, fpobj, "red-cube", "Person")
 	// rcb.Pose.Pos.Set(0, -1, -8)
 	// // rcb.Pose.Scale.Set(0.1, 0.1, 1)
@@ -345,7 +348,7 @@ func (gm *Game) Config() {
 	gi.FilterLaggyKeyEvents = true // fix key lag
 
 	go getPositions()
-	go updateEnemyPositionGraphics(sc)
+	go updateEnemyPositionGraphics(gm)
 }
 
 func AddNewScene(parent ki.Ki, name string) *Scene {
@@ -353,16 +356,16 @@ func AddNewScene(parent ki.Ki, name string) *Scene {
 	sc.Defaults()
 	return sc
 }
-func updateEnemyPositionGraphics(sc *Scene) {
+func updateEnemyPositionGraphics(gm *Game) {
 	// fmt.Printf("Working 3 \n")
-	// for 1 < 2 {
-	// for _, d := range ThePositions {
-	// 	var opo *gi3d.Solid
-	// 	opo = gi3d.AddNewSolid(&sc.Scene, &sc.Scene, "Person", "Person")
-	// 	opo.Pose.Pos = d.Pos
-	// 	opo.Mat.Color.SetString("blue", nil)
-	// }
-	// }
+	for 1 < 2 {
+		for _, d := range ThePositions {
+			fmt.Printf("Data: %v \n", gm.Map["person_"+d.Username])
+			gm.Map["person_"+d.Username] = &MapObj{"OppPerson", d.Pos, mat32.Vec3{1, 1, 1}}
+			gm.BuildMap()
+			gm.World.InitWorld()
+		}
+	}
 
 	// fmt.Printf("Working 4 \n")
 }
@@ -589,5 +592,7 @@ func (sc *Scene) NavKeyEvents(kt *key.ChordEvent) {
 		obj.UpdateSig()
 		return
 	}
+	rcb.Initial.Pos.X = sc.Camera.Pose.Pos.X
+	rcb.Initial.Pos.Z = sc.Camera.Pose.Pos.Z - 10
 	sc.UpdateSig()
 }
