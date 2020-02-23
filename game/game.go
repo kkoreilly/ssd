@@ -21,6 +21,11 @@ import (
 	"github.com/goki/ki/kit"
 )
 
+type CurPosition struct {
+	Username string
+	Pos      mat32.Vec3
+	Points   int
+}
 type Game struct {
 	World   *eve.Group
 	View    *evev.View
@@ -31,8 +36,12 @@ type Game struct {
 
 // TheGame is the game instance for the current game
 var TheGame *Game
-var rcb *gi3d.Solid
-var fpobj *gi3d.Group
+var rcb *eve.Group
+
+// var fpobj *gi3d.Group
+type CurPositions map[string]*CurPosition
+
+var ThePositions = CurPositions{}
 
 type Scene struct {
 	gi3d.Scene
@@ -64,96 +73,103 @@ func (gm *Game) MakeObj(obj *MapObj, nm string) *eve.Group {
 			house := gm.PhysMakeBrickHouse(ogp, fmt.Sprintf("%v-House%v", nm, i))
 			house.Initial.Pos.Set(float32(20*i), 0, 0)
 		}
-		/*
-			case "Hill":
-					ogp = gi3d.AddNewGroup(sc, sc, nm)
-					o := gi3d.AddNewObject(sc, ogp, "hill", "Hill")
-					o.Pose.Pos.Set(0, 0, 0)
-					// o.Pose.Scale.Set(1, 10, 1)
-					o.Mat.Color.SetString("green", nil)
-				case "House":
-					ogp = gi3d.AddNewGroup(sc, sc, nm)
-					o := gi3d.AddNewObject(sc, ogp, "house_ground", "HouseFloor")
-					o.Pose.Pos.Set(0, 0, 0)
-					// o.Pose.Scale.Set(10, 0.01, 10)
-					o.Mat.Color.SetString("brown", nil)
+	case "FirstPerson":
+		ogp = eve.AddNewGroup(gm.World, nm)
+		gm.PhysMakePerson(ogp, nm)
 
-					o = gi3d.AddNewObject(sc, ogp, "house_roof", "HouseRoof")
-					o.Pose.Pos.Set(0, 4.995, 0)
-					// o.Pose.Scale.Set(10, 0.01, 10)
-					o.Mat.Color.SetString("brown", nil)
-
-					o = gi3d.AddNewObject(sc, ogp, "house_wall1", "HouseWallOne")
-					o.Pose.Pos.Set(-5.25, 0, 0)
-					// o.Pose.Scale.Set(0.5, 10, 10)
-					o.Mat.Color.SetString("brown", nil)
-
-					o = gi3d.AddNewObject(sc, ogp, "house_wall2", "HouseWallOne")
-					o.Pose.Pos.Set(4.75, 0, 0)
-					// o.Pose.Scale.Set(0.5, 10, 10)
-					o.Mat.Color.SetString("brown", nil)
-
-					o = gi3d.AddNewObject(sc, ogp, "house_wall3", "HouseWallTwo")
-					o.Pose.Pos.Set(0, 0, -5)
-					// o.Pose.Scale.Set(10, 10, 0.5)
-					o.Mat.Color.SetString("brown", nil)
-
-					o = gi3d.AddNewObject(sc, ogp, "house_bed1", "HouseBedOne")
-					o.Pose.Pos.Set(-3.5, 0, -4)
-					// o.Mat.Color.SetString("green", nil)
-					o.Mat.SetTextureName(sc, "HouseBed")
-
-					o = gi3d.AddNewObject(sc, ogp, "house_blanket1", "HouseBlanketOne")
-					o.Pose.Pos.Set(-3.5, 1.05, -4)
-					o.Mat.SetTextureName(sc, "HouseBlanket")
-
-					o = gi3d.AddNewObject(sc, ogp, "house_pillow1", "HousePillowOne")
-					o.Pose.Pos.Set(-4.75, 1.15, -4)
-					o.Mat.SetTextureName(sc, "HousePillow")
-
-					o = gi3d.AddNewObject(sc, ogp, "house_couch_base1", "HouseCouchBaseOne")
-					o.Pose.Pos.Set(2, 0, -3.5)
-					o.Mat.SetTextureName(sc, "HouseCouch")
-
-					o = gi3d.AddNewObject(sc, ogp, "house_couch_top1", "HouseCouchTopOne")
-					o.Pose.Pos.Set(2, 1.5, -4.5)
-					o.Mat.SetTextureName(sc, "HouseCouch")
-
-					o = gi3d.AddNewObject(sc, ogp, "house_window1", "HouseWindowOne")
-					o.Pose.Pos.Set(2, 3.5, -4.8)
-					o.Mat.SetTextureName(sc, "HouseWindow")
-
-					o = gi3d.AddNewObject(sc, ogp, "house_window2", "HouseWindowOne")
-					o.Pose.Pos.Set(-3, 3.5, -4.8)
-					o.Mat.SetTextureName(sc, "HouseWindow")
-
-				case "Center_Blue":
-					ogp = gi3d.AddNewGroup(sc, sc, nm)
-					o := gi3d.AddNewObject(sc, ogp, "center_blue", "Center_Blue")
-					o.Pose.Pos.Set(0, 0, 0)
-					o.Mat.Color.SetString("blue", nil)
-				case "Table":
-					ogp = gi3d.AddNewGroup(sc, sc, nm)
-					o := gi3d.AddNewObject(sc, ogp, "table", "Table")
-					o.Pose.Pos.Set(0, 0, 0)
-
-					o.Mat.SetTextureName(sc, "Table")
-				case "BigComplex":
-					ogp = gi3d.AddNewGroup(sc, sc, nm)
-					o := gi3d.AddNewObject(sc, ogp, "bigComplexPlaceholder", "BigComplexPlaceholder")
-					o.Pose.Pos.Set(0, 20, 0)
-					// o.Mat.Color.SetString("red", nil)
-					o.Mat.SetTextureName(sc, "Metal1")
-				case "TestBed":
-					ogp = gi3d.AddNewGroup(sc, sc, nm)
-					err := sc.OpenObj([]string{"bed1.obj"}, ogp)
-					if err != nil {
-						log.Println(err)
-
-					}
-		*/
-
+	case "OppPerson":
+		ogp = eve.AddNewGroup(gm.World, nm)
+		gm.PhysMakePerson(ogp, nm)
 	}
+	/*
+		case "Hill":
+				ogp = gi3d.AddNewGroup(sc, sc, nm)
+				o := gi3d.AddNewObject(sc, ogp, "hill", "Hill")
+				o.Pose.Pos.Set(0, 0, 0)
+				// o.Pose.Scale.Set(1, 10, 1)
+				o.Mat.Color.SetString("green", nil)
+			case "House":
+				ogp = gi3d.AddNewGroup(sc, sc, nm)
+				o := gi3d.AddNewObject(sc, ogp, "house_ground", "HouseFloor")
+				o.Pose.Pos.Set(0, 0, 0)
+				// o.Pose.Scale.Set(10, 0.01, 10)
+				o.Mat.Color.SetString("brown", nil)
+
+				o = gi3d.AddNewObject(sc, ogp, "house_roof", "HouseRoof")
+				o.Pose.Pos.Set(0, 4.995, 0)
+				// o.Pose.Scale.Set(10, 0.01, 10)
+				o.Mat.Color.SetString("brown", nil)
+
+				o = gi3d.AddNewObject(sc, ogp, "house_wall1", "HouseWallOne")
+				o.Pose.Pos.Set(-5.25, 0, 0)
+				// o.Pose.Scale.Set(0.5, 10, 10)
+				o.Mat.Color.SetString("brown", nil)
+
+				o = gi3d.AddNewObject(sc, ogp, "house_wall2", "HouseWallOne")
+				o.Pose.Pos.Set(4.75, 0, 0)
+				// o.Pose.Scale.Set(0.5, 10, 10)
+				o.Mat.Color.SetString("brown", nil)
+
+				o = gi3d.AddNewObject(sc, ogp, "house_wall3", "HouseWallTwo")
+				o.Pose.Pos.Set(0, 0, -5)
+				// o.Pose.Scale.Set(10, 10, 0.5)
+				o.Mat.Color.SetString("brown", nil)
+
+				o = gi3d.AddNewObject(sc, ogp, "house_bed1", "HouseBedOne")
+				o.Pose.Pos.Set(-3.5, 0, -4)
+				// o.Mat.Color.SetString("green", nil)
+				o.Mat.SetTextureName(sc, "HouseBed")
+
+				o = gi3d.AddNewObject(sc, ogp, "house_blanket1", "HouseBlanketOne")
+				o.Pose.Pos.Set(-3.5, 1.05, -4)
+				o.Mat.SetTextureName(sc, "HouseBlanket")
+
+				o = gi3d.AddNewObject(sc, ogp, "house_pillow1", "HousePillowOne")
+				o.Pose.Pos.Set(-4.75, 1.15, -4)
+				o.Mat.SetTextureName(sc, "HousePillow")
+
+				o = gi3d.AddNewObject(sc, ogp, "house_couch_base1", "HouseCouchBaseOne")
+				o.Pose.Pos.Set(2, 0, -3.5)
+				o.Mat.SetTextureName(sc, "HouseCouch")
+
+				o = gi3d.AddNewObject(sc, ogp, "house_couch_top1", "HouseCouchTopOne")
+				o.Pose.Pos.Set(2, 1.5, -4.5)
+				o.Mat.SetTextureName(sc, "HouseCouch")
+
+				o = gi3d.AddNewObject(sc, ogp, "house_window1", "HouseWindowOne")
+				o.Pose.Pos.Set(2, 3.5, -4.8)
+				o.Mat.SetTextureName(sc, "HouseWindow")
+
+				o = gi3d.AddNewObject(sc, ogp, "house_window2", "HouseWindowOne")
+				o.Pose.Pos.Set(-3, 3.5, -4.8)
+				o.Mat.SetTextureName(sc, "HouseWindow")
+
+			case "Center_Blue":
+				ogp = gi3d.AddNewGroup(sc, sc, nm)
+				o := gi3d.AddNewObject(sc, ogp, "center_blue", "Center_Blue")
+				o.Pose.Pos.Set(0, 0, 0)
+				o.Mat.Color.SetString("blue", nil)
+			case "Table":
+				ogp = gi3d.AddNewGroup(sc, sc, nm)
+				o := gi3d.AddNewObject(sc, ogp, "table", "Table")
+				o.Pose.Pos.Set(0, 0, 0)
+
+				o.Mat.SetTextureName(sc, "Table")
+			case "BigComplex":
+				ogp = gi3d.AddNewGroup(sc, sc, nm)
+				o := gi3d.AddNewObject(sc, ogp, "bigComplexPlaceholder", "BigComplexPlaceholder")
+				o.Pose.Pos.Set(0, 20, 0)
+				// o.Mat.Color.SetString("red", nil)
+				o.Mat.SetTextureName(sc, "Metal1")
+			case "TestBed":
+				ogp = gi3d.AddNewGroup(sc, sc, nm)
+				err := sc.OpenObj([]string{"bed1.obj"}, ogp)
+				if err != nil {
+					log.Println(err)
+
+				}
+	*/
+
 	if ogp != nil {
 		ogp.Initial.Pos = obj.Pos
 		// ogp.Initial.Scale = obj.Scale
@@ -166,6 +182,7 @@ func (gm *Game) MakeObj(obj *MapObj, nm string) *eve.Group {
 func (gm *Game) MakeLibrary() {
 	gm.LibMakeBrickHouse()
 	gm.LibMakeTheWall()
+	gm.LibMakePerson()
 }
 
 func (gm *Game) MakeMeshes() {
@@ -215,7 +232,7 @@ func (gm *Game) MakeView() {
 	gm.MakeMeshes()
 	wgp := gi3d.AddNewGroup(sc, sc, "world")
 	gm.View = evev.NewView(gm.World, sc, wgp)
-	//gm.View.InitLibrary() // this makes a basic library based on body shapes, sizes
+	// gm.View.InitLibrary() // this makes a basic library based on body shapes, sizes
 	gm.MakeLibrary()
 	gm.View.Sync()
 }
@@ -276,12 +293,13 @@ func (gm *Game) Config() {
 
 	// center_bluem :=
 	// cbm.Segs.Set(10, 10, 10) // not clear if any diff really..
-
-	fpobj = gi3d.AddNewGroup(&sc.Scene, &sc.Scene, "TrackCamera")
-	rcb = gi3d.AddNewSolid(&sc.Scene, fpobj, "red-cube", "Person")
-	rcb.Pose.Pos.Set(0, -1, -8)
-	// rcb.Pose.Scale.Set(0.1, 0.1, 1)
-	rcb.Mat.Color.SetString("red", nil)
+	// fpobj = gm.MakeObj(&MapObj{"FirstPerson", mat32.Vec3{0,0,0}, mat32.Vec3{1,1,1}}, "FirstPerson")
+	rcb = gm.MakeObj(&MapObj{"FirstPerson", mat32.Vec3{0, 0, 10}, mat32.Vec3{1, 1, 1}}, "FirstPerson")
+	gm.World.InitWorld()
+	// rcb = gi3d.AddNewSolid(&sc.Scene, fpobj, "red-cube", "Person")
+	// rcb.Pose.Pos.Set(0, -1, -8)
+	// // rcb.Pose.Scale.Set(0.1, 0.1, 1)
+	// rcb.Mat.Color.SetString("red", nil)
 
 	// center_blue := sc.AddNewObject("center_blue", center_bluem.Name())
 	// center_blue.Pose.Pos.Set(0, 0, 0)
@@ -327,6 +345,7 @@ func (gm *Game) Config() {
 	gi.FilterLaggyKeyEvents = true // fix key lag
 
 	go getPositions()
+	go updateEnemyPositionGraphics(sc)
 }
 
 func AddNewScene(parent ki.Ki, name string) *Scene {
@@ -334,13 +353,17 @@ func AddNewScene(parent ki.Ki, name string) *Scene {
 	sc.Defaults()
 	return sc
 }
-func makeOtherPlayer(posX, posY, posZ float32) {
+func updateEnemyPositionGraphics(sc *Scene) {
 	// fmt.Printf("Working 3 \n")
-	sc := &TheGame.Scene.Scene
-	var opo *gi3d.Solid
-	opo = gi3d.AddNewSolid(sc, sc, "Person", "Person")
-	opo.Pose.Pos.Set(posX, posY, posZ)
-	opo.Mat.Color.SetString("blue", nil)
+	// for 1 < 2 {
+	// for _, d := range ThePositions {
+	// 	var opo *gi3d.Solid
+	// 	opo = gi3d.AddNewSolid(&sc.Scene, &sc.Scene, "Person", "Person")
+	// 	opo.Pose.Pos = d.Pos
+	// 	opo.Mat.Color.SetString("blue", nil)
+	// }
+	// }
+
 	// fmt.Printf("Working 4 \n")
 }
 func (sc *Scene) Render2D() {
@@ -544,21 +567,21 @@ func (sc *Scene) NavKeyEvents(kt *key.ChordEvent) {
 		sc.Camera.Pose.MoveOnAxis(0, 0, -0.5, .5)
 		kt.SetProcessed()
 		sc.Camera.Pose.Pos.Y = y
-		go updatePosition("posZ", rcb.Pose.Pos.Z+fpobj.Pose.Pos.Z)
+		go updatePosition("posZ", rcb.Initial.Pos.Z)
 	case "s":
 		y := sc.Camera.Pose.Pos.Y
 		sc.Camera.Pose.MoveOnAxis(0, 0, 0.5, .5)
 		kt.SetProcessed()
 		sc.Camera.Pose.Pos.Y = y
-		go updatePosition("posZ", rcb.Pose.Pos.Z+fpobj.Pose.Pos.Z)
+		go updatePosition("posZ", rcb.Initial.Pos.Z)
 	case "a":
 		sc.Camera.Pan(panDel, 0)
 		kt.SetProcessed()
-		go updatePosition("posX", rcb.Pose.Pos.X+fpobj.Pose.Pos.X)
+		go updatePosition("posX", rcb.Initial.Pos.X)
 	case "d":
 		sc.Camera.Pan(-panDel, 0)
 		kt.SetProcessed()
-		go updatePosition("posX", rcb.Pose.Pos.X+fpobj.Pose.Pos.X)
+		go updatePosition("posX", rcb.Initial.Pos.X)
 	case "t":
 		kt.SetProcessed()
 		obj := sc.Child(0).(*gi3d.Solid)

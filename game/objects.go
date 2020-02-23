@@ -6,7 +6,7 @@ package main
 
 import (
 	"log"
-
+	// "fmt"
 	"github.com/emer/eve/eve"
 	"github.com/goki/gi/gi3d"
 	"github.com/goki/gi/mat32"
@@ -16,6 +16,14 @@ import (
 
 // PhysMakeBrickHouse makes the EVE physics version of house
 // in par = parent group.
+func (gm *Game) PhysMakePerson(par *eve.Group, name string) *eve.Group {
+	// fmt.Printf("Making person \n")
+	pgroup := eve.AddNewGroup(par, name)
+	person := eve.AddNewBox(pgroup, "person", mat32.Vec3{0.25, 1, 0.25}, mat32.Vec3{0.5, 2, 0.5})
+	person.Color = "blue" // for debugging
+	person.Vis = "Person"
+	return pgroup
+}
 func (gm *Game) PhysMakeBrickHouse(par *eve.Group, name string) *eve.Group {
 	width := float32(15)
 	depth := float32(15)
@@ -139,6 +147,15 @@ func (gm *Game) LibMakeItemSpawner() {
 	// isws.Mat.Color.SetName("black")
 	gi3d.AddNewTextureFile(sc, "spawner", "objs/spawner.png")
 	isws.Mat.Texture = gi3d.TexName("spawner")
+}
+
+func (gm *Game) LibMakePerson() {
+	sc := &gm.Scene.Scene
+	pnm := "Person"
+	pwg := sc.NewInLibrary(pnm)
+	pwm := gi3d.AddNewBox(sc, pnm, 0.5, 2, 0.5)
+	pws := gi3d.AddNewSolid(sc, pwg, pnm, pwm.Name())
+	pws.Mat.Color.SetName("blue")
 }
 
 func (gm *Game) LibMakeBrickDoorWall() {

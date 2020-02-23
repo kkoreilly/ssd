@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/mat32"
 	"github.com/goki/ki/ki"
 	_ "github.com/lib/pq"
 )
@@ -333,7 +334,8 @@ func getPositions() {
 			var posX, posY, posZ float32
 			var points int
 			rows.Scan(&username, &posX, &posY, &posZ, &battleName, &points)
-			go makeOtherPlayer(posX, posY, posZ)
+			ThePositions[username] = &CurPosition{username, mat32.Vec3{posX, posY, posZ}, points}
+			// fmt.Printf("Username: %v   Position: %v    Points: %v \n", ThePositions[username].Username, ThePositions[username].Pos, ThePositions[username].Points)
 		}
 	}
 }
