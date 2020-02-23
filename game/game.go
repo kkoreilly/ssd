@@ -37,11 +37,12 @@ type Game struct {
 // TheGame is the game instance for the current game
 var TheGame *Game
 var rcb *eve.Group
+var PeopleGroup *eve.Group
 
 // var fpobj *gi3d.Group
-type CurPositions map[string]*CurPosition
+// type CurPositions map[string]*CurPosition
 
-var ThePositions = CurPositions{}
+var ThePositions = make(map[string]*CurPosition)
 
 type Scene struct {
 	gi3d.Scene
@@ -269,6 +270,7 @@ func (gm *Game) Config() {
 	gm.MakeWorld()
 
 	gm.MakeView()
+
 	gi.AddNewSpace(gamerow, "space1")
 
 	brow := gi.AddNewLayout(playTab, "brow", gi.LayoutHoriz)
@@ -290,6 +292,7 @@ func (gm *Game) Config() {
 			tabIndex, _ := tv.TabIndexByName("<b>Game</b>")
 			tv.DeleteTabIndex(tabIndex, true)
 			tv.SelectTabIndex(0)
+			gameOpen = false
 			go removePlayer()
 		}
 	})
@@ -358,13 +361,19 @@ func AddNewScene(parent ki.Ki, name string) *Scene {
 }
 func updateEnemyPositionGraphics(gm *Game) {
 	// fmt.Printf("Working 3 \n")
-	for 1 < 2 {
+	PeopleGroup = eve.AddNewGroup(gm.World, "PeopleGroup")
+	// fmt.Printf("People Group: %v \n", PeopleGroup)
+	for gameOpen {
 		for _, d := range ThePositions {
-			fmt.Printf("Data: %v \n", gm.Map["person_"+d.Username])
-			gm.Map["person_"+d.Username] = &MapObj{"OppPerson", d.Pos, mat32.Vec3{1, 1, 1}}
-			gm.BuildMap()
-			gm.World.InitWorld()
+			// fmt.Printf("Data: %v \n", gm.Map["person_"+d.Username])
+			// gm.Map["person_"+d.Username] = &MapObj{"OppPerson", d.Pos, mat32.Vec3{1, 1, 1}}
+			// fmt.Printf("People Group 2: %v \n", PeopleGroup)
+			// fmt.Printf("Username: %v \n", d.Username)
+			npg := gm.PhysMakePerson(PeopleGroup, d.Username)
+			npg.Abs.Pos = d.Pos
 		}
+		fmt.Printf("World: %v \n", gm.World)
+		// gm.World.InitWorld()
 	}
 
 	// fmt.Printf("Working 4 \n")
@@ -592,7 +601,9 @@ func (sc *Scene) NavKeyEvents(kt *key.ChordEvent) {
 		obj.UpdateSig()
 		return
 	}
-	rcb.Initial.Pos.X = sc.Camera.Pose.Pos.X
-	rcb.Initial.Pos.Z = sc.Camera.Pose.Pos.Z - 10
+	// updt := sc.UpdateStart()
+	rcb.Abs.Pos.X = sc.Camera.Pose.Pos.X
+	rcb.Abs.Pos.Z = sc.Camera.Pose.Pos.Z - 10
+	// sc.UpdateEnd(updt)
 	sc.UpdateSig()
 }

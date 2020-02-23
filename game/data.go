@@ -25,6 +25,7 @@ var LIVES int
 var TEAM string
 var goldNum int
 var livesNum int
+var gameOpen = true
 
 func data() {
 	var str string
@@ -320,7 +321,7 @@ func joinTeam(name string) {
 }
 
 func getPositions() {
-	for 1 < 2 {
+	for gameOpen {
 		// fmt.Printf("Working 1 \n")
 		getStatement := "SELECT * FROM players"
 		rows, err := db.Query(getStatement)
