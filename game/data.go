@@ -7,7 +7,7 @@ import (
 	"database/sql"
 	"fmt"
 	"io/ioutil"
-	"math/rand"
+	// "math/rand"
 	"os"
 	"path/filepath"
 	"strings"
@@ -341,9 +341,9 @@ func (gm *Game) GetPosFromServer() {
 			}
 		}
 		time.Sleep(1 * time.Second)
-		gm.OtherPos["testyother"] = &CurPosition{"testyother", mat32.Vec3{rand.Float32()*5 - 2.5, 1, rand.Float32()*5 - 2.5}, 50}
-		gm.PosMu.Unlock()
-		gm.PosUpdtChan <- true // tells UpdatePeopleWorldPos to update to new positions!
+		// gm.OtherPos["testyother"] = &CurPosition{"testyother", mat32.Vec3{rand.Float32()*5 - 2.5, 1, rand.Float32()*5 - 2.5}, 50}
+		// gm.PosMu.Unlock()
+		// gm.PosUpdtChan <- true // tells UpdatePeopleWorldPos to update to new positions!
 		// todo: don't know from sender perspective if channel is still open!
 		// if !ok {
 		// 	return // game over
@@ -409,9 +409,15 @@ func readWorld() {
 		tr.Color = color
 	}
 }
-func updatePosition(axis string, value float32) {
-	statement := fmt.Sprintf("UPDATE players SET %v = '%v' WHERE username='%v'", axis, value, USER)
+func updatePosition(t string, value mat32.Vec3) {
+	statement := fmt.Sprintf("UPDATE players SET posX = '%v' WHERE username='%v'", value.X, USER)
 	_, err := db.Exec(statement)
+	if err != nil {
+		panic(err)
+	}
+
+	statement2 := fmt.Sprintf("UPDATE players SET posZ = '%v' WHERE username='%v'", value.X, USER)
+	_, err = db.Exec(statement2)
 	if err != nil {
 		panic(err)
 	}

@@ -641,7 +641,7 @@ func (sc *Scene) NavKeyEvents(kt *key.ChordEvent) {
 	}
 
 	gm.World.UpdateWorld()
-	// go updatePosition("pos", pers.Abs.Pos) // this was updated from UpdateWorld
+	go updatePosition("pos", pers.Abs.Pos) // this was updated from UpdateWorld
 	sc.Camera.Pose.Pos = pers.Abs.Pos.Add(camOff)
 	gm.World.UpdateEnd(wupdt)
 	gm.View.UpdatePose()
