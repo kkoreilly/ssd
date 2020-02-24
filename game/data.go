@@ -336,14 +336,17 @@ func (gm *Game) GetPosFromServer() {
 			var posX, posY, posZ float32
 			var points int
 			rows.Scan(&username, &posX, &posY, &posZ, &battleName, &points)
+			// fmt.Printf("Username: %v \n", username)
+			// fmt.Printf("User: %v \n", USER)
 			if username != USER {
 				gm.OtherPos[username] = &CurPosition{username, mat32.Vec3{posX, posY, posZ}, points}
+				// fmt.Printf("Other Pos: %v \n", gm.OtherPos[username])
 			}
 		}
-		time.Sleep(1 * time.Second)
+		time.Sleep(100 * time.Millisecond)
 		// gm.OtherPos["testyother"] = &CurPosition{"testyother", mat32.Vec3{rand.Float32()*5 - 2.5, 1, rand.Float32()*5 - 2.5}, 50}
-		// gm.PosMu.Unlock()
-		// gm.PosUpdtChan <- true // tells UpdatePeopleWorldPos to update to new positions!
+		gm.PosMu.Unlock()
+		gm.PosUpdtChan <- true // tells UpdatePeopleWorldPos to update to new positions!
 		// todo: don't know from sender perspective if channel is still open!
 		// if !ok {
 		// 	return // game over
