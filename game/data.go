@@ -11,7 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
+	// "time"
 
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/mat32"
