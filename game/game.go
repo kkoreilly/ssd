@@ -6,6 +6,7 @@ package main
 
 import (
 	"fmt"
+	"sort"
 	"sync"
 
 	"github.com/emer/eve/eve"
@@ -29,14 +30,15 @@ type CurPosition struct {
 }
 
 type Game struct {
-	World    *eve.Group
-	View     *evev.View
-	Scene    *Scene
-	Map      Map
-	MapObjs  map[string]bool
-	OtherPos map[string]*CurPosition
-	PosMu    sync.Mutex `desc:"protects updates to OtherPos map"`
-	WorldMu  sync.Mutex `desc:"protects updates to World physics and view"`
+	World       *eve.Group
+	View        *evev.View
+	Scene       *Scene
+	Map         Map
+	MapObjs     map[string]bool
+	OtherPos    map[string]*CurPosition
+	PosUpdtChan chan bool  `desc:"channel connecting server pos updates with world state update"`
+	PosMu       sync.Mutex `desc:"protects updates to OtherPos map"`
+	WorldMu     sync.Mutex `desc:"protects updates to World physics and view"`
 }
 
 // TheGame is the game instance for the current game
@@ -344,8 +346,12 @@ func (gm *Game) Config() {
 
 	gi.FilterLaggyKeyEvents = true // fix key lag
 
-	// go getPositions()
-	// go updateEnemyPositionGraphics(gm)
+	gm.PosUpdtChan = make(chan bool) // todo: close channel when ending game, will terminate goroutines
+
+	gm.OtherPos = make(map[string]*CurPosition)
+
+	go gm.GetPosFromServer()     // this is loop getting positions from server
+	go gm.UpdatePeopleWorldPos() // this is loop updating positions
 }
 
 func AddNewScene(parent ki.Ki, name string) *Scene {
@@ -354,25 +360,52 @@ func AddNewScene(parent ki.Ki, name string) *Scene {
 	return sc
 }
 
-/*
-func updateEnemyPositionGraphics(gm *Game) {
-	// fmt.Printf("People Group: %v \n", PeopleGroup)
-	for gameOpen {
-		for _, d := range ThePositions {
-			// fmt.Printf("Data: %v \n", gm.Map["person_"+d.Username])
-			// gm.Map["person_"+d.Username] = &MapObj{"OppPerson", d.Pos, mat32.Vec3{1, 1, 1}}
-			// fmt.Printf("People Group 2: %v \n", PeopleGroup)
-			// fmt.Printf("Username: %v \n", d.Username)
-			npg := gm.PhysMakePerson(PeopleGroup, d.Username)
-			npg.Abs.Pos = d.Pos
+func (gm *Game) UpdatePeopleWorldPos() {
+	pGp := gm.World.ChildByName("PeopleGroup", 0).(*eve.Group)
+	for {
+		_, ok := <-gm.PosUpdtChan // we wait here to receive channel message sent when positions have been updated
+		if !ok {                  // this means channel was closed, we need to bail, game over!
+			return
 		}
-		fmt.Printf("World: %v \n", gm.World)
-		// gm.World.InitWorld()
+		gm.PosMu.Lock()
+		gm.WorldMu.Lock()
+		keys := make([]string, len(gm.OtherPos))
+		ctr := 0
+		for k, _ := range gm.OtherPos {
+			keys[ctr] = k
+			ctr++
+		}
+		sort.Strings(keys) // it is "key" to have others in same order so if there are no changes, nothing happens
+		config := kit.TypeAndNameList{}
+		for _, k := range keys {
+			config.Add(eve.KiT_Group, k)
+		}
+		mods, updt := pGp.ConfigChildren(config, ki.NonUniqueNames)
+		if !mods {
+			updt = pGp.UpdateStart() // updt is automatically set if mods = true, so we're just doing it here
+		}
+		// now, the children of pGp are the keys of OtherPos in order
+		for i, k := range keys {
+			ppos := gm.OtherPos[k]
+			pers := pGp.Child(i).(*eve.Group) // this is guaranteed to be for person "k"
+			if !pers.HasChildren() {          // if has not already been made
+				gm.PhysMakePerson(pers, k) // make
+			}
+			pers.Rel.Pos = ppos.Pos
+		}
+		gm.PosMu.Unlock()
+		// so now everyone's updated
+		gm.World.UpdateWorld()
+		pGp.UpdateEnd(updt)
+		if mods {
+			gm.View.Sync() // if something was created or destroyed, it must use Sync to update Scene
+		} else {
+			gm.View.UpdatePose() // UpdatePose is much faster and assumes no changes in objects
+		}
+		gm.WorldMu.Unlock()
+		gm.Scene.UpdateSig()
 	}
-
-	// fmt.Printf("Working 4 \n")
 }
-*/
 
 func (sc *Scene) Render2D() {
 	if sc.PushBounds() {

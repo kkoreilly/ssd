@@ -7,11 +7,14 @@ import (
 	"database/sql"
 	"fmt"
 	"io/ioutil"
+	"math/rand"
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/goki/gi/gi"
+	"github.com/goki/gi/mat32"
 	"github.com/goki/ki/ki"
 	_ "github.com/lib/pq"
 )
@@ -319,24 +322,32 @@ func joinTeam(name string) {
 
 }
 
-func getPositions() {
-	for gameOpen {
+func (gm *Game) GetPosFromServer() {
+	for {
 		// fmt.Printf("Working 1 \n")
 		getStatement := "SELECT * FROM players"
 		rows, err := db.Query(getStatement)
-
 		if err != nil {
 			panic(err)
 		}
+		gm.PosMu.Lock()
 		for rows.Next() {
-			// fmt.Printf("Working 2 \n")
 			var username, battleName string
 			var posX, posY, posZ float32
 			var points int
 			rows.Scan(&username, &posX, &posY, &posZ, &battleName, &points)
-			// ThePositions[username] = &CurPosition{username, mat32.Vec3{posX, posY, posZ}, points}
-			// fmt.Printf("Username: %v   Position: %v    Points: %v \n", ThePositions[username].Username, ThePositions[username].Pos, ThePositions[username].Points)
+			if username != USER {
+				gm.OtherPos[username] = &CurPosition{username, mat32.Vec3{posX, posY, posZ}, points}
+			}
 		}
+		time.Sleep(1 * time.Second)
+		gm.OtherPos["testyother"] = &CurPosition{"testyother", mat32.Vec3{rand.Float32()*5 - 2.5, 1, rand.Float32()*5 - 2.5}, 50}
+		gm.PosMu.Unlock()
+		gm.PosUpdtChan <- true // tells UpdatePeopleWorldPos to update to new positions!
+		// todo: don't know from sender perspective if channel is still open!
+		// if !ok {
+		// 	return // game over
+		// }
 	}
 }
 

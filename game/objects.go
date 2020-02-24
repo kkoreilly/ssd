@@ -18,7 +18,7 @@ import (
 // in par = parent group.
 func (gm *Game) PhysMakePerson(par *eve.Group, name string) *eve.Group {
 	// fmt.Printf("Making person \n")
-	pgroup := eve.AddNewGroup(par, name)
+	pgroup := eve.AddNewGroup(par, name) // note: this is probably redundant
 	person := eve.AddNewBox(pgroup, "person", mat32.Vec3{0, 0, 0}, mat32.Vec3{0.5, 2, 0.5})
 	person.Color = "blue" // for debugging
 	person.Vis = "Person"
