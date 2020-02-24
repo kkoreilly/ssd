@@ -6,6 +6,7 @@ package main
 
 import (
 	"fmt"
+	"sync"
 
 	"github.com/emer/eve/eve"
 	"github.com/emer/eve/evev"
@@ -26,23 +27,20 @@ type CurPosition struct {
 	Pos      mat32.Vec3
 	Points   int
 }
+
 type Game struct {
-	World   *eve.Group
-	View    *evev.View
-	Scene   *Scene
-	Map     Map
-	MapObjs map[string]bool
+	World    *eve.Group
+	View     *evev.View
+	Scene    *Scene
+	Map      Map
+	MapObjs  map[string]bool
+	OtherPos map[string]*CurPosition
+	PosMu    sync.Mutex `desc:"protects updates to OtherPos map"`
+	WorldMu  sync.Mutex `desc:"protects updates to World physics and view"`
 }
 
 // TheGame is the game instance for the current game
 var TheGame *Game
-var rcb *eve.Group
-var PeopleGroup *eve.Group
-
-// var fpobj *gi3d.Group
-// type CurPositions map[string]*CurPosition
-
-var ThePositions = make(map[string]*CurPosition)
 
 type Scene struct {
 	gi3d.Scene
@@ -54,6 +52,11 @@ type Scene struct {
 var KiT_Scene = kit.Types.AddType(&Scene{}, nil)
 
 func (gm *Game) BuildMap() {
+	ogp := eve.AddNewGroup(gm.World, "FirstPerson")
+	gm.PhysMakePerson(ogp, "FirstPerson")
+	ogp.Initial.Pos.Set(0.25, 1, 10.25)
+
+	eve.AddNewGroup(gm.World, "PeopleGroup")
 	for nm, obj := range gm.Map {
 		// fmt.Printf("Object type: %v \n", obj.ObjType)
 		gm.MakeObj(obj, nm)
@@ -75,15 +78,6 @@ func (gm *Game) MakeObj(obj *MapObj, nm string) *eve.Group {
 			house := gm.PhysMakeBrickHouse(ogp, fmt.Sprintf("%v-House%v", nm, i))
 			house.Initial.Pos.Set(float32(20*i), 0, 0)
 		}
-	case "FirstPerson":
-		ogp = eve.AddNewGroup(gm.World, nm)
-		gm.PhysMakePerson(ogp, nm)
-		rcb = ogp
-	case "OppPerson":
-		// fmt.Printf("Making Opp person \n")
-		ogp = eve.AddNewGroup(gm.World, nm)
-		gm.PhysMakePerson(ogp, nm)
-		// fmt.Printf("Object: %v", ogp)
 	}
 	/*
 		case "Hill":
@@ -350,8 +344,8 @@ func (gm *Game) Config() {
 
 	gi.FilterLaggyKeyEvents = true // fix key lag
 
-	go getPositions()
-	go updateEnemyPositionGraphics(gm)
+	// go getPositions()
+	// go updateEnemyPositionGraphics(gm)
 }
 
 func AddNewScene(parent ki.Ki, name string) *Scene {
@@ -359,9 +353,9 @@ func AddNewScene(parent ki.Ki, name string) *Scene {
 	sc.Defaults()
 	return sc
 }
+
+/*
 func updateEnemyPositionGraphics(gm *Game) {
-	// fmt.Printf("Working 3 \n")
-	PeopleGroup = eve.AddNewGroup(gm.World, "PeopleGroup")
 	// fmt.Printf("People Group: %v \n", PeopleGroup)
 	for gameOpen {
 		for _, d := range ThePositions {
@@ -378,6 +372,8 @@ func updateEnemyPositionGraphics(gm *Game) {
 
 	// fmt.Printf("Working 4 \n")
 }
+*/
+
 func (sc *Scene) Render2D() {
 	if sc.PushBounds() {
 		if !sc.NoNav {
@@ -495,8 +491,19 @@ func (sc *Scene) NavKeyEvents(kt *key.ChordEvent) {
 	ch := string(kt.Chord())
 	// fmt.Printf(ch)
 	// orbDeg := float32(5)
-	panDel := float32(.1)
+	// panDel := float32(.1)
 	// zoomPct := float32(.05)
+
+	gm := TheGame
+	gm.WorldMu.Lock()
+	defer gm.WorldMu.Unlock()
+
+	wupdt := gm.World.UpdateStart()
+
+	pers := gm.World.ChildByName("FirstPerson", 0).(*eve.Group)
+	camOff := sc.Camera.Pose.Pos.Sub(pers.Abs.Pos) // currrent offset of camera vs. person
+	// todo: get current camera axis-angle
+
 	switch ch {
 	case "Escape":
 		sc.TrackMouse = !sc.TrackMouse
@@ -570,40 +577,40 @@ func (sc *Scene) NavKeyEvents(kt *key.ChordEvent) {
 	// 	sc.Camera.Zoom(zoomPct)
 	// 	kt.SetProcessed()
 	case " ":
-		err := sc.SetCamera("default")
-		if err != nil {
-			sc.Camera.DefaultPose()
-		}
+		pers.Rel.Pos.Set(0, 1, 0)
+		pers.Rel.Quat.SetFromAxisAngle(mat32.Vec3{0, 1, 0}, 0)
 	case "w":
-		y := sc.Camera.Pose.Pos.Y
-		sc.Camera.Pose.MoveOnAxis(0, 0, -0.5, .5)
 		kt.SetProcessed()
-		sc.Camera.Pose.Pos.Y = y
-		go updatePosition("posZ", rcb.Initial.Pos.Z)
+		y := pers.Rel.Pos.Y               // keep height fixed -- no jumping right now.
+		pers.Rel.MoveOnAxis(0, 0, -1, .5) // todo: use camera axis not fixed axis
+		pers.Rel.Pos.Y = y
 	case "s":
-		y := sc.Camera.Pose.Pos.Y
-		sc.Camera.Pose.MoveOnAxis(0, 0, 0.5, .5)
 		kt.SetProcessed()
-		sc.Camera.Pose.Pos.Y = y
-		go updatePosition("posZ", rcb.Initial.Pos.Z)
+		y := pers.Rel.Pos.Y // keep height fixed -- no jumping right now.
+		pers.Rel.MoveOnAxis(0, 0, 1, .5)
+		pers.Rel.Pos.Y = y
 	case "a":
-		sc.Camera.Pan(panDel, 0)
 		kt.SetProcessed()
-		go updatePosition("posX", rcb.Initial.Pos.X)
+		y := pers.Rel.Pos.Y // keep height fixed -- no jumping right now.
+		pers.Rel.MoveOnAxis(-1, 0, 0, .5)
+		pers.Rel.Pos.Y = y
+		// sc.Camera.Pan(panDel, 0)
+		// kt.SetProcessed()
+		// go updatePosition("posX", rcb.Initial.Pos.X)
 	case "d":
-		sc.Camera.Pan(-panDel, 0)
 		kt.SetProcessed()
-		go updatePosition("posX", rcb.Initial.Pos.X)
-	case "t":
-		kt.SetProcessed()
-		obj := sc.Child(0).(*gi3d.Solid)
-		fmt.Printf("updated obj: %v\n", obj.PathUnique())
-		obj.UpdateSig()
-		return
+		y := pers.Rel.Pos.Y // keep height fixed -- no jumping right now.
+		pers.Rel.MoveOnAxis(1, 0, 0, .5)
+		pers.Rel.Pos.Y = y
+		// sc.Camera.Pan(-panDel, 0)
+		// kt.SetProcessed()
+		// go updatePosition("posX", rcb.Initial.Pos.X)
 	}
-	// updt := sc.UpdateStart()
-	rcb.Abs.Pos.X = sc.Camera.Pose.Pos.X
-	rcb.Abs.Pos.Z = sc.Camera.Pose.Pos.Z - 10
-	// sc.UpdateEnd(updt)
+
+	gm.World.UpdateWorld()
+	// go updatePosition("pos", pers.Abs.Pos) // this was updated from UpdateWorld
+	sc.Camera.Pose.Pos = pers.Abs.Pos.Add(camOff)
+	gm.World.UpdateEnd(wupdt)
+	gm.View.UpdatePose()
 	sc.UpdateSig()
 }

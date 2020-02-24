@@ -19,11 +19,12 @@ import (
 func (gm *Game) PhysMakePerson(par *eve.Group, name string) *eve.Group {
 	// fmt.Printf("Making person \n")
 	pgroup := eve.AddNewGroup(par, name)
-	person := eve.AddNewBox(pgroup, "person", mat32.Vec3{0.25, 1, 0.25}, mat32.Vec3{0.5, 2, 0.5})
+	person := eve.AddNewBox(pgroup, "person", mat32.Vec3{0, 0, 0}, mat32.Vec3{0.5, 2, 0.5})
 	person.Color = "blue" // for debugging
 	person.Vis = "Person"
 	return pgroup
 }
+
 func (gm *Game) PhysMakeBrickHouse(par *eve.Group, name string) *eve.Group {
 	width := float32(15)
 	depth := float32(15)

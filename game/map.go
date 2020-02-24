@@ -21,9 +21,8 @@ var FirstMap = Map{
 	// "House1":    {"House", mat32.Vec3{10, 0, -40}, DefScale},
 	// "House1": {"House", mat32.Vec3{0, 0, -10}, DefScale},
 	// "House2": {"House", mat32.Vec3{20, 0, -10}, DefScale},
-	"Block1":      {"Block", mat32.Vec3{-80, 0, -10}, DefScale},
-	"TheWall1":    {"TheWall", mat32.Vec3{0, 0, 0}, DefScale},
-	"FirstPerson": {"FirstPerson", mat32.Vec3{0, 0, 0}, DefScale},
+	"Block1":   {"Block", mat32.Vec3{-80, 0, -10}, DefScale},
+	"TheWall1": {"TheWall", mat32.Vec3{0, 0, 0}, DefScale},
 }
 
 var SecondMap = Map{
