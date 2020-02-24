@@ -343,7 +343,7 @@ func (gm *Game) GetPosFromServer() {
 				// fmt.Printf("Other Pos: %v \n", gm.OtherPos[username])
 			}
 		}
-		time.Sleep(100 * time.Millisecond)
+		// time.Sleep(100 * time.Millisecond)
 		// gm.OtherPos["testyother"] = &CurPosition{"testyother", mat32.Vec3{rand.Float32()*5 - 2.5, 1, rand.Float32()*5 - 2.5}, 50}
 		gm.PosMu.Unlock()
 		gm.PosUpdtChan <- true // tells UpdatePeopleWorldPos to update to new positions!
