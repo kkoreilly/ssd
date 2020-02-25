@@ -392,6 +392,11 @@ func (gm *Game) UpdatePeopleWorldPos() {
 			pers := pGp.Child(i).(*eve.Group) // this is guaranteed to be for person "k"
 			if !pers.HasChildren() {          // if has not already been made
 				gm.PhysMakePerson(pers, k) // make
+				text := gi3d.AddNewText2D(&gm.Scene.Scene, pers, k+"Text", k)
+				text.SetProp("color", "black")
+				text.SetProp("background-color", "white")
+				text.Pose.Scale.SetScalar(1)
+				text.Pose.Pos = ppos.Pos
 			}
 			pers.Rel.Pos = ppos.Pos
 		}
