@@ -16,12 +16,16 @@ import (
 
 // PhysMakeBrickHouse makes the EVE physics version of house
 // in par = parent group.
-func (gm *Game) PhysMakePerson(par *eve.Group, name string) *eve.Group {
+func (gm *Game) PhysMakePerson(par *eve.Group, name string, first bool) *eve.Group {
 	// fmt.Printf("Making person \n")
 	pgroup := eve.AddNewGroup(par, name) // note: this is probably redundant
 	person := eve.AddNewBox(pgroup, "person", mat32.Vec3{0, 0, 0}, mat32.Vec3{0.5, 2, 0.5})
 	person.Color = "blue" // for debugging
-	person.Vis = "Person"
+	if first {
+		person.Vis = "PersonYou"
+	} else {
+		person.Vis = "PersonOpp"
+	}
 	return pgroup
 }
 
@@ -152,11 +156,19 @@ func (gm *Game) LibMakeItemSpawner() {
 
 func (gm *Game) LibMakePerson() {
 	sc := &gm.Scene.Scene
-	pnm := "Person"
+	pnm := "PersonYou"
 	pwg := sc.NewInLibrary(pnm)
 	pwm := gi3d.AddNewBox(sc, pnm, 0.5, 2, 0.5)
 	pws := gi3d.AddNewSolid(sc, pwg, pnm, pwm.Name())
 	pws.Mat.Color.SetName("blue")
+}
+func (gm *Game) LibMakePerson1() {
+	sc := &gm.Scene.Scene
+	pnm := "PersonOpp"
+	pwg := sc.NewInLibrary(pnm)
+	pwm := gi3d.AddNewBox(sc, pnm, 0.5, 2, 0.5)
+	pws := gi3d.AddNewSolid(sc, pwg, pnm, pwm.Name())
+	pws.Mat.Color.SetName("red")
 }
 
 func (gm *Game) LibMakeBrickDoorWall() {

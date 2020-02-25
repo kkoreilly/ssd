@@ -56,10 +56,11 @@ var KiT_Scene = kit.Types.AddType(&Scene{}, nil)
 
 func (gm *Game) BuildMap() {
 	ogp := eve.AddNewGroup(gm.World, "FirstPerson")
-	gm.PhysMakePerson(ogp, "FirstPerson")
+	gm.PhysMakePerson(ogp, "FirstPerson", true)
 	ogp.Initial.Pos.Set(0.25, 1, 10.25)
 
 	eve.AddNewGroup(gm.World, "PeopleGroup")
+	gi3d.AddNewGroup(&gm.Scene.Scene, &gm.Scene.Scene, "PeopleTextGroup")
 	for nm, obj := range gm.Map {
 		// fmt.Printf("Object type: %v \n", obj.ObjType)
 		gm.MakeObj(obj, nm)
@@ -184,6 +185,7 @@ func (gm *Game) MakeLibrary() {
 	gm.LibMakeBrickHouse()
 	gm.LibMakeTheWall()
 	gm.LibMakePerson()
+	gm.LibMakePerson1()
 }
 
 func (gm *Game) MakeMeshes() {
@@ -364,6 +366,7 @@ func AddNewScene(parent ki.Ki, name string) *Scene {
 
 func (gm *Game) UpdatePeopleWorldPos() {
 	pGp := gm.World.ChildByName("PeopleGroup", 0).(*eve.Group)
+	pgt := gm.Scene.Scene.ChildByName("PeopleTextGroup", 0)
 	for {
 		_, ok := <-gm.PosUpdtChan // we wait here to receive channel message sent when positions have been updated
 		if !ok {                  // this means channel was closed, we need to bail, game over!
@@ -383,20 +386,27 @@ func (gm *Game) UpdatePeopleWorldPos() {
 			config.Add(eve.KiT_Group, k)
 		}
 		mods, updt := pGp.ConfigChildren(config, ki.NonUniqueNames)
+		mods1, updt1 := pgt.ConfigChildren(config, ki.NonUniqueNames)
 		if !mods {
 			updt = pGp.UpdateStart() // updt is automatically set if mods = true, so we're just doing it here
+		}
+		if !mods1 {
+			updt1 = pgt.UpdateStart() // updt is automatically set if mods = true, so we're just doing it here
 		}
 		// now, the children of pGp are the keys of OtherPos in order
 		for i, k := range keys {
 			ppos := gm.OtherPos[k]
 			pers := pGp.Child(i).(*eve.Group) // this is guaranteed to be for person "k"
 			if !pers.HasChildren() {          // if has not already been made
-				gm.PhysMakePerson(pers, k) // make
-				text := gi3d.AddNewText2D(&gm.Scene.Scene, pers, k+"Text", k)
+				gm.PhysMakePerson(pers, k, false) // make
+				text := gi3d.AddNewText2D(&gm.Scene.Scene, &gm.Scene.Scene, k+"Text", k)
 				text.SetProp("color", "black")
 				text.SetProp("background-color", "white")
-				text.Pose.Scale.SetScalar(1)
+				text.Pose.Scale.SetScalar(0.3)
 				text.Pose.Pos = ppos.Pos
+				text.Pose.Pos.Y = text.Pose.Pos.Y + 1.3
+				text.Pose.Pos.X = text.Pose.Pos.X - 0.2
+				// fmt.Printf("Text: %v    Pos: %v    Text: %v\n", text, text.Pose.Pos, text.Text)
 			}
 			pers.Rel.Pos = ppos.Pos
 		}
@@ -404,6 +414,7 @@ func (gm *Game) UpdatePeopleWorldPos() {
 		// so now everyone's updated
 		gm.World.UpdateWorld()
 		pGp.UpdateEnd(updt)
+		pgt.UpdateEnd(updt1)
 		if mods {
 			gm.View.Sync() // if something was created or destroyed, it must use Sync to update Scene
 		} else {
