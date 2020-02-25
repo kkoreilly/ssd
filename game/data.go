@@ -20,11 +20,11 @@ import (
 )
 
 var db *sql.DB
-var USER string
-var PASSWORD string
-var GOLD int
-var LIVES int
-var TEAM string
+var USER string     // Global variable for your username
+var PASSWORD string // Global variable for your password
+var GOLD int        // Global variable for the amount of gold you have in game
+var LIVES int       // Global variable for the amount of lives you have in game
+var TEAM string     // Global variable for what team you're on
 var goldNum int
 var livesNum int
 var gameOpen = true
@@ -321,7 +321,7 @@ func joinTeam(name string) {
 
 }
 
-func (gm *Game) GetPosFromServer() {
+func (gm *Game) GetPosFromServer() { // GetPosFromServer loops through the players database and updates gm.OtherPos with the new data
 	for {
 		// fmt.Printf("Working 1 \n")
 		getStatement := "SELECT * FROM players"
