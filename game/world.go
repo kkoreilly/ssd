@@ -111,7 +111,7 @@ var FirstWorldBorders = Borders{
 
 func InitStrength() {
 	// fmt.Printf("init strength \n")
-	for k, _ := range TeamStrength {
+	for k := range TeamStrength {
 		randNum := rand.Float32()
 		TeamStrength[k] = randNum
 		simulationControlsTab.SetFullReRender()
@@ -193,7 +193,7 @@ func (bd *Borders) simulateMap(fullSim bool) {
 				}
 				teams[d.Owner] = teams[d.Owner] + 1
 			}
-			for k, _ := range teams {
+			for k := range teams {
 				if teams[k] == 1 {
 					TeamStrength[k] = TeamStrength[k] + 20
 				}

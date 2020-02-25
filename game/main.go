@@ -549,7 +549,7 @@ func initMainTabs() {
 	resetButton1.Text = "Reset Strength"
 	resetButton1.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
-			for k, _ := range TeamStrength {
+			for k := range TeamStrength {
 				TeamStrength[k] = 1
 			}
 		}
@@ -559,7 +559,7 @@ func initMainTabs() {
 	resetButton2.Text = "Reset All"
 	resetButton2.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
-			for k, _ := range TeamStrength {
+			for k := range TeamStrength {
 				TeamStrength[k] = 1
 			}
 			curCountSimulation = 0

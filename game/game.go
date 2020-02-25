@@ -376,7 +376,7 @@ func (gm *Game) UpdatePeopleWorldPos() {
 		gm.WorldMu.Lock()
 		keys := make([]string, len(gm.OtherPos))
 		ctr := 0
-		for k, _ := range gm.OtherPos {
+		for k := range gm.OtherPos {
 			keys[ctr] = k
 			ctr++
 		}

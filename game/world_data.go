@@ -4,8 +4,6 @@
 
 package main
 
-import ()
-
 type DataSVG struct {
 	Data string
 }
