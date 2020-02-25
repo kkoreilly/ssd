@@ -365,9 +365,8 @@ func AddNewScene(parent ki.Ki, name string) *Scene {
 func (gm *Game) UpdatePeopleWorldPos() {
 	pGp := gm.World.ChildByName("PeopleGroup", 0).(*eve.Group)
 	for {
-		d, ok := <-gm.PosUpdtChan // we wait here to receive channel message sent when positions have been updated
-		fmt.Printf("Ok: %v    D: %v \n", ok, d)
-		if !ok { // this means channel was closed, we need to bail, game over!
+		_, ok := <-gm.PosUpdtChan // we wait here to receive channel message sent when positions have been updated
+		if !ok {                  // this means channel was closed, we need to bail, game over!
 			return
 		}
 		gm.PosMu.Lock()
