@@ -31,10 +31,9 @@ var gameOpen = true
 
 func data() {
 	var str string
-	var b []byte
-	home, err := os.UserHomeDir()
+	home, _ := os.UserHomeDir()
 	fn := filepath.Join(filepath.Join(home, "dburl"), "url.txt")
-	b, err = ioutil.ReadFile(fn)
+	b, err := ioutil.ReadFile(fn)
 	if err != nil {
 		// fmt.Printf("%v \n", err)
 		str = "example.com"
