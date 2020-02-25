@@ -39,6 +39,7 @@ type Game struct {
 	PosUpdtChan chan bool  `desc:"channel connecting server pos updates with world state update"`
 	PosMu       sync.Mutex `desc:"protects updates to OtherPos map"`
 	WorldMu     sync.Mutex `desc:"protects updates to World physics and view"`
+	GameOn      bool       // starts on when game turned out, turn off when close game
 }
 
 // TheGame is the game instance for the current game
@@ -285,11 +286,11 @@ func (gm *Game) Config() {
 	cgbut.SetText("Close Game")
 	cgbut.ButtonSig.Connect(gm.World.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
+			gm.GameOn = false
+			go removePlayer()
 			tabIndex, _ := tv.TabIndexByName("<b>Game</b>")
 			tv.DeleteTabIndex(tabIndex, true)
 			tv.SelectTabIndex(0)
-			gameOpen = false
-			go removePlayer()
 		}
 	})
 
@@ -349,6 +350,7 @@ func (gm *Game) Config() {
 	gm.PosUpdtChan = make(chan bool) // todo: close channel when ending game, will terminate goroutines
 
 	gm.OtherPos = make(map[string]*CurPosition)
+	gm.GameOn = true
 
 	go gm.GetPosFromServer()     // this is loop getting positions from server
 	go gm.UpdatePeopleWorldPos() // this is loop updating positions
@@ -363,8 +365,9 @@ func AddNewScene(parent ki.Ki, name string) *Scene {
 func (gm *Game) UpdatePeopleWorldPos() {
 	pGp := gm.World.ChildByName("PeopleGroup", 0).(*eve.Group)
 	for {
-		_, ok := <-gm.PosUpdtChan // we wait here to receive channel message sent when positions have been updated
-		if !ok {                  // this means channel was closed, we need to bail, game over!
+		d, ok := <-gm.PosUpdtChan // we wait here to receive channel message sent when positions have been updated
+		fmt.Printf("Ok: %v    D: %v \n", ok, d)
+		if !ok { // this means channel was closed, we need to bail, game over!
 			return
 		}
 		gm.PosMu.Lock()
