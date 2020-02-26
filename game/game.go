@@ -367,6 +367,7 @@ func AddNewScene(parent ki.Ki, name string) *Scene {
 func (gm *Game) UpdatePeopleWorldPos() {
 	pGp := gm.World.ChildByName("PeopleGroup", 0).(*eve.Group)
 	pgt := gm.Scene.Scene.ChildByName("PeopleTextGroup", 0)
+	uk := playTab.ChildByName("usernameKey", 0)
 	for {
 		_, ok := <-gm.PosUpdtChan // we wait here to receive channel message sent when positions have been updated
 		if !ok {                  // this means channel was closed, we need to bail, game over!
@@ -387,11 +388,15 @@ func (gm *Game) UpdatePeopleWorldPos() {
 		}
 		mods, updt := pGp.ConfigChildren(config, ki.NonUniqueNames)
 		mods1, updt1 := pgt.ConfigChildren(config, ki.NonUniqueNames)
+		mods2, updt2 := pgt.ConfigChildren(config, ki.NonUniqueNames)
 		if !mods {
 			updt = pGp.UpdateStart() // updt is automatically set if mods = true, so we're just doing it here
 		}
 		if !mods1 {
 			updt1 = pgt.UpdateStart() // updt is automatically set if mods = true, so we're just doing it here
+		}
+		if !mods2 {
+			updt2 = uk.UpdateStart() // updt is automatically set if mods = true, so we're just doing it here
 		}
 		// now, the children of pGp are the keys of OtherPos in order
 		for i, k := range keys {
@@ -406,6 +411,9 @@ func (gm *Game) UpdatePeopleWorldPos() {
 				text.Pose.Scale.SetScalar(0.3)
 				text.Pose.Pos = ppos.Pos
 				text.Pose.Pos.Y = text.Pose.Pos.Y + 1.3
+				ukt := gi.AddNewLabel(uk, "uk"+k, "")
+				ukt.SetText(fmt.Sprintf("<b>%v:</b>         %v kills", k, gm.OtherPos[k].Points))
+				ukt.Redrawable = true
 				// text.Pose.Pos.X = text.Pose.Pos.X - 0.2
 
 				// fmt.Printf("Text: %v    Pos: %v    Text: %v\n", text, text.Pose.Pos, text.Text)
@@ -423,6 +431,7 @@ func (gm *Game) UpdatePeopleWorldPos() {
 		gm.World.UpdateWorld()
 		pGp.UpdateEnd(updt)
 		pgt.UpdateEnd(updt1)
+		uk.UpdateEnd(updt2)
 		if mods {
 			gm.View.Sync() // if something was created or destroyed, it must use Sync to update Scene
 		} else {
