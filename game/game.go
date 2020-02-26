@@ -402,17 +402,19 @@ func (gm *Game) UpdatePeopleWorldPos() {
 				text := gi3d.AddNewText2D(&gm.Scene.Scene, &gm.Scene.Scene, k+"Text", k)
 				text.SetProp("color", "black")
 				text.SetProp("background-color", "white")
+				text.SetProp("text-align", "center")
 				text.Pose.Scale.SetScalar(0.3)
 				text.Pose.Pos = ppos.Pos
 				text.Pose.Pos.Y = text.Pose.Pos.Y + 1.3
-				text.Pose.Pos.X = text.Pose.Pos.X - 0.2
+				// text.Pose.Pos.X = text.Pose.Pos.X - 0.2
 
 				// fmt.Printf("Text: %v    Pos: %v    Text: %v\n", text, text.Pose.Pos, text.Text)
 			} else {
 				text := gm.Scene.Scene.ChildByName(k+"Text", 0).(*gi3d.Text2D)
 				text.Pose.Pos = ppos.Pos
 				text.Pose.Pos.Y = text.Pose.Pos.Y + 1.3
-				text.Pose.Pos.X = text.Pose.Pos.X - 0.2
+				text.SetProp("text-align", "center")
+				// text.Pose.Pos.X = text.Pose.Pos.X - 0.2
 			}
 			pers.Rel.Pos = ppos.Pos
 		}
