@@ -420,7 +420,7 @@ func (gm *Game) UpdatePeopleWorldPos() {
 				text := gi3d.AddNewText2D(&gm.Scene.Scene, &gm.Scene.Scene, k+"Text", k)
 				text.SetProp("color", "black")
 				text.SetProp("background-color", "white")
-				text.SetProp("text-align", "center")
+				text.SetProp("text-align", gi.AlignLeft)
 				text.Pose.Scale.SetScalar(0.3)
 				text.Pose.Pos = ppos.Pos
 				text.Pose.Pos.Y = text.Pose.Pos.Y + 1.3
@@ -451,7 +451,7 @@ func (gm *Game) UpdatePeopleWorldPos() {
 				text := gm.Scene.Scene.ChildByName(k+"Text", 0).(*gi3d.Text2D)
 				text.Pose.Pos = ppos.Pos
 				text.Pose.Pos.Y = text.Pose.Pos.Y + 1.3
-				text.SetProp("text-align", "center")
+				text.SetProp("text-align", gi.AlignLeft)
 				uktt, err := uk.ChildByNameTry("ukt_"+k, 0)
 				if err != nil {
 					panic(err)
