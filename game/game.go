@@ -368,7 +368,7 @@ func (gm *Game) UpdatePeopleWorldPos() {
 	pGp := gm.World.ChildByName("PeopleGroup", 0).(*eve.Group)
 	pgt := gm.Scene.Scene.ChildByName("PeopleTextGroup", 0)
 	uk := playTab.ChildByName("usernameKey", 0)
-	for {
+	for i := 0; 1 < 2; i++ {
 		_, ok := <-gm.PosUpdtChan // we wait here to receive channel message sent when positions have been updated
 		if !ok {                  // this means channel was closed, we need to bail, game over!
 			return
@@ -383,12 +383,19 @@ func (gm *Game) UpdatePeopleWorldPos() {
 		}
 		sort.Strings(keys) // it is "key" to have others in same order so if there are no changes, nothing happens
 		config := kit.TypeAndNameList{}
+		config1 := kit.TypeAndNameList{}
 		for _, k := range keys {
 			config.Add(eve.KiT_Group, k)
+			if uk.ChildByName("ukt_"+k, 0) != nil {
+				config1.Add(gi.KiT_Label, "ukt_"+k)
+			}
+			if i >= 1 {
+				config1.Add(gi.KiT_Label, "ukt_"+USER)
+			}
 		}
 		mods, updt := pGp.ConfigChildren(config, ki.NonUniqueNames)
 		mods1, updt1 := pgt.ConfigChildren(config, ki.NonUniqueNames)
-		mods2, updt2 := pgt.ConfigChildren(config, ki.NonUniqueNames)
+		mods2, updt2 := uk.ConfigChildren(config1, ki.NonUniqueNames)
 		if !mods {
 			updt = pGp.UpdateStart() // updt is automatically set if mods = true, so we're just doing it here
 		}
@@ -411,8 +418,10 @@ func (gm *Game) UpdatePeopleWorldPos() {
 				text.Pose.Scale.SetScalar(0.3)
 				text.Pose.Pos = ppos.Pos
 				text.Pose.Pos.Y = text.Pose.Pos.Y + 1.3
-				ukt := gi.AddNewLabel(uk, "uk"+k, "")
+				uktn := "ukt_" + k
+				ukt := gi.AddNewLabel(uk, uktn, "")
 				ukt.SetText(fmt.Sprintf("<b>%v:</b>         %v kills", k, gm.OtherPos[k].Points))
+				ukt.SetProp("font-size", "30px")
 				ukt.Redrawable = true
 				// text.Pose.Pos.X = text.Pose.Pos.X - 0.2
 
@@ -422,10 +431,28 @@ func (gm *Game) UpdatePeopleWorldPos() {
 				text.Pose.Pos = ppos.Pos
 				text.Pose.Pos.Y = text.Pose.Pos.Y + 1.3
 				text.SetProp("text-align", "center")
-				// text.Pose.Pos.X = text.Pose.Pos.X - 0.2
+				uktt, err := uk.ChildByNameTry("ukt_"+k, 0)
+				if err != nil {
+					panic(err)
+				}
+				ukt := uktt.(*gi.Label)
+				ukt.SetText(fmt.Sprintf("<b>%v:</b>         %v kills", k, gm.OtherPos[k].Points))
+				text.Pose.Pos.X = text.Pose.Pos.X - 0.2
 			}
 			pers.Rel.Pos = ppos.Pos
 		}
+
+		_, err := uk.ChildByNameTry("ukt_"+USER, 0)
+		if err != nil {
+			ukt := gi.AddNewLabel(uk, "ukt_"+USER, "")
+			ukt.SetText(fmt.Sprintf("<b>%v:</b>         %v kills", USER, POINTS))
+			ukt.SetProp("font-size", "30px")
+			ukt.Redrawable = true
+		} else {
+			ukt := uk.ChildByName("ukt_"+USER, 0).(*gi.Label)
+			ukt.SetText(fmt.Sprintf("<b>%v:</b>         %v kills", USER, POINTS))
+		}
+
 		gm.PosMu.Unlock()
 		// so now everyone's updated
 		gm.World.UpdateWorld()

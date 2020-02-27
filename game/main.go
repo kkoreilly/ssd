@@ -749,12 +749,12 @@ func initPlayTab() {
 	playTitleText.SetProp("text-align", "center")
 	playTitleText.SetProp("font-size", "40px")
 
-	usernameKey := gi.AddNewFrame(playTab, "usernameKey", gi.LayoutVert)
-	usernameKey.SetStretchMaxWidth()
-
-	usernameKeyTitle := gi.AddNewLabel(usernameKey, "usernameKeyTitle", "<b>Battle first to 10 kills:</b>")
+	usernameKeyTitle := gi.AddNewLabel(playTab, "usernameKeyTitle", "<b>Battle first to 10 kills:</b>")
 	usernameKeyTitle.SetProp("text-align", "center")
 	usernameKeyTitle.SetProp("font-size", "40px")
+
+	usernameKey := gi.AddNewFrame(playTab, "usernameKey", gi.LayoutVert)
+	usernameKey.SetStretchMaxWidth()
 
 	TheGame = &Game{} // Set up game
 	TheGame.Config()  // Set up game
