@@ -191,6 +191,13 @@ func createBattleJoinLayouts() {
 
 	}
 }
+func updateBattlePoints(username string, value int) {
+	statement := fmt.Sprintf("UPDATE players SET points = '%v' WHERE username = '%v'", value, username)
+	_, err := db.Exec(statement)
+	if err != nil {
+		panic(err)
+	}
+}
 func setActive() {
 	for _, d := range FirstWorldBorders {
 		activeString := "f"

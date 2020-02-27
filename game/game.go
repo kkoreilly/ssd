@@ -365,6 +365,8 @@ func AddNewScene(parent ki.Ki, name string) *Scene {
 }
 
 func (gm *Game) UpdatePeopleWorldPos() {
+	rec := ki.Node{}
+	rec.InitName(&rec, "rec")
 	pGp := gm.World.ChildByName("PeopleGroup", 0).(*eve.Group)
 	pgt := gm.Scene.Scene.ChildByName("PeopleTextGroup", 0)
 	uk := playTab.ChildByName("usernameKey", 0)
@@ -389,8 +391,12 @@ func (gm *Game) UpdatePeopleWorldPos() {
 			if uk.ChildByName("ukt_"+k, 0) != nil {
 				config1.Add(gi.KiT_Label, "ukt_"+k)
 			}
+			if uk.ChildByName("ukt_"+k+"_button", 0) != nil {
+				config1.Add(gi.KiT_Button, "ukt_"+k+"_button")
+			}
 			if i >= 1 {
 				config1.Add(gi.KiT_Label, "ukt_"+USER)
+				config1.Add(gi.KiT_Button, "ukt_"+USER+"_button")
 			}
 		}
 		mods, updt := pGp.ConfigChildren(config, ki.NonUniqueNames)
@@ -420,9 +426,24 @@ func (gm *Game) UpdatePeopleWorldPos() {
 				text.Pose.Pos.Y = text.Pose.Pos.Y + 1.3
 				uktn := "ukt_" + k
 				ukt := gi.AddNewLabel(uk, uktn, "")
-				ukt.SetText(fmt.Sprintf("<b>%v:</b>         %v kills", k, gm.OtherPos[k].Points))
+				ukt.SetText(fmt.Sprintf("<b>%v:</b>         %v kills         ", k, gm.OtherPos[k].Points))
 				ukt.SetProp("font-size", "30px")
 				ukt.Redrawable = true
+				addPointsButton := gi.AddNewButton(uk, uktn+"_button")
+				addPointsButton.SetText("Plus 1 point")
+				addPointsButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+					if sig == int64(gi.ButtonClicked) {
+						if gm.OtherPos[k] != nil {
+							gm.OtherPos[k].Points = gm.OtherPos[k].Points + 1
+							updateBattlePoints(k, gm.OtherPos[k].Points)
+						} else {
+							POINTS = POINTS + 1
+							updateBattlePoints(USER, POINTS)
+						}
+
+					}
+				})
+
 				// text.Pose.Pos.X = text.Pose.Pos.X - 0.2
 
 				// fmt.Printf("Text: %v    Pos: %v    Text: %v\n", text, text.Pose.Pos, text.Text)
@@ -436,7 +457,7 @@ func (gm *Game) UpdatePeopleWorldPos() {
 					panic(err)
 				}
 				ukt := uktt.(*gi.Label)
-				ukt.SetText(fmt.Sprintf("<b>%v:</b>         %v kills", k, gm.OtherPos[k].Points))
+				ukt.SetText(fmt.Sprintf("<b>%v:</b>         %v kills              ", k, gm.OtherPos[k].Points))
 				text.Pose.Pos.X = text.Pose.Pos.X - 0.2
 			}
 			pers.Rel.Pos = ppos.Pos
@@ -445,12 +466,23 @@ func (gm *Game) UpdatePeopleWorldPos() {
 		_, err := uk.ChildByNameTry("ukt_"+USER, 0)
 		if err != nil {
 			ukt := gi.AddNewLabel(uk, "ukt_"+USER, "")
-			ukt.SetText(fmt.Sprintf("<b>%v:</b>         %v kills", USER, POINTS))
+			ukt.SetText(fmt.Sprintf("<b>%v:</b>         %v kills              ", USER, POINTS))
 			ukt.SetProp("font-size", "30px")
 			ukt.Redrawable = true
+			addPointsButton := gi.AddNewButton(uk, "ukt_"+USER+"_button")
+			addPointsButton.SetText("Plus 1 point")
+			addPointsButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+				if sig == int64(gi.ButtonClicked) {
+					POINTS = POINTS + 1
+					updateBattlePoints(USER, POINTS)
+					if POINTS >= 10 {
+					}
+				}
+
+			})
 		} else {
 			ukt := uk.ChildByName("ukt_"+USER, 0).(*gi.Label)
-			ukt.SetText(fmt.Sprintf("<b>%v:</b>         %v kills", USER, POINTS))
+			ukt.SetText(fmt.Sprintf("<b>%v:</b>         %v kills            ", USER, POINTS))
 		}
 
 		gm.PosMu.Unlock()
