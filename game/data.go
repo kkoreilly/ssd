@@ -132,13 +132,15 @@ func createBattleJoinLayouts() {
 	teamJoinTitle := gi.AddNewLabel(homeTab, "teamJoinTitle", "<b>Battles that you can join:</b>")
 	teamJoinTitle.SetProp("text-align", "center")
 	teamJoinTitle.SetProp("font-size", "40px")
+	joinLayoutG := gi.AddNewFrame(homeTab, "joinLayoutG", gi.LayoutVert)
+	joinLayoutG.SetStretchMaxWidth()
 	for rows.Next() {
 		var territory1, territory2, team1, team2 string
 		var team1points, team2points int
 		rows.Scan(&territory1, &territory2, &team1, &team2, &team1points, &team2points)
 		// fmt.Printf("TEAM Global var: %v \n", TEAM)
 		if (FirstWorld[territory1].Owner != FirstWorld[territory2].Owner) && (team1 == TEAM || team2 == TEAM) {
-			joinLayout := gi.AddNewFrame(homeTab, "joinLayout", gi.LayoutVert)
+			joinLayout := gi.AddNewFrame(joinLayoutG, "joinLayout", gi.LayoutVert)
 			joinLayout.SetStretchMaxWidth()
 			scoreText := gi.AddNewLabel(joinLayout, "scoreText", fmt.Sprintf("<b>%v             -                %v</b>", team1points, team2points))
 			scoreText.SetProp("font-size", "35px")
@@ -174,12 +176,15 @@ func createBattleJoinLayouts() {
 	if err != nil {
 		panic(err)
 	}
+	joinLayoutG1 := gi.AddNewFrame(homeTab, "joinLayoutG1", gi.LayoutVert)
+	joinLayoutG1.SetStretchMaxWidth()
 	for rows.Next() {
 		var territory1, territory2, team1, team2 string
 		var team1points, team2points int
 		rows.Scan(&territory1, &territory2, &team1, &team2, &team1points, &team2points)
+
 		if FirstWorld[territory1].Owner != FirstWorld[territory2].Owner && (team1 != TEAM && team2 != TEAM) {
-			joinLayout := gi.AddNewFrame(homeTab, "joinLayout1", gi.LayoutVert)
+			joinLayout := gi.AddNewFrame(joinLayoutG1, "joinLayout1", gi.LayoutVert)
 			joinLayout.SetStretchMaxWidth()
 			scoreText := gi.AddNewLabel(joinLayout, "scoreText", fmt.Sprintf("<b>%v             -                %v</b>", team1points, team2points))
 			scoreText.SetProp("font-size", "35px")
@@ -211,7 +216,7 @@ func (gm *Game) battleOver(winner string) {
 		gameResultText.SetText(fmt.Sprintf("<b>Congratulations on winning the battle with %v points. \nYour team (%v) wins one point in the battle %v vs. %v</b>", POINTS, TEAM, curBattleTerritory1, curBattleTerritory2))
 	} else {
 		oppTeam := getEnemyTeamFromName(winner)
-		gameResultText.SetText(fmt.Sprintf("<b>User %v won the battle with %v points. \nTheir team (%v) wins one point in the battle %v vs. %v</b>", winner, POINTS, oppTeam, curBattleTerritory1, curBattleTerritory2))
+		gameResultText.SetText(fmt.Sprintf("<b>User %v won the battle with %v points. \nTheir team (%v) wins one point in the battle %v vs. %v</b>", winner, gm.OtherPos[winner].Points, oppTeam, curBattleTerritory1, curBattleTerritory2))
 	}
 	tabIndexResult, _ := tv.TabIndexByName("<b>Game Result</b>")
 	gameResultText.SetProp("text-align", "center")
@@ -233,10 +238,15 @@ func (gm *Game) battleOver(winner string) {
 	})
 
 	go updateBorderPoints(getEnemyTeamFromName(winner), 1, curBattleTerritory1, curBattleTerritory2)
-	joinLayout := homeTab.ChildByName("joinLayout", 0)
-	joinLayout1 := homeTab.ChildByName("joinLayout1", 0)
+	joinLayout := homeTab.ChildByName("joinLayoutG", 0)
+	joinLayout1 := homeTab.ChildByName("joinLayoutG1", 0)
 	joinLayout.Delete(true)
 	joinLayout1.Delete(true)
+	joinLayoutTitle := homeTab.ChildByName("teamJoinTitle", 0)
+	joinLayoutNoTitle := homeTab.ChildByName("teamNoJoinTitle", 0)
+	joinLayoutTitle.Delete(true)
+	joinLayoutNoTitle.Delete(true)
+	readWorld()
 	go createBattleJoinLayouts()
 	tv.SelectTabIndex(tabIndexResult)
 	gm.WorldMu.Unlock()
