@@ -29,6 +29,7 @@ var POINTS int      // Global variable for the currrent amount of points you hav
 var goldNum int
 var livesNum int
 var gameOpen = true
+var curBattleTerritory1, curBattleTerritory2 string
 
 func data() {
 	var str string
@@ -160,6 +161,8 @@ func createBattleJoinLayouts() {
 					currentMap = FirstMap
 					initPlayTab()
 					joinPlayersTable(territory1 + territory2)
+					curBattleTerritory1 = territory1
+					curBattleTerritory2 = territory2
 				}
 			})
 		}
@@ -190,6 +193,58 @@ func createBattleJoinLayouts() {
 		}
 
 	}
+}
+func (gm *Game) battleOver(winner string) {
+	gm.GameOn = false
+	tabIndex, _ := tv.TabIndexByName("<b>Game</b>")
+	tv.DeleteTabIndex(tabIndex, true)
+	gameResultTab := tv.AddNewTab(gi.KiT_Frame, "<b>Game Result</b>").(*gi.Frame)
+
+	gameResultTab.Lay = gi.LayoutVert
+	gameResultTab.SetStretchMaxWidth()
+	gameResultTab.SetStretchMaxHeight()
+
+	gameResultText := gi.AddNewLabel(gameResultTab, "gameResultText", "")
+	if winner == USER {
+		gameResultText.SetText(fmt.Sprintf("<b>Congratulations on winning the battle with %v points. \nYour team (%v) wins one point in the battle %v vs. %v</b>", POINTS, TEAM, curBattleTerritory1, curBattleTerritory2))
+	} else {
+		oppTeam := getEnemyTeamFromName(winner)
+		gameResultText.SetText(fmt.Sprintf("<b>User %v won the battle with %v points. \nTheir team (%v) wins one point in the battle %v vs. %v</b>", winner, POINTS, oppTeam, curBattleTerritory1, curBattleTerritory2))
+	}
+	tabIndexResult, _ := tv.TabIndexByName("<b>Game Result</b>")
+	gameResultText.SetProp("text-align", "center")
+	gameResultText.SetProp("font-size", "60px")
+
+	returnToHomeTab := gi.AddNewButton(gameResultTab, "returnToHomeTab")
+	returnToHomeTab.Text = "Return to home"
+	returnToHomeTab.SetProp("font-size", "40px")
+	returnToHomeTab.SetProp("horizontal-align", "center")
+	gameResultTab.SetFullReRender()
+	rec := ki.Node{}
+	rec.InitName(&rec, "rec")
+	returnToHomeTab.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(gi.ButtonClicked) {
+			tv.DeleteTabIndex(tabIndexResult, true)
+			tv.SelectTabIndex(0)
+			go removePlayer()
+		}
+	})
+
+	tv.SelectTabIndex(tabIndexResult)
+}
+func getEnemyTeamFromName(username string) (team string) {
+	rows, err := db.Query(fmt.Sprintf("SELECT * FROM users WHERE username = '%v'", username))
+	if err != nil {
+		panic(err)
+	}
+	for rows.Next() {
+		var username string
+		var password string
+		var gold int
+		var lives int
+		rows.Scan(&username, &password, &gold, &lives, &team)
+	}
+	return team
 }
 func updateBattlePoints(username string, value int) {
 	statement := fmt.Sprintf("UPDATE players SET points = '%v' WHERE username = '%v'", value, username)

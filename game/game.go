@@ -436,6 +436,9 @@ func (gm *Game) UpdatePeopleWorldPos() {
 						if gm.OtherPos[k] != nil {
 							gm.OtherPos[k].Points = gm.OtherPos[k].Points + 1
 							updateBattlePoints(k, gm.OtherPos[k].Points)
+							if gm.OtherPos[k].Points >= 10 {
+								gm.battleOver(k)
+							}
 						} else {
 							POINTS = POINTS + 1
 							updateBattlePoints(USER, POINTS)
@@ -476,6 +479,7 @@ func (gm *Game) UpdatePeopleWorldPos() {
 					POINTS = POINTS + 1
 					updateBattlePoints(USER, POINTS)
 					if POINTS >= 10 {
+						gm.battleOver(USER)
 					}
 				}
 
