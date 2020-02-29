@@ -370,7 +370,7 @@ func (gm *Game) UpdatePeopleWorldPos() {
 	pGp := gm.World.ChildByName("PeopleGroup", 0).(*eve.Group)
 	pgt := gm.Scene.Scene.ChildByName("PeopleTextGroup", 0)
 	uk := playTab.ChildByName("usernameKey", 0)
-	for i := 0; 1 < 2; i++ {
+	for i := 0; true; i++ {
 		_, ok := <-gm.PosUpdtChan // we wait here to receive channel message sent when positions have been updated
 		if !ok {                  // this means channel was closed, we need to bail, game over!
 			return
@@ -492,18 +492,18 @@ func (gm *Game) UpdatePeopleWorldPos() {
 			ukt := uk.ChildByName("ukt_"+USER, 0).(*gi.Label)
 			ukt.SetText(fmt.Sprintf("<b>%v:</b>         %v kills            ", USER, POINTS))
 		}
-
+		if mods {
+			gm.View.Sync() // if something was created or destroyed, it must use Sync to update Scene
+		} else {
+			gm.View.UpdatePose() // UpdatePose is much faster and assumes no changes in objects
+		}
 		gm.PosMu.Unlock()
 		// so now everyone's updated
 		gm.World.UpdateWorld()
 		pGp.UpdateEnd(updt)
 		pgt.UpdateEnd(updt1)
 		uk.UpdateEnd(updt2)
-		if mods {
-			gm.View.Sync() // if something was created or destroyed, it must use Sync to update Scene
-		} else {
-			gm.View.UpdatePose() // UpdatePose is much faster and assumes no changes in objects
-		}
+
 		gm.WorldMu.Unlock()
 		gm.Scene.UpdateSig()
 	}

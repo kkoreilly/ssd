@@ -195,9 +195,9 @@ func createBattleJoinLayouts() {
 	}
 }
 func (gm *Game) battleOver(winner string) {
-	gm.GameOn = false
-	gm.PosUpdtChan <- false
 	gm.WorldMu.Lock()
+	gm.PosMu.Lock()
+	gm.GameOn = false
 	tabIndex, _ := tv.TabIndexByName("<b>Game</b>")
 	tv.DeleteTabIndex(tabIndex, true)
 	gameResultTab := tv.AddNewTab(gi.KiT_Frame, "<b>Game Result</b>").(*gi.Frame)
@@ -240,9 +240,10 @@ func (gm *Game) battleOver(winner string) {
 	go createBattleJoinLayouts()
 	tv.SelectTabIndex(tabIndexResult)
 	gm.WorldMu.Unlock()
+	gm.PosMu.Unlock()
 }
 func updateBorderPoints(team string, changeNum int, territory1, territory2 string) {
-	rowsB, err := db.Query("SELECT * FROM borders WHERE territory1 = '%v' AND territory2 = '%v'")
+	rowsB, err := db.Query(fmt.Sprintf("SELECT * FROM borders WHERE territory1 = '%v' AND territory2 = '%v'", territory1, territory2))
 	if err != nil {
 		panic(err)
 	}
@@ -259,9 +260,10 @@ func updateBorderPoints(team string, changeNum int, territory1, territory2 strin
 			teamType = "team2"
 			curPoints = team2points
 		}
+		fmt.Printf("Team: %v  Team 1: %v   Team 2: %v    Team Type: %v \n", team, team1, team2, teamType)
 
 	}
-	statement := fmt.Sprintf("IF territory1 = '%v' AND territory2 = '%v' AND %v = '%v' THEN UPDATE borders SET team1points = '%v' END IF", territory1, territory2, teamType, team, changeNum+curPoints)
+	statement := fmt.Sprintf("UPDATE borders SET %v = '%v' WHERE territory1 = '%v' AND territory2='%v'", teamType+"points", changeNum+curPoints, territory1, territory2)
 	_, err = db.Exec(statement)
 	if err != nil {
 		panic(err)
@@ -444,7 +446,7 @@ func (gm *Game) GetPosFromServer() { // GetPosFromServer loops through the playe
 		// gm.OtherPos["testyother"] = &CurPosition{"testyother", mat32.Vec3{rand.Float32()*5 - 2.5, 1, rand.Float32()*5 - 2.5}, 50}
 
 		if !gm.GameOn {
-			gm.PosUpdtChan <- false
+			close(gm.PosUpdtChan)
 			return
 		}
 		gm.PosMu.Unlock()
