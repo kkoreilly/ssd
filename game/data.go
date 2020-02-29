@@ -179,7 +179,7 @@ func createBattleJoinLayouts() {
 		var team1points, team2points int
 		rows.Scan(&territory1, &territory2, &team1, &team2, &team1points, &team2points)
 		if FirstWorld[territory1].Owner != FirstWorld[territory2].Owner && (team1 != TEAM && team2 != TEAM) {
-			joinLayout := gi.AddNewFrame(homeTab, "joinLayout", gi.LayoutVert)
+			joinLayout := gi.AddNewFrame(homeTab, "joinLayout1", gi.LayoutVert)
 			joinLayout.SetStretchMaxWidth()
 			scoreText := gi.AddNewLabel(joinLayout, "scoreText", fmt.Sprintf("<b>%v             -                %v</b>", team1points, team2points))
 			scoreText.SetProp("font-size", "35px")
@@ -196,6 +196,8 @@ func createBattleJoinLayouts() {
 }
 func (gm *Game) battleOver(winner string) {
 	gm.GameOn = false
+	gm.PosUpdtChan <- false
+	gm.WorldMu.Lock()
 	tabIndex, _ := tv.TabIndexByName("<b>Game</b>")
 	tv.DeleteTabIndex(tabIndex, true)
 	gameResultTab := tv.AddNewTab(gi.KiT_Frame, "<b>Game Result</b>").(*gi.Frame)
@@ -230,7 +232,40 @@ func (gm *Game) battleOver(winner string) {
 		}
 	})
 
+	go updateBorderPoints(getEnemyTeamFromName(winner), 1, curBattleTerritory1, curBattleTerritory2)
+	joinLayout := homeTab.ChildByName("joinLayout", 0)
+	joinLayout1 := homeTab.ChildByName("joinLayout1", 0)
+	joinLayout.Delete(true)
+	joinLayout1.Delete(true)
+	go createBattleJoinLayouts()
 	tv.SelectTabIndex(tabIndexResult)
+	gm.WorldMu.Unlock()
+}
+func updateBorderPoints(team string, changeNum int, territory1, territory2 string) {
+	rowsB, err := db.Query("SELECT * FROM borders WHERE territory1 = '%v' AND territory2 = '%v'")
+	if err != nil {
+		panic(err)
+	}
+	var teamType string
+	var curPoints int
+	for rowsB.Next() {
+		var team1, team2 string
+		var team1points, team2points int
+		rowsB.Scan(&territory1, &territory2, &team1, &team2, &team1points, &team2points)
+		if team1 == team {
+			teamType = "team1"
+			curPoints = team1points
+		} else {
+			teamType = "team2"
+			curPoints = team2points
+		}
+
+	}
+	statement := fmt.Sprintf("IF territory1 = '%v' AND territory2 = '%v' AND %v = '%v' THEN UPDATE borders SET team1points = '%v' END IF", territory1, territory2, teamType, team, changeNum+curPoints)
+	_, err = db.Exec(statement)
+	if err != nil {
+		panic(err)
+	}
 }
 func getEnemyTeamFromName(username string) (team string) {
 	rows, err := db.Query(fmt.Sprintf("SELECT * FROM users WHERE username = '%v'", username))

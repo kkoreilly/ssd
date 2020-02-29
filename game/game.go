@@ -451,7 +451,11 @@ func (gm *Game) UpdatePeopleWorldPos() {
 
 				// fmt.Printf("Text: %v    Pos: %v    Text: %v\n", text, text.Pose.Pos, text.Text)
 			} else {
-				text := gm.Scene.Scene.ChildByName(k+"Text", 0).(*gi3d.Text2D)
+				text1 := gm.Scene.Scene.ChildByName(k+"Text", 0)
+				if text1 == nil {
+					continue
+				}
+				text := text1.(*gi3d.Text2D)
 				text.Pose.Pos = ppos.Pos
 				text.Pose.Pos.Y = text.Pose.Pos.Y + 1.3
 				text.SetProp("text-align", gi.AlignLeft)
