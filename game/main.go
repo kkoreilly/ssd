@@ -219,6 +219,7 @@ func mainrun() {
 }
 
 func initMainTabs() {
+	// initBorders()
 	updt := tv.UpdateStart()
 	tv.SetFullReRender()
 

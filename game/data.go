@@ -270,10 +270,11 @@ func updateBorderPoints(team string, changeNum int, territory1, territory2 strin
 			teamType = "team2"
 			curPoints = team2points
 		}
-		fmt.Printf("Team: %v  Team 1: %v   Team 2: %v    Team Type: %v \n", team, team1, team2, teamType)
+		// fmt.Printf("Team: %v  Team 1: %v   Team 2: %v    Team Type: %v \n", team, team1, team2, teamType)
 
 	}
 	statement := fmt.Sprintf("UPDATE borders SET %v = '%v' WHERE territory1 = '%v' AND territory2='%v'", teamType+"points", changeNum+curPoints, territory1, territory2)
+	// fmt.Printf("Statement: %v \n", statement)
 	_, err = db.Exec(statement)
 	if err != nil {
 		panic(err)
