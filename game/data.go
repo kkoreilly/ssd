@@ -113,7 +113,7 @@ func initBorders() {
 	}
 }
 func joinPlayersTable(battleName string) {
-	statement := fmt.Sprintf("INSERT INTO players(username, posX, posY, posZ, battleName) VALUES ('%v', '%v', '%v', '%v', '%v')", USER, 0, 1, 0, battleName)
+	statement := fmt.Sprintf("INSERT INTO players(username, posX, posY, posZ, battleName, points) VALUES ('%v', '%v', '%v', '%v', '%v', 0)", USER, 0, 1, 0, battleName)
 	_, err := db.Exec(statement)
 	if err != nil {
 		panic(err)
@@ -138,6 +138,7 @@ func createBattleJoinLayouts() {
 		var territory1, territory2, team1, team2 string
 		var team1points, team2points int
 		rows.Scan(&territory1, &territory2, &team1, &team2, &team1points, &team2points)
+		// fmt.Printf("Team 1 points: %v   Team 2 points: %v \n", team1points, team2points)
 		// fmt.Printf("TEAM Global var: %v \n", TEAM)
 		if (FirstWorld[territory1].Owner != FirstWorld[territory2].Owner) && (team1 == TEAM || team2 == TEAM) {
 			joinLayout := gi.AddNewFrame(joinLayoutG, "joinLayout", gi.LayoutVert)
@@ -199,10 +200,16 @@ func createBattleJoinLayouts() {
 
 	}
 }
-func (gm *Game) battleOver(winner string) {
+func (gm *Game) setGameOver(winner string) {
 	gm.WorldMu.Lock()
 	gm.PosMu.Lock()
 	gm.GameOn = false
+	gm.Winner = winner
+	gm.WorldMu.Unlock()
+	gm.PosMu.Unlock()
+}
+func (gm *Game) battleOver(winner string) {
+	gm.WorldMu.Lock()
 	tabIndex, _ := tv.TabIndexByName("<b>Game</b>")
 	tv.DeleteTabIndex(tabIndex, true)
 	gameResultTab := tv.AddNewTab(gi.KiT_Frame, "<b>Game Result</b>").(*gi.Frame)
@@ -250,7 +257,6 @@ func (gm *Game) battleOver(winner string) {
 	go createBattleJoinLayouts()
 	tv.SelectTabIndex(tabIndexResult)
 	gm.WorldMu.Unlock()
-	gm.PosMu.Unlock()
 }
 func updateBorderPoints(team string, changeNum int, territory1, territory2 string) {
 	rowsB, err := db.Query(fmt.Sprintf("SELECT * FROM borders WHERE territory1 = '%v' AND territory2 = '%v'", territory1, territory2))
@@ -458,6 +464,8 @@ func (gm *Game) GetPosFromServer() { // GetPosFromServer loops through the playe
 
 		if !gm.GameOn {
 			close(gm.PosUpdtChan)
+			gm.battleOver(gm.Winner)
+			gm.PosMu.Unlock()
 			return
 		}
 		gm.PosMu.Unlock()

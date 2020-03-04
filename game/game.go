@@ -40,6 +40,7 @@ type Game struct {
 	PosMu       sync.Mutex `desc:"protects updates to OtherPos map"`
 	WorldMu     sync.Mutex `desc:"protects updates to World physics and view"`
 	GameOn      bool       // starts on when game turned out, turn off when close game
+	Winner      string
 }
 
 // TheGame is the game instance for the current game
@@ -437,7 +438,7 @@ func (gm *Game) UpdatePeopleWorldPos() {
 							gm.OtherPos[k].Points = gm.OtherPos[k].Points + 1
 							updateBattlePoints(k, gm.OtherPos[k].Points)
 							if gm.OtherPos[k].Points >= 10 {
-								gm.battleOver(k)
+								gm.setGameOver(k)
 							}
 						} else {
 							POINTS = POINTS + 1
@@ -483,7 +484,7 @@ func (gm *Game) UpdatePeopleWorldPos() {
 					POINTS = POINTS + 1
 					updateBattlePoints(USER, POINTS)
 					if POINTS >= 10 {
-						gm.battleOver(USER)
+						gm.setGameOver(USER)
 					}
 				}
 
