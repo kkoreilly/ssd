@@ -285,6 +285,36 @@ func updateBorderPoints(team string, changeNum int, territory1, territory2 strin
 	if err != nil {
 		panic(err)
 	}
+	if changeNum+curPoints >= 10 { // then ten points have been reached and the border battle has been won
+		var losingTerritory string // the territory that has been taken over
+		if teamType == "team1" {
+			losingTerritory = territory2
+		} else {
+			losingTerritory = territory1
+		}
+		// fmt.Printf("Losing territory: %v \n", losingTerritory)
+		updateTStatement := fmt.Sprintf("UPDATE world SET owner = '%v' WHERE name = '%v'", team, losingTerritory)
+		_, err = db.Exec(updateTStatement)
+		if err != nil {
+			panic(err)
+		}
+		rowsT, err := db.Query(fmt.Sprintf("SELECT * FROM teams WHERE name = '%v'", team))
+		if err != nil {
+			panic(err)
+		}
+		var color string
+		for rowsT.Next() {
+			var name string
+			var numOfPeople int
+			rowsT.Scan(&name, &numOfPeople, &color)
+		}
+		updateCStatement := fmt.Sprintf("UPDATE world SET color = '%v' WHERE name = '%v'", color, losingTerritory)
+		_, err = db.Exec(updateCStatement)
+		if err != nil {
+			panic(err)
+		}
+		FirstWorldLive.RenderSVGs(mapSVG)
+	}
 }
 func getEnemyTeamFromName(username string) (team string) {
 	rows, err := db.Query(fmt.Sprintf("SELECT * FROM users WHERE username = '%v'", username))
