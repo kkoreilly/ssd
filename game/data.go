@@ -129,18 +129,39 @@ func createBattleJoinLayouts() {
 	if err != nil {
 		panic(err)
 	}
+	for rows.Next() {
+		var territory1, territory2, team1, team2 string
+		var team1points, team2points int
+		rows.Scan(&territory1, &territory2, &team1, &team2, &team1points, &team2points)
+		if FirstWorldLive[territory1].Owner != team1 {
+			fixStatement := fmt.Sprintf("UPDATE borders SET team1 = '%v' WHERE territory1 = '%v' AND territory2 = '%v'", FirstWorldLive[territory1].Owner, territory1, territory2)
+			_, err := db.Exec(fixStatement)
+			if err != nil {
+				panic(err)
+			}
+		}
+
+		if FirstWorldLive[territory2].Owner != team2 {
+			fixStatement := fmt.Sprintf("UPDATE borders SET team2 = '%v' WHERE territory1 = '%v' AND territory2 = '%v'", FirstWorldLive[territory2].Owner, territory1, territory2)
+			_, err := db.Exec(fixStatement)
+			if err != nil {
+				panic(err)
+			}
+		}
+	}
 	teamJoinTitle := gi.AddNewLabel(homeTab, "teamJoinTitle", "<b>Battles that you can join:</b>")
 	teamJoinTitle.SetProp("text-align", "center")
 	teamJoinTitle.SetProp("font-size", "40px")
 	joinLayoutG := gi.AddNewFrame(homeTab, "joinLayoutG", gi.LayoutVert)
 	joinLayoutG.SetStretchMaxWidth()
+	rows, err = db.Query(statement)
 	for rows.Next() {
 		var territory1, territory2, team1, team2 string
 		var team1points, team2points int
 		rows.Scan(&territory1, &territory2, &team1, &team2, &team1points, &team2points)
 		// fmt.Printf("Team 1 points: %v   Team 2 points: %v \n", team1points, team2points)
 		// fmt.Printf("TEAM Global var: %v \n", TEAM)
-		if (FirstWorld[territory1].Owner != FirstWorld[territory2].Owner) && (team1 == TEAM || team2 == TEAM) {
+		if (FirstWorldLive[territory1].Owner != FirstWorldLive[territory2].Owner) && (team1 == TEAM || team2 == TEAM) {
 			joinLayout := gi.AddNewFrame(joinLayoutG, "joinLayout", gi.LayoutVert)
 			joinLayout.SetStretchMaxWidth()
 			scoreText := gi.AddNewLabel(joinLayout, "scoreText", fmt.Sprintf("<b>%v             -                %v</b>", team1points, team2points))
@@ -183,8 +204,7 @@ func createBattleJoinLayouts() {
 		var territory1, territory2, team1, team2 string
 		var team1points, team2points int
 		rows.Scan(&territory1, &territory2, &team1, &team2, &team1points, &team2points)
-
-		if FirstWorld[territory1].Owner != FirstWorld[territory2].Owner && (team1 != TEAM && team2 != TEAM) {
+		if FirstWorldLive[territory1].Owner != FirstWorldLive[territory2].Owner && (team1 != TEAM && team2 != TEAM) {
 			joinLayout := gi.AddNewFrame(joinLayoutG1, "joinLayout1", gi.LayoutVert)
 			joinLayout.SetStretchMaxWidth()
 			scoreText := gi.AddNewLabel(joinLayout, "scoreText", fmt.Sprintf("<b>%v             -                %v</b>", team1points, team2points))
@@ -197,7 +217,6 @@ func createBattleJoinLayouts() {
 			territoriesText.SetProp("font-size", "25px")
 			territoriesText.SetProp("text-align", "center")
 		}
-
 	}
 }
 func (gm *Game) setGameOver(winner string) {
@@ -313,6 +332,7 @@ func updateBorderPoints(team string, changeNum int, territory1, territory2 strin
 		if err != nil {
 			panic(err)
 		}
+
 		FirstWorldLive.RenderSVGs(mapSVG)
 	}
 }
