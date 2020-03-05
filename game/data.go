@@ -263,7 +263,7 @@ func (gm *Game) battleOver(winner string) {
 		}
 	})
 
-	go updateBorderPoints(getEnemyTeamFromName(winner), 1, curBattleTerritory1, curBattleTerritory2)
+	updateBorderPoints(getEnemyTeamFromName(winner), 1, curBattleTerritory1, curBattleTerritory2)
 	joinLayout := homeTab.ChildByName("joinLayoutG", 0)
 	joinLayout1 := homeTab.ChildByName("joinLayoutG1", 0)
 	joinLayout.Delete(true)
