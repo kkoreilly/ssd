@@ -4,7 +4,7 @@
 
 package main
 
-import "github.com/goki/gi/mat32"
+import "github.com/goki/mat32"
 
 type MapObj struct {
 	ObjType string
@@ -21,8 +21,9 @@ var FirstMap = Map{
 	// "House1":    {"House", mat32.Vec3{10, 0, -40}, DefScale},
 	// "House1": {"House", mat32.Vec3{0, 0, -10}, DefScale},
 	// "House2": {"House", mat32.Vec3{20, 0, -10}, DefScale},
-	"House1":   {"House", mat32.Vec3{0, 0, -20}, DefScale},
-	"House2":   {"House", mat32.Vec3{0, 0, 20}, DefScale},
+	"Block1":   {"Block", mat32.Vec3{0, 0, -20}, DefScale},
+	"Block2":   {"Block", mat32.Vec3{0, 0, 20}, DefScale},
+	"Road":     {"Road", mat32.Vec3{0, 0, 0}, DefScale},
 	"TheWall1": {"TheWall", mat32.Vec3{0, 0, 0}, DefScale},
 }
 

@@ -14,13 +14,13 @@ import (
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gi3d"
 	"github.com/goki/gi/giv"
-	"github.com/goki/gi/mat32"
 	"github.com/goki/gi/oswin"
 	"github.com/goki/gi/oswin/key"
 	"github.com/goki/gi/oswin/mouse"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
+	"github.com/goki/mat32"
 )
 
 type CurPosition struct {
@@ -79,10 +79,13 @@ func (gm *Game) MakeObj(obj *MapObj, nm string) *eve.Group {
 		gm.PhysMakeBrickHouse(ogp, nm)
 	case "Block":
 		ogp = eve.AddNewGroup(gm.World, nm)
-		for i := 0; i < 8; i++ {
+		for i := 0; i < 3; i++ {
 			house := gm.PhysMakeBrickHouse(ogp, fmt.Sprintf("%v-House%v", nm, i))
 			house.Initial.Pos.Set(float32(20*i), 0, 0)
 		}
+	case "Road":
+		ogp = eve.AddNewGroup(gm.World, nm)
+		gm.PhysMakeRoad(ogp, nm)
 	}
 	/*
 		case "Hill":
@@ -187,6 +190,7 @@ func (gm *Game) MakeLibrary() {
 	gm.LibMakeTheWall()
 	gm.LibMakePerson()
 	gm.LibMakePerson1()
+	gm.LibMakeRoad()
 }
 
 func (gm *Game) MakeMeshes() {

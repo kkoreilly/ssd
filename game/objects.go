@@ -9,7 +9,7 @@ import (
 	// "fmt"
 	"github.com/emer/eve/eve"
 	"github.com/goki/gi/gi3d"
-	"github.com/goki/gi/mat32"
+	"github.com/goki/mat32"
 )
 
 // all units are in meters
@@ -121,6 +121,13 @@ func (gm *Game) PhysMakeBrickHouse(par *eve.Group, name string) *eve.Group {
 	return house
 }
 
+func (gm *Game) PhysMakeRoad(par *eve.Group, name string) *eve.Group {
+	roadg := eve.AddNewGroup(par, name)
+	tw1 := eve.AddNewBox(roadg, "Road", mat32.Vec3{20, 0.05, 0}, mat32.Vec3{60, 0.1, 12})
+	tw1.Color = "black"
+	tw1.Vis = "Road"
+	return roadg
+}
 func (gm *Game) PhysMakeTheWall(par *eve.Group, name string) *eve.Group {
 	wallg := eve.AddNewGroup(par, name)
 	tw1 := eve.AddNewBox(wallg, "TheWall", mat32.Vec3{-100, 50, 0}, mat32.Vec3{2, 100, 200})
@@ -161,6 +168,17 @@ func (gm *Game) LibMakePerson() {
 	pwm := gi3d.AddNewBox(sc, pnm, 0.5, 2, 0.5)
 	pws := gi3d.AddNewSolid(sc, pwg, pnm, pwm.Name())
 	pws.Mat.Color.SetName("blue")
+}
+
+func (gm *Game) LibMakeRoad() {
+	sc := &gm.Scene.Scene
+	pnm := "Road"
+	pwg := sc.NewInLibrary(pnm)
+	pwm := gi3d.AddNewBox(sc, pnm, 60, 0.1, 12)
+	pws := gi3d.AddNewSolid(sc, pwg, pnm, pwm.Name())
+	gi3d.AddNewTextureFile(sc, "road", "objs/road.png")
+	pws.Mat.Texture = gi3d.TexName("road")
+	pws.Mat.Tiling.Repeat.Set(5, 1)
 }
 func (gm *Game) LibMakePerson1() {
 	sc := &gm.Scene.Scene
