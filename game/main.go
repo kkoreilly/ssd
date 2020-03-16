@@ -73,7 +73,7 @@ func mainrun() {
 	toprow.SetStretchMaxWidth()
 
 	toprow.SetProp("background-color", "black")
-	mainHeaderText := `<b>Welcome to <span style="color:grey">Singularity</span> <span style="color:red">Showdown</span> version 0.0.0 pre-alpha</b>`
+	mainHeaderText := `<b>Welcome to <span style="color:grey">Singularity</span> <span style="color:red">Showdown</span> version 0.0.0 Alpha</b>`
 	mainHeader := gi.AddNewLabel(toprow, "mainHeader", mainHeaderText)
 	mainHeader.SetProp("font-size", "90px")
 	mainHeader.SetProp("text-align", "center")
@@ -715,7 +715,8 @@ func initMainTabs() {
 	aboutText.SetProp("font-size", "30px")
 	aboutText.SetProp("font-family", "Times New Roman, serif")
 	aboutText.SetProp("text-align", "left")
-	aboutText.Text = "Singularity Showdown is an open source, Strategic 3D Battle Game."
+	aboutText.Text = "Singularity Showdown is an open-source strategic 3D batlle game. In Singularity Showdown, AI have become super-intelligent and attacked their human creators. The war has been going on for several months now, and both sides have split up into different groups fighting for control and resources. In Singularity Showdown, you get to choose a side and group to fight for. You fight other teams in 3D battles, the results of which effect the live Map of the World. This map is shared by everyone, and the team that takes over the world wins. \n\nThis is Singularity Showdown version 0.0.0 Alpha, and more features will be added with new releases."
+	aboutText.SetProp("white-space", "normal")
 	createBattleJoinLayouts()
 	tv.UpdateEnd(updt)
 }
