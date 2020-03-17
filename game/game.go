@@ -477,6 +477,7 @@ func (gm *Game) UpdatePeopleWorldPos() {
 
 		_, err := uk.ChildByNameTry("ukt_"+USER, 0)
 		if err != nil {
+			// fmt.Printf("Points: %v", POINTS)
 			ukt := gi.AddNewLabel(uk, "ukt_"+USER, "")
 			ukt.SetText(fmt.Sprintf("<b>%v:</b>         %v kills              ", USER, POINTS))
 			ukt.SetProp("font-size", "30px")

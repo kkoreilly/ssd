@@ -468,7 +468,7 @@ func initMainTabs() {
 	aboutText.SetProp("font-size", "30px")
 	aboutText.SetProp("font-family", "Times New Roman, serif")
 	aboutText.SetProp("text-align", "left")
-	aboutText.Text = "Singularity Showdown is an open-source strategic 3D battle game. In Singularity Showdown, AI have become super-intelligent and attacked their human creators. The war has been going on for several months now, and both sides have split up into different groups fighting for control and resources. In Singularity Showdown, you get to choose a side and group to fight for. You fight other teams in 3D battles, the results of which effect the live Map of the World. This map is shared by everyone, and the team that takes over the world wins. <br><br>This is Singularity Showdown version 0.0.0 Alpha, and more features will be added with new releases."
+	aboutText.Text = "Singularity Showdown is an open-source strategic 3D battle game. In Singularity Showdown, AI have become super-intelligent and attacked their human creators. The war has been going on for several months now, and both sides have split up into different groups fighting for control and resources. In Singularity Showdown, you get to choose a side and group to fight for. You fight other teams in 3D battles, the results of which effect the live map of the world. This map is shared by everyone, and the team that takes over the world wins. <br><br>This is Singularity Showdown version 0.0.0 Alpha, and more features will be added with new releases."
 	aboutText.SetProp("white-space", gi.WhiteSpaceNormal)
 	aboutText.SetProp("max-width", -1)
 	aboutText.SetProp("width", "20em")

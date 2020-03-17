@@ -114,6 +114,8 @@ func initBorders() {
 }
 func joinPlayersTable(battleName string) {
 	statement := fmt.Sprintf("INSERT INTO players(username, posX, posY, posZ, battleName, points) VALUES ('%v', '%v', '%v', '%v', '%v', 0)", USER, 0, 1, 0, battleName)
+	POINTS = 0
+	// fmt.Printf("Points Data: %v", POINTS)
 	_, err := db.Exec(statement)
 	if err != nil {
 		panic(err)
