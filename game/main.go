@@ -31,6 +31,7 @@ var tv *gi.TabView
 var signUpTab *gi.Frame
 var homeTab *gi.Frame
 var aboutTab *gi.Frame
+var tutorialTab *gi.Frame
 var playTab *gi.Frame
 var resourcesTab *gi.Frame
 var simulationTab *gi.Frame
@@ -390,6 +391,110 @@ func initMainTabs() {
 	keyMainTextM := gi.AddNewLabel(keyRowM, "keyMainTextM", "<b>Team Key:</b>")
 	keyMainTextM.SetProp("font-size", "30px")
 
+	// map3dTab = tv.AddNewTab(gi.KiT_Frame, "<b>Map (3D)</b>").(*gi.Frame)
+	//
+	// map3dTab.Lay = gi.LayoutVert
+	// map3dTab.SetStretchMaxWidth()
+	// map3dTab.SetStretchMaxHeight()
+	// map3dTab.SetProp("background-color", "lightblue")
+	//
+	// map3dTitle := map3dTab.AddNewChild(gi.KiT_Label, "map3dTitle").(*gi.Label)
+	// map3dTitle.SetProp("font-size", "60px")
+	// map3dTitle.SetProp("font-family", "Times New Roman, serif")
+	// map3dTitle.SetProp("text-align", "center")
+	// map3dTitle.Text = "Live Map of the World (3D):"
+
+	teamTab = tv.AddNewTab(gi.KiT_Frame, "<b>Your Team</b>").(*gi.Frame)
+
+	teamTab.Lay = gi.LayoutVert
+	teamTab.SetStretchMaxWidth()
+	teamTab.SetStretchMaxHeight()
+	teamTab.SetProp("background-color", "lightblue")
+
+	teamTitle := teamTab.AddNewChild(gi.KiT_Label, "teamTitle").(*gi.Label)
+	teamTitle.SetProp("font-size", "60px")
+	teamTitle.SetProp("font-family", "Times New Roman, serif")
+	teamTitle.SetProp("text-align", "center")
+	teamTitle.Text = "<b>Your Team</b>"
+
+	teamMainText = teamTab.AddNewChild(gi.KiT_Label, "teamMainText").(*gi.Label)
+	teamMainText.SetProp("font-size", "30px")
+	teamMainText.SetProp("font-family", "Times New Roman, serif")
+	// teamMainText.SetProp("text-align", "center")
+	teamMainText.Text = ""
+	teamMainText.Redrawable = true
+	readTeam()
+
+	//if TEAM == "" { // when uncommented -- you can not switch teams. When commented, you can switch teams
+	if TEAM == "" {
+		teamMainText.SetText(teamMainText.Text + "\n\n<b>Since you have no team right now, you must join a team. Click one of the buttons below to join a team</b>.")
+	} else {
+		teamMainText.SetText(teamMainText.Text + "\n\n<b>Click one of the buttons below to switch your team<b>.")
+	}
+	gi.AddNewSpace(teamTab, "space1")
+	tbrowH = gi.AddNewLayout(teamTab, "tbrowH", gi.LayoutHoriz)
+	tbrowH.SetProp("spacing", units.NewEx(2))
+	tbrowH.SetProp("horizontal-align", gi.AlignLeft)
+	tbrowH.SetStretchMaxWidth()
+	tbrowHText := gi.AddNewLabel(tbrowH, "tBrowHText", "<b>Join a human team:</b>")
+	tbrowHText.SetProp("font-size", "30px")
+
+	gi.AddNewSpace(teamTab, "space2")
+
+	tbrowR = gi.AddNewLayout(teamTab, "tbrowR", gi.LayoutHoriz)
+	tbrowR.SetProp("spacing", units.NewEx(2))
+	tbrowR.SetProp("horizontal-align", gi.AlignLeft)
+	tbrowR.SetStretchMaxWidth()
+
+	tbrowRText := gi.AddNewLabel(tbrowR, "tBrowRText", "<b>Join a robot team:</b>")
+	tbrowRText.SetProp("font-size", "30px")
+	addTeamUpdateButtons()
+	//}
+
+	aboutTab = tv.AddNewTab(gi.KiT_Frame, "<b>About</b>").(*gi.Frame)
+
+	aboutTab.Lay = gi.LayoutVert
+	aboutTab.SetStretchMaxWidth()
+	aboutTab.SetStretchMaxHeight()
+	aboutTab.SetProp("background-color", "lightblue")
+
+	aboutTitle := aboutTab.AddNewChild(gi.KiT_Label, "aboutTitle").(*gi.Label)
+	aboutTitle.SetProp("font-size", "60px")
+	aboutTitle.SetProp("font-family", "Times New Roman, serif")
+	aboutTitle.SetProp("text-align", "center")
+	aboutTitle.Text = "About Singularity Showdown"
+
+	aboutText := aboutTab.AddNewChild(gi.KiT_Label, "aboutText").(*gi.Label)
+	aboutText.SetProp("font-size", "30px")
+	aboutText.SetProp("font-family", "Times New Roman, serif")
+	aboutText.SetProp("text-align", "left")
+	aboutText.Text = "Singularity Showdown is an open-source strategic 3D battle game. In Singularity Showdown, AI have become super-intelligent and attacked their human creators. The war has been going on for several months now, and both sides have split up into different groups fighting for control and resources. In Singularity Showdown, you get to choose a side and group to fight for. You fight other teams in 3D battles, the results of which effect the live Map of the World. This map is shared by everyone, and the team that takes over the world wins. <br><br>This is Singularity Showdown version 0.0.0 Alpha, and more features will be added with new releases."
+	aboutText.SetProp("white-space", gi.WhiteSpaceNormal)
+	aboutText.SetProp("max-width", -1)
+	aboutText.SetProp("width", "20em")
+
+	tutorialTab = tv.AddNewTab(gi.KiT_Frame, "<b>How to Play</b>").(*gi.Frame)
+
+	tutorialTab.Lay = gi.LayoutVert
+	tutorialTab.SetStretchMaxWidth()
+	tutorialTab.SetStretchMaxHeight()
+	tutorialTab.SetProp("background-color", "lightblue")
+
+	tutorialTitle := tutorialTab.AddNewChild(gi.KiT_Label, "tutorialTitle").(*gi.Label)
+	tutorialTitle.SetProp("font-size", "60px")
+	tutorialTitle.SetProp("font-family", "Times New Roman, serif")
+	tutorialTitle.SetProp("text-align", "center")
+	tutorialTitle.Text = "How to Play Singularity Showdown"
+
+	tutorialText := tutorialTab.AddNewChild(gi.KiT_Label, "tutorialText").(*gi.Label)
+	tutorialText.SetProp("font-size", "30px")
+	tutorialText.SetProp("font-family", "Times New Roman, serif")
+	tutorialText.SetProp("text-align", "left")
+	tutorialText.Text = "<b>Keyboard Controls during Battles:</b> <br> <br><b>W, A, S, D:</b> Move (Forward, Left, Back, Right) <br><b>Space:</b> Jump <br><b>Move mouse:</b> Rotate screen<br><b>Escape:</b> Toggle Rotate<br><b>Click:</b> Shoot <br> <br><b>Game structure:</b> <br>From the home tab, you can choose to join a battle on a border between territories. Whoever gets to 10 kills first in the 3D Battle wins the battle, which gets their team one point on the border. Once a team gets to 10 points on the border, they take the opponent's territory on the border, which updates the live map for everyone. <br> <br>To get started playing Singularity Showdown, join a team and start battling!"
+	tutorialText.SetProp("white-space", gi.WhiteSpaceNormal)
+	tutorialText.SetProp("max-width", -1)
+	tutorialText.SetProp("width", "20em")
+
 	simulationControlsTab = tv.AddNewTab(gi.KiT_Frame, "<b>Simulation Settings</b>").(*gi.Frame)
 	simulationControlsTab.Lay = gi.LayoutVert
 	simulationControlsTab.SetStretchMaxWidth()
@@ -638,87 +743,6 @@ func initMainTabs() {
 
 	FirstWorld.RenderSVGs(simMapSVG)
 
-	// map3dTab = tv.AddNewTab(gi.KiT_Frame, "<b>Map (3D)</b>").(*gi.Frame)
-	//
-	// map3dTab.Lay = gi.LayoutVert
-	// map3dTab.SetStretchMaxWidth()
-	// map3dTab.SetStretchMaxHeight()
-	// map3dTab.SetProp("background-color", "lightblue")
-	//
-	// map3dTitle := map3dTab.AddNewChild(gi.KiT_Label, "map3dTitle").(*gi.Label)
-	// map3dTitle.SetProp("font-size", "60px")
-	// map3dTitle.SetProp("font-family", "Times New Roman, serif")
-	// map3dTitle.SetProp("text-align", "center")
-	// map3dTitle.Text = "Live Map of the World (3D):"
-
-	teamTab = tv.AddNewTab(gi.KiT_Frame, "<b>Your Team</b>").(*gi.Frame)
-
-	teamTab.Lay = gi.LayoutVert
-	teamTab.SetStretchMaxWidth()
-	teamTab.SetStretchMaxHeight()
-	teamTab.SetProp("background-color", "lightblue")
-
-	teamTitle := teamTab.AddNewChild(gi.KiT_Label, "teamTitle").(*gi.Label)
-	teamTitle.SetProp("font-size", "60px")
-	teamTitle.SetProp("font-family", "Times New Roman, serif")
-	teamTitle.SetProp("text-align", "center")
-	teamTitle.Text = "<b>Your Team</b>"
-
-	teamMainText = teamTab.AddNewChild(gi.KiT_Label, "teamMainText").(*gi.Label)
-	teamMainText.SetProp("font-size", "30px")
-	teamMainText.SetProp("font-family", "Times New Roman, serif")
-	// teamMainText.SetProp("text-align", "center")
-	teamMainText.Text = ""
-	teamMainText.Redrawable = true
-	readTeam()
-
-	//if TEAM == "" { // when uncommented -- you can not switch teams. When commented, you can switch teams
-	if TEAM == "" {
-		teamMainText.SetText(teamMainText.Text + "\n\n<b>Since you have no team right now, you must join a team. Click one of the buttons below to join a team</b>.")
-	} else {
-		teamMainText.SetText(teamMainText.Text + "\n\n<b>Click one of the buttons below to switch your team<b>.")
-	}
-	gi.AddNewSpace(teamTab, "space1")
-	tbrowH = gi.AddNewLayout(teamTab, "tbrowH", gi.LayoutHoriz)
-	tbrowH.SetProp("spacing", units.NewEx(2))
-	tbrowH.SetProp("horizontal-align", gi.AlignLeft)
-	tbrowH.SetStretchMaxWidth()
-	tbrowHText := gi.AddNewLabel(tbrowH, "tBrowHText", "<b>Join a human team:</b>")
-	tbrowHText.SetProp("font-size", "30px")
-
-	gi.AddNewSpace(teamTab, "space2")
-
-	tbrowR = gi.AddNewLayout(teamTab, "tbrowR", gi.LayoutHoriz)
-	tbrowR.SetProp("spacing", units.NewEx(2))
-	tbrowR.SetProp("horizontal-align", gi.AlignLeft)
-	tbrowR.SetStretchMaxWidth()
-
-	tbrowRText := gi.AddNewLabel(tbrowR, "tBrowRText", "<b>Join a robot team:</b>")
-	tbrowRText.SetProp("font-size", "30px")
-	addTeamUpdateButtons()
-	//}
-
-	aboutTab = tv.AddNewTab(gi.KiT_Frame, "<b>About</b>").(*gi.Frame)
-
-	aboutTab.Lay = gi.LayoutVert
-	aboutTab.SetStretchMaxWidth()
-	aboutTab.SetStretchMaxHeight()
-	aboutTab.SetProp("background-color", "lightblue")
-
-	aboutTitle := aboutTab.AddNewChild(gi.KiT_Label, "aboutTitle").(*gi.Label)
-	aboutTitle.SetProp("font-size", "60px")
-	aboutTitle.SetProp("font-family", "Times New Roman, serif")
-	aboutTitle.SetProp("text-align", "center")
-	aboutTitle.Text = "About Singularity Showdown"
-
-	aboutText := aboutTab.AddNewChild(gi.KiT_Label, "aboutText").(*gi.Label)
-	aboutText.SetProp("font-size", "30px")
-	aboutText.SetProp("font-family", "Times New Roman, serif")
-	aboutText.SetProp("text-align", "left")
-	aboutText.Text = "Singularity Showdown is an open-source strategic 3D battle game. In Singularity Showdown, AI have become super-intelligent and attacked their human creators. The war has been going on for several months now, and both sides have split up into different groups fighting for control and resources. In Singularity Showdown, you get to choose a side and group to fight for. You fight other teams in 3D battles, the results of which effect the live Map of the World. This map is shared by everyone, and the team that takes over the world wins. <br><br>This is Singularity Showdown version 0.0.0 Alpha, and more features will be added with new releases."
-	aboutText.SetProp("white-space", gi.WhiteSpaceNormal)
-	aboutText.SetProp("max-width", -1)
-	aboutText.SetProp("width", "20em")
 	createBattleJoinLayouts()
 	tv.UpdateEnd(updt)
 }
