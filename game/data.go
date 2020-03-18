@@ -335,6 +335,17 @@ func updateBorderPoints(team string, changeNum int, territory1, territory2 strin
 			panic(err)
 		}
 
+		updatePStatement := fmt.Sprintf("UPDATE borders SET team1points = 0 WHERE territory1 = '%v' AND territory2='%v'", territory1, territory2)
+		_, err = db.Exec(updatePStatement)
+		if err != nil {
+			panic(err)
+		}
+		updatePStatement1 := fmt.Sprintf("UPDATE borders SET team2points = 0 WHERE territory1 = '%v' AND territory2='%v'", territory1, territory2)
+		_, err = db.Exec(updatePStatement1)
+		if err != nil {
+			panic(err)
+		}
+
 		FirstWorldLive.RenderSVGs(mapSVG)
 	}
 }
