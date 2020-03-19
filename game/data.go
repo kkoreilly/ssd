@@ -555,7 +555,7 @@ func readResources() {
 		// fmt.Printf("Lives: %v \n", livesNum)
 		goldResourcesText.SetText(fmt.Sprintf("%v \n \n You have %v gold", goldResourcesText.Text, goldNum))
 		GOLD = goldNum
-		livesResourcesText.SetText(fmt.Sprintf("%v \n \n You have %v lives", livesResourcesText.Text, livesNum))
+		// livesResourcesText.SetText(fmt.Sprintf("%v \n \n You have %v lives", livesResourcesText.Text, livesNum))
 		LIVES = livesNum
 	}
 }

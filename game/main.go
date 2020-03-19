@@ -306,58 +306,70 @@ func initMainTabs() {
 	goldResourcesText.Text = "                                                                                                                                      "
 	goldResourcesText.Redrawable = true
 
-	brow := gi.AddNewLayout(resourcesTab, "gbrow", gi.LayoutHoriz)
-	brow.SetProp("spacing", units.NewEx(2))
-	brow.SetProp("horizontal-align", gi.AlignLeft)
-	brow.SetStretchMaxWidth()
-
-	goldButton := gi.AddNewButton(brow, "goldButton")
-	goldButton.Text = "Purchase 100 gold for just 99 cents"
-	goldButton.SetProp("background-color", "#D4AF37")
-	goldButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(gi.ButtonClicked) {
-			updateResource("gold", GOLD+100)
-			goldResourcesText.SetText("                                            ")
-			readResources()
-		}
-	})
-
-	goldButton1 := gi.AddNewButton(brow, "goldButton1")
-	goldButton1.Text = "BEST DEAL: Purchase 1000 gold for $8.99"
-	goldButton1.SetProp("background-color", "#D4AF37")
-	goldButton1.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(gi.ButtonClicked) {
-			// t0 := time.Now()
-			updateResource("gold", GOLD+1000)
-			goldResourcesText.SetText("                                            ")
-			readResources()
-			// t1 := time.Now()
-			// d := t1.Sub(t0)
-			// fmt.Printf("Time to update: %v \n", d.Milliseconds())
-		}
-	})
-	livesResourcesText = resourcesTab.AddNewChild(gi.KiT_Label, "livesResourcesText").(*gi.Label)
-	livesResourcesText.SetProp("font-size", "30px")
-	livesResourcesText.SetProp("font-family", "Times New Roman, serif")
-	livesResourcesText.SetProp("text-align", "left")
-	livesResourcesText.Text = "                                                                                                                                      "
-	livesResourcesText.Redrawable = true
-
-	livesButton := gi.AddNewButton(resourcesTab, "livesButton")
-	livesButton.Text = "Purchase 10 lives for 10 gold"
-	livesButton.SetProp("background-color", "pink")
-	livesButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(gi.ButtonClicked) {
-			updateResource("gold", GOLD-10)
-			updateResource("lives", LIVES+10)
-			goldResourcesText.SetText("                                            ")
-			livesResourcesText.SetText("                                            ")
-			readResources()
-		}
-	})
-
-	// updateResource("gold", 70)
+	// brow := gi.AddNewLayout(resourcesTab, "gbrow", gi.LayoutHoriz)
+	// brow.SetProp("spacing", units.NewEx(2))
+	// brow.SetProp("horizontal-align", gi.AlignLeft)
+	// brow.SetStretchMaxWidth()
+	//
+	// goldButton := gi.AddNewButton(brow, "goldButton")
+	// goldButton.Text = "Purchase 100 gold for just 99 cents"
+	// goldButton.SetProp("background-color", "#D4AF37")
+	// goldButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	// 	if sig == int64(gi.ButtonClicked) {
+	// 		updateResource("gold", GOLD+100)
+	// 		goldResourcesText.SetText("                                            ")
+	// 		readResources()
+	// 	}
+	// })
+	//
+	// goldButton1 := gi.AddNewButton(brow, "goldButton1")
+	// goldButton1.Text = "BEST DEAL: Purchase 1000 gold for $8.99"
+	// goldButton1.SetProp("background-color", "#D4AF37")
+	// goldButton1.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	// 	if sig == int64(gi.ButtonClicked) {
+	// 		// t0 := time.Now()
+	// 		updateResource("gold", GOLD+1000)
+	// 		goldResourcesText.SetText("                                            ")
+	// 		readResources()
+	// 		// t1 := time.Now()
+	// 		// d := t1.Sub(t0)
+	// 		// fmt.Printf("Time to update: %v \n", d.Milliseconds())
+	// 	}
+	// })
+	// livesResourcesText = resourcesTab.AddNewChild(gi.KiT_Label, "livesResourcesText").(*gi.Label)
+	// livesResourcesText.SetProp("font-size", "30px")
+	// livesResourcesText.SetProp("font-family", "Times New Roman, serif")
+	// livesResourcesText.SetProp("text-align", "left")
+	// livesResourcesText.Text = "                                                                                                                                      "
+	// livesResourcesText.Redrawable = true
+	//
+	// livesButton := gi.AddNewButton(resourcesTab, "livesButton")
+	// livesButton.Text = "Purchase 10 lives for 10 gold"
+	// livesButton.SetProp("background-color", "pink")
+	// livesButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	// 	if sig == int64(gi.ButtonClicked) {
+	// 		updateResource("gold", GOLD-10)
+	// 		updateResource("lives", LIVES+10)
+	// 		goldResourcesText.SetText("                                            ")
+	// 		livesResourcesText.SetText("                                            ")
+	// 		readResources()
+	// 	}
+	// })
+	//
+	// // updateResource("gold", 70)
 	readResources()
+
+	aboutResourcesText := gi.AddNewLabel(resourcesTab, "aboutResourcesText", "")
+	aboutResourcesText.Text = `
+<br><b>About Resources</b>
+<br> <br>Resources are the in-game currency for Singularity Showdown. As of Singularity Showdown v.0.0.0 Alpha, gold is the only resource. This will change later. You start out with 500 gold. Currently, the only way to get gold is through winning battles - for every battle you win you get 10 gold. In later releases, there will be more ways to get gold, including in-app purchases. Currently, you can not purchase anything with gold, but this will also change later. Any gold you get in this version will carry over to the next version.
+	`
+	aboutResourcesText.SetProp("font-size", "30px")
+	aboutResourcesText.SetProp("font-family", "Times New Roman, serif")
+	aboutResourcesText.SetProp("text-align", "left")
+	aboutResourcesText.SetProp("white-space", gi.WhiteSpaceNormal)
+	aboutResourcesText.SetProp("max-width", -1)
+	aboutResourcesText.SetProp("width", "20em")
 
 	map2dTab = tv.AddNewTab(gi.KiT_Frame, "<b>Live Map of the World</b>").(*gi.Frame)
 
