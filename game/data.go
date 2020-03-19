@@ -241,7 +241,9 @@ func (gm *Game) battleOver(winner string) {
 
 	gameResultText := gi.AddNewLabel(gameResultTab, "gameResultText", "")
 	if winner == USER {
-		gameResultText.SetText(fmt.Sprintf("<b>Congratulations on winning the battle with %v points. \nYour team (%v) wins one point in the battle %v vs. %v</b>", POINTS, TEAM, curBattleTerritory1, curBattleTerritory2))
+		gameResultText.SetText(fmt.Sprintf("<b>Congratulations on winning the battle with %v points. \nYour team (%v) wins one point in the battle %v vs. %v. \nYou win 10 gold.</b>", POINTS, TEAM, curBattleTerritory1, curBattleTerritory2))
+		updateResource("gold", GOLD+10)
+		readResources()
 	} else {
 		oppTeam := getEnemyTeamFromName(winner)
 		gameResultText.SetText(fmt.Sprintf("<b>User %v won the battle with %v points. \nTheir team (%v) wins one point in the battle %v vs. %v</b>", winner, gm.OtherPos[winner].Points, oppTeam, curBattleTerritory1, curBattleTerritory2))
@@ -553,7 +555,7 @@ func readResources() {
 		findUserResult.Scan(&USER, &PASSWORD, &goldNum, &livesNum, &TEAM)
 		// fmt.Printf("Gold: %v \n", goldNum)
 		// fmt.Printf("Lives: %v \n", livesNum)
-		goldResourcesText.SetText(fmt.Sprintf("%v \n \n You have %v gold", goldResourcesText.Text, goldNum))
+		goldResourcesText.SetText(fmt.Sprintf("You have %v gold", goldNum))
 		GOLD = goldNum
 		// livesResourcesText.SetText(fmt.Sprintf("%v \n \n You have %v lives", livesResourcesText.Text, livesNum))
 		LIVES = livesNum
