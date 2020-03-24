@@ -248,43 +248,49 @@ func initMainTabs() {
 	// 		initPlayTab()
 	// 	}
 	// })
-	trow := gi.AddNewLayout(homeTab, "trainingRow", gi.LayoutHoriz)
-	trow.SetProp("spacing", units.NewEx(2))
-	trow.SetProp("horizontal-align", gi.AlignLeft)
-	trow.SetStretchMaxWidth()
-
-	trainingText := gi.AddNewLabel(trow, "trainingRowText", "Practice and level up in Training Mode:")
-	trainingText.SetProp("font-size", "30px")
-
-	trainingDropdown := gi.AddNewMenuButton(trow, "trainingDropdown")
-	trainingDropdown.SetText("Choose a map to train in")
-
-	for _, value := range AllMaps {
-		var value1 = value.Name
-		var value2 = value.MapData
-		// fmt.Printf("Value (0): %v \n", value.Name)
-		trainingDropdown.Menu.AddAction(gi.ActOpts{Label: value1},
-			win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-				// fmt.Printf("Value (1): %v \n", value.Name)
-				// fmt.Printf("Value (2): %v \n", value1)
-				currentMap = value2 // Set the correct map for this dropdown
-				currentMapString = value1
-				trainingDropdown.SetText(value1)
-				// fmt.Printf("Value: %v \n", value1)
-			})
-	}
-
-	trainingPlayButton := trow.AddNewChild(gi.KiT_Button, "trainingPlayButton").(*gi.Button)
-	trainingPlayButton.Text = "<b>Play in Training Mode</b>"
-	trainingPlayButton.SetProp("background-color", "orange")
-
-	trainingPlayButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(gi.ButtonClicked) {
-			initPlayTab()
-		}
-	})
-
+	// trow := gi.AddNewLayout(homeTab, "trainingRow", gi.LayoutHoriz)
+	// trow.SetProp("spacing", units.NewEx(2))
+	// trow.SetProp("horizontal-align", gi.AlignLeft)
+	// trow.SetStretchMaxWidth()
+	//
+	// trainingText := gi.AddNewLabel(trow, "trainingRowText", "Practice and level up in Training Mode:")
+	// trainingText.SetProp("font-size", "30px")
+	//
+	// trainingDropdown := gi.AddNewMenuButton(trow, "trainingDropdown")
+	// trainingDropdown.SetText("Choose a map to train in")
+	//
+	// for _, value := range AllMaps {
+	// 	var value1 = value.Name
+	// 	var value2 = value.MapData
+	// 	// fmt.Printf("Value (0): %v \n", value.Name)
+	// 	trainingDropdown.Menu.AddAction(gi.ActOpts{Label: value1},
+	// 		win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	// 			// fmt.Printf("Value (1): %v \n", value.Name)
+	// 			// fmt.Printf("Value (2): %v \n", value1)
+	// 			currentMap = value2 // Set the correct map for this dropdown
+	// 			currentMapString = value1
+	// 			trainingDropdown.SetText(value1)
+	// 			// fmt.Printf("Value: %v \n", value1)
+	// 		})
+	// }
+	//
+	// trainingPlayButton := trow.AddNewChild(gi.KiT_Button, "trainingPlayButton").(*gi.Button)
+	// trainingPlayButton.Text = "<b>Play in Training Mode</b>"
+	// trainingPlayButton.SetProp("background-color", "orange")
+	//
+	// trainingPlayButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	// 	if sig == int64(gi.ButtonClicked) {
+	// 		initPlayTab()
+	// 	}
+	// })
+	homeTabText := gi.AddNewLabel(homeTab, "homeTabText", "")
+	homeTabText.Text = "Singularity Showdown is an open-source 3D strategic battle game, for more information about Singularity Showdown see the about page. This version of Singularity Showdown also includes a simulation that simulates what team would win given different strengths. You can see the simulation on the simulation tab, and set the strengths of different teams on the simulation settings tab. A list of all the borders and who is winning is below, to join a battle click 'Join Battle'."
 	homeTab.SetProp("background-color", "lightblue")
+	homeTabText.SetProp("font-size", "30px")
+	homeTabText.SetProp("white-space", gi.WhiteSpaceNormal)
+	homeTabText.SetProp("max-width", -1)
+	homeTabText.SetProp("width", "20em")
+	homeTabText.SetProp("text-align", "center")
 
 	resourcesTab = tv.AddNewTab(gi.KiT_Frame, "<b>Resources</b>").(*gi.Frame)
 

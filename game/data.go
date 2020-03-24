@@ -6,10 +6,7 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"io/ioutil"
 	// "math/rand"
-	"os"
-	"path/filepath"
 	"strings"
 	// "time"
 
@@ -33,16 +30,13 @@ var curBattleTerritory1, curBattleTerritory2 string
 
 func data() {
 	var str string
-	home, _ := os.UserHomeDir()
-	fn := filepath.Join(filepath.Join(home, "dburl"), "url.txt")
-	b, err := ioutil.ReadFile(fn)
-	if err != nil {
-		// fmt.Printf("%v \n", err)
-		str = "example.com"
+	if URL_GLOBAL != "" {
+		str = URL_GLOBAL
 	} else {
-		str = strings.TrimSpace(string(b)) // convert content to a 'string'
+		fmt.Printf("Unable to connect to database, URL missing \n")
+		return
 	}
-	// fmt.Printf("Test String: %v \n", str)
+	var err error
 	db, err = sql.Open("postgres", str)
 	if err != nil {
 		panic(err)
@@ -176,7 +170,7 @@ func createBattleJoinLayouts() {
 			territoriesText.SetProp("font-size", "25px")
 			territoriesText.SetProp("text-align", "center")
 			joinBattleButton := gi.AddNewButton(joinLayout, "joinBattleButton")
-			joinBattleButton.Text = "Create a 1v1 Battle in this Battlefield"
+			joinBattleButton.Text = "Join Battle"
 			joinBattleButton.SetProp("font-size", "30px")
 			joinBattleButton.SetProp("horizontal-align", gi.AlignCenter)
 			rec := ki.Node{}
@@ -544,7 +538,6 @@ func (gm *Game) GetPosFromServer() { // GetPosFromServer loops through the playe
 
 func readResources() {
 	findUserStatement := fmt.Sprintf("SELECT * FROM users WHERE username='%v'", USER)
-
 	findUserResult, err := db.Query(findUserStatement)
 
 	if err != nil {
