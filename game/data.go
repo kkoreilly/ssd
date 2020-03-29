@@ -484,7 +484,7 @@ func joinTeam(name string) {
 	joinTeamStatement := fmt.Sprintf("UPDATE users SET %v = '%v' WHERE username='%v'", "team", name, USER)
 	// fmt.Printf("%v \n", joinTeamStatement)
 
-	result, err := db.Exec(joinTeamStatement)
+	_, err := db.Exec(joinTeamStatement)
 	// fmt.Printf("%v \n", result)
 
 	if err != nil {
@@ -602,6 +602,40 @@ func readWorld() {
 		tr.Owner = owner
 		tr.Color = color
 	}
+	var previousMapObjOwner string
+	mapDone := true
+	for _, d := range FirstWorldLive {
+		if d.Owner == previousMapObjOwner {
+			previousMapObjOwner = d.Owner
+		} else {
+			mapDone = false
+			break
+		}
+	}
+	// Code currently doesn't actually reset map, fix later
+	mapDoneDB := false
+	if mapDone == true || mapDoneDB == true { // one team has taken over the world
+		winTeam := previousMapObjOwner // the team that has taken over the world
+		fmt.Printf("Team %v has taken over the world! \n", winTeam)
+		joinLayout := homeTab.ChildByName("joinLayoutG", 0)
+		joinLayout1 := homeTab.ChildByName("joinLayoutG1", 0)
+		joinLayout.Delete(true)
+		joinLayout1.Delete(true)
+		joinLayoutTitle := homeTab.ChildByName("teamJoinTitle", 0)
+		joinLayoutNoTitle := homeTab.ChildByName("teamNoJoinTitle", 0)
+		joinLayoutTitle.Delete(true)
+		joinLayoutNoTitle.Delete(true)
+		gameOverText := gi.AddNewLabel(homeTab, "gameOverText", "")
+		if winTeam != TEAM {
+			gameOverText.Text = "Team " + winTeam + " has taken over the world! A new game has started with a reset map."
+		} else {
+			gameOverText.Text = "Your team (" + winTeam + ") has taken over the world! You get 1000 gold! A new game has started with a reset map."
+			updateResource("gold", GOLD+1000)
+		}
+		gameOverText.SetProp("font-size", "40px")
+		gameOverText.SetProp("text-align", "center")
+	}
+
 }
 func updatePosition(t string, value mat32.Vec3) {
 	statement := fmt.Sprintf("UPDATE players SET posX = '%v' WHERE username='%v'", value.X, USER)
