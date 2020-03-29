@@ -482,10 +482,10 @@ func addKeyItems() {
 }
 func joinTeam(name string) {
 	joinTeamStatement := fmt.Sprintf("UPDATE users SET %v = '%v' WHERE username='%v'", "team", name, USER)
-	fmt.Printf("%v \n", joinTeamStatement)
+	// fmt.Printf("%v \n", joinTeamStatement)
 
 	result, err := db.Exec(joinTeamStatement)
-	fmt.Printf("%v \n", result)
+	// fmt.Printf("%v \n", result)
 
 	if err != nil {
 		fmt.Printf("Error")
@@ -494,6 +494,16 @@ func joinTeam(name string) {
 	TEAM = name
 	readTeam()
 	teamMainText.SetText(teamMainText.Text + "\n\n<b>Click one of the buttons below to switch your team<b>.")
+	joinLayout := homeTab.ChildByName("joinLayoutG", 0)
+	joinLayout1 := homeTab.ChildByName("joinLayoutG1", 0)
+	joinLayout.Delete(true)
+	joinLayout1.Delete(true)
+	joinLayoutTitle := homeTab.ChildByName("teamJoinTitle", 0)
+	joinLayoutNoTitle := homeTab.ChildByName("teamNoJoinTitle", 0)
+	joinLayoutTitle.Delete(true)
+	joinLayoutNoTitle.Delete(true)
+	readWorld()
+	createBattleJoinLayouts()
 
 }
 
