@@ -604,15 +604,20 @@ func readWorld() {
 	}
 	var previousMapObjOwner string
 	mapDone := true
+	var i = 0
 	for _, d := range FirstWorldLive {
-		if d.Owner == previousMapObjOwner {
+		// fmt.Printf("Map Done During: %v \n", mapDone)
+		if d.Owner == previousMapObjOwner || i == 0 || d.Owner == "none" || previousMapObjOwner == "none" {
 			previousMapObjOwner = d.Owner
 		} else {
+			// fmt.Printf("False, Owner: %v Prev owner: %v \n", d.Owner, previousMapObjOwner)
 			mapDone = false
 			break
 		}
+		i = i + 1
 	}
 	// Code currently doesn't actually reset map, fix later
+	// fmt.Printf("Map Done: %v \n", mapDone)
 	if mapDone == true { // one team has taken over the world
 		winTeam := previousMapObjOwner // the team that has taken over the world
 		resetWorld()
@@ -634,10 +639,11 @@ func readWorld() {
 				if err != nil {
 					panic(err)
 				}
-				sendMessage("important", fmt.Sprintf("Your team (%v) has taken over the world! You have been awarded 1000 gold for being on the winning team! The map has been reset and a new game started.", team), username)
+				sendMessage("important", fmt.Sprintf("Your team (%v) has taken over the world! You have been awarded 1000 gold for being on the winning team! The map has been reset and a new game started.", winTeam), username)
 			} else {
-				sendMessage("important", fmt.Sprintf("Team (%v) has taken over the world. The map has been reset and a new game started.", team), username)
+				sendMessage("important", fmt.Sprintf("Team %v has taken over the world. The map has been reset and a new game started.", winTeam), username)
 			}
+
 			readMessages()
 			readWorld()
 
@@ -707,7 +713,7 @@ func resetWorld() {
 			panic(err)
 		}
 		statement1 := fmt.Sprintf("UPDATE world SET color = '%v' WHERE name = '%v'", d.Color, d.Name)
-		_, err := db.Exec(statement1)
+		_, err = db.Exec(statement1)
 		if err != nil {
 			panic(err)
 		}
@@ -728,12 +734,25 @@ func readMessages() {
 	if err != nil {
 		panic(err)
 	}
+	for i := 0; i < 10; i++ {
+		name := fmt.Sprintf("messageFrame%v", i)
+		if homeTab.ChildByName(name, 0) != nil {
+			homeTab.ChildByName(name, 0).Delete(true)
+		}
+	}
 	for rows.Next() {
 		var messageType, message, username string
 		rows.Scan(&messageType, &message, &username)
 		if username == USER {
 			if messageType == "important" {
-				messageFrame := gi.AddNewFrame(homeTab, "messageFrame", gi.LayoutVert)
+				var name string
+				for i := 0; 1 < 2; i++ {
+					name = fmt.Sprintf("messageFrame%v", i)
+					if homeTab.ChildByName(name, 0) == nil {
+						break
+					}
+				}
+				messageFrame := gi.AddNewFrame(homeTab, name, gi.LayoutVert)
 				messageFrame.SetStretchMaxWidth()
 				// messageFrame.Lay = gi.LayoutVert
 				messageFrame.SetProp("background-color", "lightgreen")
@@ -741,6 +760,9 @@ func readMessages() {
 				messageText.Text = "<b>IMPORTANT MESSAGE:</b> \n<b>" + message + "</b>"
 				messageText.SetProp("font-size", "50px")
 				messageText.SetProp("text-align", "center")
+				messageText.SetProp("white-space", gi.WhiteSpaceNormal)
+				messageText.SetProp("max-width", -1)
+				messageText.SetProp("width", "20em")
 				messageButton := gi.AddNewButton(messageFrame, "messageButton")
 				messageButton.Text = "OK"
 				messageButton.SetProp("font-size", "30px")
