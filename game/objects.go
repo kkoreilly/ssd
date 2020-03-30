@@ -23,6 +23,7 @@ func (gm *Game) PhysMakePerson(par *eve.Group, name string, first bool) *eve.Gro
 	person.Color = "blue" // for debugging
 	if first {
 		person.Vis = "PersonYou"
+		person.SetDynamic()
 	} else {
 		person.Vis = "PersonOpp"
 	}

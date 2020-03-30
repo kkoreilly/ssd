@@ -21,6 +21,7 @@ import (
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
+	"strings"
 )
 
 type CurPosition struct {
@@ -41,6 +42,7 @@ type Game struct {
 	WorldMu     sync.Mutex `desc:"protects updates to World physics and view"`
 	GameOn      bool       // starts on when game turned out, turn off when close game
 	Winner      string
+	PersHitWall bool
 }
 
 // TheGame is the game instance for the current game
@@ -58,7 +60,7 @@ var KiT_Scene = kit.Types.AddType(&Scene{}, nil)
 func (gm *Game) BuildMap() {
 	ogp := eve.AddNewGroup(gm.World, "FirstPerson")
 	gm.PhysMakePerson(ogp, "FirstPerson", true)
-	ogp.Initial.Pos.Set(0.25, 1, 10.25)
+	ogp.Initial.Pos.Set(0.25, 1, 40)
 
 	eve.AddNewGroup(gm.World, "PeopleGroup")
 	gi3d.AddNewGroup(&gm.Scene.Scene, &gm.Scene.Scene, "PeopleTextGroup")
@@ -231,7 +233,7 @@ func (gm *Game) MakeWorld() {
 	gm.World = &eve.Group{}
 	gm.World.InitName(gm.World, "World")
 	gm.BuildMap()
-	gm.World.InitWorld() // key to put things in their places!
+	gm.World.WorldInit() // key to put things in their places!
 }
 
 // MakeView makes the view
@@ -268,7 +270,7 @@ func (gm *Game) Config() {
 	// spot := gi3d.AddNewSpotLight(sc, "spot", 1, gi3d.DirectSun)
 	// spot.Pose.Pos.Set(0, 0, 2)
 	sc.Camera.Pose.Pos.Y = 2
-	sc.Camera.Pose.Pos.Z = 20
+	sc.Camera.Pose.Pos.Z = 50
 
 	gm.Map = currentMap
 	gm.MakeWorld()
@@ -305,7 +307,7 @@ func (gm *Game) Config() {
 	// cbm.Segs.Set(10, 10, 10) // not clear if any diff really..
 	// fpobj = gm.MakeObj(&MapObj{"FirstPerson", mat32.Vec3{0,0,0}, mat32.Vec3{1,1,1}}, "FirstPerson")
 	// rcb = gm.MakeObj(&MapObj{"FirstPerson", mat32.Vec3{0, 0, 10}, mat32.Vec3{1, 1, 1}}, "FirstPerson")
-	// gm.World.InitWorld()
+	// gm.World.WorldInit()
 	// rcb = gi3d.AddNewSolid(&sc.Scene, fpobj, "red-cube", "Person")
 	// rcb.Pose.Pos.Set(0, -1, -8)
 	// // rcb.Pose.Scale.Set(0.1, 0.1, 1)
@@ -505,7 +507,7 @@ func (gm *Game) UpdatePeopleWorldPos() {
 		}
 		gm.PosMu.Unlock()
 		// so now everyone's updated
-		gm.World.UpdateWorld()
+		gm.World.WorldRelToAbs()
 		pGp.UpdateEnd(updt)
 		pgt.UpdateEnd(updt1)
 		uk.UpdateEnd(updt2)
@@ -642,7 +644,7 @@ func (sc *Scene) NavKeyEvents(kt *key.ChordEvent) {
 	wupdt := gm.World.UpdateStart()
 
 	pers := gm.World.ChildByName("FirstPerson", 0).(*eve.Group)
-	camOff := sc.Camera.Pose.Pos.Sub(pers.Abs.Pos) // currrent offset of camera vs. person
+	camOff := sc.Camera.Pose.Pos.Sub(pers.Rel.Pos) // currrent offset of camera vs. person
 	// todo: get current camera axis-angle
 
 	switch ch {
@@ -722,36 +724,86 @@ func (sc *Scene) NavKeyEvents(kt *key.ChordEvent) {
 		pers.Rel.Quat.SetFromAxisAngle(mat32.Vec3{0, 1, 0}, 0)
 	case "w":
 		kt.SetProcessed()
-		y := pers.Rel.Pos.Y               // keep height fixed -- no jumping right now.
-		pers.Rel.MoveOnAxis(0, 0, -1, .5) // todo: use camera axis not fixed axis
+		y := pers.Rel.Pos.Y // keep height fixed -- no jumping right now.
+		if !gm.PersHitWall {
+			pers.Rel.MoveOnAxis(0, 0, -1, .5) // todo: use camera axis not fixed axis
+		}
 		pers.Rel.Pos.Y = y
+		gm.WorldStep()
 	case "s":
 		kt.SetProcessed()
 		y := pers.Rel.Pos.Y // keep height fixed -- no jumping right now.
-		pers.Rel.MoveOnAxis(0, 0, 1, .5)
+		if !gm.PersHitWall {
+			pers.Rel.MoveOnAxis(0, 0, 1, .5)
+		}
+
 		pers.Rel.Pos.Y = y
+		gm.WorldStep()
 	case "a":
 		kt.SetProcessed()
 		y := pers.Rel.Pos.Y // keep height fixed -- no jumping right now.
-		pers.Rel.MoveOnAxis(-1, 0, 0, .5)
+		if !gm.PersHitWall {
+			pers.Rel.MoveOnAxis(-1, 0, 0, .5)
+		}
 		pers.Rel.Pos.Y = y
+		gm.WorldStep()
 		// sc.Camera.Pan(panDel, 0)
 		// kt.SetProcessed()
 		// go updatePosition("posX", rcb.Initial.Pos.X)
 	case "d":
 		kt.SetProcessed()
 		y := pers.Rel.Pos.Y // keep height fixed -- no jumping right now.
-		pers.Rel.MoveOnAxis(1, 0, 0, .5)
+		if !gm.PersHitWall {
+			pers.Rel.MoveOnAxis(1, 0, 0, .5)
+		}
 		pers.Rel.Pos.Y = y
+		gm.WorldStep()
 		// sc.Camera.Pan(-panDel, 0)
 		// kt.SetProcessed()
 		// go updatePosition("posX", rcb.Initial.Pos.X)
 	}
 
-	gm.World.UpdateWorld()
+	// gm.World.UpdateWorld()
+	gm.World.WorldRelToAbs()
 	go updatePosition("pos", pers.Abs.Pos) // this was updated from UpdateWorld
-	sc.Camera.Pose.Pos = pers.Abs.Pos.Add(camOff)
+	// fmt.Printf("Pos Abs: %v  Pos Rel: %v \n", pers.Abs.Pos, pers.Rel.Pos)
+	sc.Camera.Pose.Pos = pers.Rel.Pos.Add(camOff)
 	gm.World.UpdateEnd(wupdt)
 	gm.View.UpdatePose()
 	sc.UpdateSig()
+}
+
+func (ev *Game) WorldStep() {
+
+	ev.World.WorldRelToAbs()
+	// var contacts eve.Contacts
+	cts := ev.World.WorldCollide(eve.DynsTopGps)
+	// fmt.Printf("Children: %v \n", ev.World.Children())
+	// fmt.Printf("Cts: %v \n", cts)
+	for _, cl := range cts {
+		// fmt.Printf("Cl: %v \n", cl)
+		if len(cl) >= 1 {
+			for _, c := range cl {
+				if c.A.Name() == "person" {
+					// contacts = cl
+					// fmt.Printf("Contacts: %v \n", contacts)
+					name := c.B.Name()
+					if strings.Contains(name, "wall") {
+						ev.PersHitWall = true
+						fmt.Printf("Hit wall! \n")
+					} else {
+						ev.PersHitWall = false
+					}
+				} else {
+					ev.PersHitWall = false
+				}
+				// fmt.Printf("A: %v  B: %v\n", c.A.Name(), c.B.Name())
+			}
+		}
+	}
+	// if len(contacts) > 0 { // turn around
+	// 	fmt.Printf("hit wall: turn around!\n")
+	// }
+	// ev.View.UpdatePose()
+	// ev.Snapshot()
 }
