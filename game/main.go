@@ -291,6 +291,7 @@ func initMainTabs() {
 	homeTabText.SetProp("max-width", -1)
 	homeTabText.SetProp("width", "20em")
 	homeTabText.SetProp("text-align", "center")
+	readMessages()
 
 	resourcesTab = tv.AddNewTab(gi.KiT_Frame, "<b>Resources</b>").(*gi.Frame)
 

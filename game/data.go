@@ -629,13 +629,56 @@ func readWorld() {
 		if winTeam != TEAM {
 			gameOverText.Text = "Team " + winTeam + " has taken over the world! A new game has started with a reset map."
 		} else {
-			gameOverText.Text = "Your team (" + winTeam + ") has taken over the world! You get 1000 gold! A new game has started with a reset map."
+			gameOverText.Text = "Your team (" + winTeam + ") has taken over the world! You have been awarded 1000 gold for being on the winning team! A new game has started with a reset map."
 			updateResource("gold", GOLD+1000)
 		}
 		gameOverText.SetProp("font-size", "40px")
 		gameOverText.SetProp("text-align", "center")
 	}
 
+}
+func readMessages() {
+	rec := ki.Node{}
+	rec.InitName(&rec, "rec")
+	statement := "SELECT * FROM messages"
+	rows, err := db.Query(statement)
+	if err != nil {
+		panic(err)
+	}
+	for rows.Next() {
+		var messageType, message, username string
+		rows.Scan(&messageType, &message, &username)
+		if username == USER {
+			if messageType == "important" {
+				messageFrame := gi.AddNewFrame(homeTab, "messageFrame", gi.LayoutVert)
+				messageFrame.SetStretchMaxWidth()
+				// messageFrame.Lay = gi.LayoutVert
+				messageFrame.SetProp("background-color", "lightgreen")
+				messageText := gi.AddNewLabel(messageFrame, "importantMessageText", "")
+				messageText.Text = "<b>IMPORTANT MESSAGE:</b> \n<b>" + message + "</b>"
+				messageText.SetProp("font-size", "50px")
+				messageText.SetProp("text-align", "center")
+				messageButton := gi.AddNewButton(messageFrame, "messageButton")
+				messageButton.Text = "OK"
+				messageButton.SetProp("font-size", "30px")
+				messageButton.SetProp("horizontal-align", "center")
+				messageButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+					if sig == int64(gi.ButtonClicked) {
+						removeMessage(message, username)
+						messageFrame.Delete(true)
+					}
+				})
+			}
+		}
+	}
+
+}
+func removeMessage(message string, username string) {
+	statement := fmt.Sprintf("DELETE FROM messages WHERE message = '%v' AND username='%v'", message, username)
+	_, err := db.Exec(statement)
+	if err != nil {
+		panic(err)
+	}
 }
 func updatePosition(t string, value mat32.Vec3) {
 	statement := fmt.Sprintf("UPDATE players SET posX = '%v' WHERE username='%v'", value.X, USER)
