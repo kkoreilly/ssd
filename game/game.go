@@ -774,7 +774,7 @@ func (sc *Scene) NavKeyEvents(kt *key.ChordEvent) {
 }
 
 func (ev *Game) WorldStep() {
-
+// fmt.Printf("In world step! \n")
 	ev.World.WorldRelToAbs()
 	// var contacts eve.Contacts
 	cts := ev.World.WorldCollide(eve.DynsTopGps)
@@ -787,15 +787,12 @@ func (ev *Game) WorldStep() {
 				if c.A.Name() == "person" {
 					// contacts = cl
 					// fmt.Printf("Contacts: %v \n", contacts)
+					fmt.Printf("Contact: %v \n", c)
 					name := c.B.Name()
 					if strings.Contains(name, "wall") {
 						ev.PersHitWall = true
 						fmt.Printf("Hit wall! \n")
-					} else {
-						ev.PersHitWall = false
 					}
-				} else {
-					ev.PersHitWall = false
 				}
 				// fmt.Printf("A: %v  B: %v\n", c.A.Name(), c.B.Name())
 			}
