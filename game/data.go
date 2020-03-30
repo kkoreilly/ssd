@@ -613,29 +613,112 @@ func readWorld() {
 		}
 	}
 	// Code currently doesn't actually reset map, fix later
-	mapDoneDB := false
-	if mapDone == true || mapDoneDB == true { // one team has taken over the world
+	if mapDone == true { // one team has taken over the world
 		winTeam := previousMapObjOwner // the team that has taken over the world
-		fmt.Printf("Team %v has taken over the world! \n", winTeam)
-		joinLayout := homeTab.ChildByName("joinLayoutG", 0)
-		joinLayout1 := homeTab.ChildByName("joinLayoutG1", 0)
-		joinLayout.Delete(true)
-		joinLayout1.Delete(true)
-		joinLayoutTitle := homeTab.ChildByName("teamJoinTitle", 0)
-		joinLayoutNoTitle := homeTab.ChildByName("teamNoJoinTitle", 0)
-		joinLayoutTitle.Delete(true)
-		joinLayoutNoTitle.Delete(true)
-		gameOverText := gi.AddNewLabel(homeTab, "gameOverText", "")
-		if winTeam != TEAM {
-			gameOverText.Text = "Team " + winTeam + " has taken over the world! A new game has started with a reset map."
-		} else {
-			gameOverText.Text = "Your team (" + winTeam + ") has taken over the world! You have been awarded 1000 gold for being on the winning team! A new game has started with a reset map."
-			updateResource("gold", GOLD+1000)
+		resetWorld()
+		resetBorders()
+		rows, err := db.Query("SELECT * FROM users")
+		if err != nil {
+			panic(err)
 		}
-		gameOverText.SetProp("font-size", "40px")
-		gameOverText.SetProp("text-align", "center")
+		for rows.Next() {
+			var username string
+			var password string
+			var gold int
+			var lives int
+			var team string
+			rows.Scan(&username, &password, &gold, &lives, &team)
+			if team == winTeam { // this person won!
+				updateGoldStatement := fmt.Sprintf("UPDATE users SET gold = '%v' WHERE username = '%v'", gold+1000, username) // give them a thousand gold
+				_, err := db.Exec(updateGoldStatement)
+				if err != nil {
+					panic(err)
+				}
+				sendMessage("important", fmt.Sprintf("Your team (%v) has taken over the world! You have been awarded 1000 gold for being on the winning team! The map has been reset and a new game started.", team), username)
+			} else {
+				sendMessage("important", fmt.Sprintf("Team (%v) has taken over the world. The map has been reset and a new game started.", team), username)
+			}
+			readMessages()
+			readWorld()
+
+		}
+
 	}
 
+}
+func resetBorders() {
+	FirstWorldBorders = Borders{
+		"AlaskaRussia":               {"Alaska", "Russia", "battle"},
+		"AlaskaCanada":               {"Alaska", "Canada", "human2"},
+		"CanadaUSA":                  {"Canada", "USA", "battle"},
+		"USACentralAmerica":          {"USA", "CentralAmerica", "human1"},
+		"CentralAmericaSouthAmerica": {"CentralAmerica", "SouthAmerica", "battle"},
+		"SouthAmericaBrazil":         {"SouthAmerica", "Brazil", "human3"},
+		"WestAfricaEastAfrica":       {"WestAfrica", "EastAfrica", "human4"},
+		"WestAfricaWestEurope":       {"WestAfrica", "WestEurope", "battle"},
+		"WestEuropeNorthernEurope":   {"WestEurope", "NorthernEurope", "robot1"},
+		"WestEuropeEastEurope":       {"WestEurope", "EastEurope", "battle"},
+		"EastEuropeMiddleEast":       {"EastEurope", "MiddleEast", "robot2"},
+		"EastAfricaMiddleEast":       {"EastAfrica", "MiddleEast", "battle"},
+		"NorthernEuropeRussia":       {"NorthernEurope", "Russia", "battle"},
+		"EastEuropeRussia":           {"EastEurope", "Russia", "battle"},
+		"MiddleEastRussia":           {"MiddleEast", "Russia", "battle"},
+		"MiddleEastSouthWestAsia":    {"MiddleEast", "SouthWestAsia", "battle"},
+		"SouthWestAsiaRussia":        {"SouthWestAsia", "Russia", "battle"},
+		"SouthWestAsiaNorthAsia":     {"SouthWestAsia", "NorthAsia", "battle"},
+		"NorthAsiaRussia":            {"NorthAsia", "Russia", "human5"},
+		"SouthWestAsiaSouthEastAsia": {"SouthWestAsia", "SouthEastAsia", "battle"},
+		"NorthAsiaSouthEastAsia":     {"NorthAsia", "SouthEastAsia", "battle"},
+		"SouthEastAsiaAustralia":     {"SouthEastAsia", "Australia", "battle"},
+		"CanadaWestEurope":           {"Canada", "WestEurope", "battle"},
+	}
+	statement := "DELETE FROM borders"
+	_, err := db.Exec(statement)
+	if err != nil {
+		panic(err)
+	}
+	initBorders()
+}
+func resetWorld() {
+	FirstWorld = World{
+		"Alaska":         {"Alaska", "human2", "green", ""},
+		"Canada":         {"Canada", "human2", "green", ""},
+		"USA":            {"USA", "human1", "blue", ""},
+		"CentralAmerica": {"CentralAmerica", "human1", "blue", ""},
+		"Brazil":         {"Brazil", "human3", "purple", ""},
+		"SouthAmerica":   {"SouthAmerica", "human3", "purple", ""},
+		"WestAfrica":     {"WestAfrica", "human4", "pink", ""},
+		"EastAfrica":     {"EastAfrica", "human4", "pink", ""},
+		"Russia":         {"Russia", "human5", "lightgreen", ""},
+		"NorthAsia":      {"NorthAsia", "human5", "lightgreen", ""},
+		"WestEurope":     {"WestEurope", "robot1", "red", ""},
+		"NorthernEurope": {"NorthernEurope", "robot1", "red", ""},
+		"EastEurope":     {"EastEurope", "robot2", "orange", ""},
+		"MiddleEast":     {"MiddleEast", "robot2", "orange", ""},
+		"Australia":      {"Australia", "robot3", "yellow", ""},
+		"SouthEastAsia":  {"SouthEastAsia", "robot4", "violet", ""},
+		"SouthWestAsia":  {"SouthWestAsia", "robot5", "maroon", ""},
+		"Antarctica":     {"Antarctica", "none", "white", ""},
+	}
+	for _, d := range FirstWorld {
+		statement := fmt.Sprintf("UPDATE world SET owner = '%v' WHERE name = '%v'", d.Owner, d.Name)
+		_, err := db.Exec(statement)
+		if err != nil {
+			panic(err)
+		}
+		statement1 := fmt.Sprintf("UPDATE world SET color = '%v' WHERE name = '%v'", d.Color, d.Name)
+		_, err := db.Exec(statement1)
+		if err != nil {
+			panic(err)
+		}
+	}
+}
+func sendMessage(messageType string, message string, username string) {
+	statement := fmt.Sprintf("INSERT INTO messages(messageType, message, username) VALUES ('%v', '%v', '%v')", messageType, message, username)
+	_, err := db.Exec(statement)
+	if err != nil {
+		panic(err)
+	}
 }
 func readMessages() {
 	rec := ki.Node{}
