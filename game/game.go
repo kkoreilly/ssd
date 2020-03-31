@@ -421,8 +421,7 @@ func (gm *Game) UpdatePeopleWorldPos() {
 	uk := playTab.ChildByName("usernameKey", 0)
 	for i := 0; true; i++ {
 		_, ok := <-gm.PosUpdtChan // we wait here to receive channel message sent when positions have been updated
-		fmt.Printf("OK: %v \n", ok)
-		if !ok { // this means channel was closed, we need to bail, game over!
+		if !ok {                  // this means channel was closed, we need to bail, game over!
 			return
 		}
 		gm.PosMu.Lock()
@@ -541,11 +540,7 @@ func (gm *Game) UpdatePeopleWorldPos() {
 					POINTS = POINTS + 1
 					updateBattlePoints(USER, POINTS)
 					if POINTS >= 10 {
-						gm.PosMu.Unlock()
-						gm.WorldMu.Unlock()
 						gm.setGameOver(USER)
-						gm.PosMu.Lock()
-						gm.WorldMu.Lock()
 					}
 				}
 

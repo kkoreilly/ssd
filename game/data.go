@@ -527,7 +527,7 @@ func (gm *Game) GetPosFromServer() { // GetPosFromServer loops through the playe
 			var posX, posY, posZ float32
 			var points int
 			rows.Scan(&username, &posX, &posY, &posZ, &battleName, &points)
-			fmt.Printf("POINTS: %v   USER: %v \n", points, username)
+			// fmt.Printf("POINTS: %v   USER: %v \n", points, username)
 			// fmt.Printf("Username: %v \n", username)
 			// fmt.Printf("User: %v \n", USER)
 			if username != USER {
@@ -537,7 +537,7 @@ func (gm *Game) GetPosFromServer() { // GetPosFromServer loops through the playe
 		}
 		// time.Sleep(100 * time.Millisecond)
 		// gm.OtherPos["testyother"] = &CurPosition{"testyother", mat32.Vec3{rand.Float32()*5 - 2.5, 1, rand.Float32()*5 - 2.5}, 50}
-		fmt.Printf("Game on: %v \n", gm.GameOn)
+		// fmt.Printf("Game on: %v \n", gm.GameOn)
 		if !gm.GameOn {
 			close(gm.PosUpdtChan)
 			gm.battleOver(gm.Winner)
