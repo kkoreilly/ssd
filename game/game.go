@@ -272,7 +272,7 @@ func (gm *Game) Config() {
 	// spot := gi3d.AddNewSpotLight(sc, "spot", 1, gi3d.DirectSun)
 	// spot.Pose.Pos.Set(0, 0, 2)
 	sc.Camera.Pose.Pos.Y = 2
-	sc.Camera.Pose.Pos.Z = 47
+	sc.Camera.Pose.Pos.Z = 50
 	gm.Gravity = 0.5
 	gm.Map = currentMap
 	gm.MakeWorld()
