@@ -21,6 +21,8 @@ import (
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
+	"math"
+	"math/rand"
 	"strings"
 	"time"
 )
@@ -29,6 +31,13 @@ type CurPosition struct {
 	Username string
 	Pos      mat32.Vec3
 	Points   int
+}
+
+type Weapon struct {
+	Name     string
+	MinD     float32 `desc:"Minimum amount of damage that this weapon will do"`
+	MaxD     float32 `desc:"Maximum amount of damage that this weapon will do"`
+	FireRate float32 `desc:"How many times this weapon can be fired in a second"`
 }
 
 type Game struct {
@@ -50,6 +59,12 @@ type Game struct {
 // TheGame is the game instance for the current game
 var TheGame *Game
 var HEALTH float32 = 100 // how much health you have
+type Weapons map[string]*Weapon
+
+var TheWeapons = Weapons{
+	"Basic":  {"Basic", 10, 30, 2},
+	"Sniper": {"Sniper", 60, 100, 0.5},
+}
 
 type Scene struct {
 	gi3d.Scene
@@ -367,6 +382,23 @@ func (gm *Game) Config() {
 	go gm.GetPosFromServer()     // this is loop getting positions from server
 	go gm.UpdatePeopleWorldPos() // this is loop updating positions
 	go gm.UpdatePersonYPos()     // deals with jumping and gravity
+}
+
+func generateDamageAmount(wp string) (damage int) {
+	var minD, maxD, rangeDiff float32
+	minD = TheWeapons[wp].MinD
+	maxD = TheWeapons[wp].MaxD
+	rangeDiff = maxD - minD
+	randNum := rand.Float32()
+	addNum := math.Round(float64(rangeDiff * randNum))
+	damage = int(float32(addNum) + minD)
+	return damage
+}
+func removeHealthPoints(wp string) {
+	damageAmount := generateDamageAmount(wp)
+	HEALTH -= float32(damageAmount)
+	healthBar.SetValue(HEALTH)
+	healthText.SetText(fmt.Sprintf("You have %v health", HEALTH))
 }
 
 func (gm *Game) UpdatePersonYPos() {

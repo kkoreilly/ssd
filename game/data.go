@@ -366,9 +366,6 @@ func updateBattlePoints(username string, value int) {
 		panic(err)
 	}
 }
-func removeHealthPoints(damage int) {
-
-}
 func setActive() {
 	for _, d := range FirstWorldBorders {
 		activeString := "f"

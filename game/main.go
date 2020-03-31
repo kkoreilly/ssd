@@ -27,6 +27,8 @@ var logInResult *gi.Label
 var inspectText *gi.Label
 var teamMainText *gi.Label
 var tv *gi.TabView
+var healthBar *gi.Slider
+var healthText *gi.Label
 
 // var SUPERMODE = false
 var signUpTab *gi.Frame
@@ -805,7 +807,7 @@ func initPlayTab() {
 	usernameKey.SetStretchMaxWidth()
 	hrow := gi.AddNewFrame(playTab, "hrow", gi.LayoutHoriz)
 	hrow.SetStretchMaxWidth()
-	healthBar := gi.AddNewSlider(hrow, "healthBar")
+	healthBar = gi.AddNewSlider(hrow, "healthBar")
 	healthBar.Dim = mat32.X
 	healthBar.Defaults()
 	healthBar.Max = 100
@@ -815,18 +817,23 @@ func initPlayTab() {
 	healthBar.SetProp(":value", ki.Props{"background-color": "green"})
 	healthBar.SetInactive()
 
-	healthText := gi.AddNewLabel(hrow, "healthText", "")
+	healthText = gi.AddNewLabel(hrow, "healthText", "")
 	healthText.Text = fmt.Sprintf("You have %v health", HEALTH)
 	healthText.SetProp("font-size", "30px")
 	healthText.Redrawable = true
 
 	takeDamage := gi.AddNewButton(hrow, "takeDamage")
-	takeDamage.Text = "Take 20 Damage"
+	takeDamage.Text = "Take Damage from the Basic Weapon"
 	takeDamage.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
-			HEALTH -= 20
-			healthBar.SetValue(HEALTH)
-			healthText.SetText(fmt.Sprintf("You have %v health", HEALTH))
+			removeHealthPoints("Basic")
+		}
+	})
+	takeDamage1 := gi.AddNewButton(hrow, "takeDamage1")
+	takeDamage1.Text = "Take Damage from the Sniper Weapon"
+	takeDamage1.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(gi.ButtonClicked) {
+			removeHealthPoints("Sniper")
 		}
 	})
 
