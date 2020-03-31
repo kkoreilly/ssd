@@ -509,6 +509,9 @@ func (gm *Game) UpdatePeopleWorldPos() {
 				ukt := uktt.(*gi.Label)
 				ukt.SetText(fmt.Sprintf("<b>%v:</b>         %v kills              ", k, gm.OtherPos[k].Points))
 				text.Pose.Pos.X = text.Pose.Pos.X - 0.2
+				if gm.OtherPos[k].Points >= 10 {
+					gm.setGameOver(k)
+				}
 			}
 			pers.Rel.Pos = ppos.Pos
 		}
