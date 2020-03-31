@@ -216,6 +216,7 @@ func createBattleJoinLayouts() {
 	}
 }
 func (gm *Game) setGameOver(winner string) {
+	fmt.Printf("SET GAME OVER FIRST \n")
 	gm.WorldMu.Lock()
 	gm.PosMu.Lock()
 	fmt.Printf("SET GAME OVER \n")
