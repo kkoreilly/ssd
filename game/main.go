@@ -5,7 +5,7 @@
 package main
 
 import (
-	// "fmt"
+	"fmt"
 	// "time"
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gimain"
@@ -13,6 +13,7 @@ import (
 	"github.com/goki/gi/svg"
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
+	"github.com/goki/mat32"
 )
 
 func main() {
@@ -802,6 +803,28 @@ func initPlayTab() {
 
 	usernameKey := gi.AddNewFrame(playTab, "usernameKey", gi.LayoutVert)
 	usernameKey.SetStretchMaxWidth()
+	hrow := gi.AddNewFrame(playTab, "hrow", gi.LayoutHoriz)
+	hrow.SetStretchMaxWidth()
+	healthBar := gi.AddNewSlider(hrow, "healthBar")
+	healthBar.Dim = mat32.X
+	healthBar.Defaults()
+	healthBar.Max = 100
+	healthBar.SetMinPrefWidth(units.NewEm(20))
+	healthBar.SetMinPrefHeight(units.NewEm(2))
+	healthBar.SetValue(HEALTH)
+	healthBar.SetProp(":value", ki.Props{"background-color": "green"})
+	healthBar.SetInactive()
+
+	healthText := gi.AddNewLabel(hrow, "healthText", "")
+	healthText.Text = fmt.Sprintf("You have %v health", HEALTH)
+	healthText.SetProp("font-size", "30px")
+
+	// healthBar.SetInactive()
+	// healthBar.Snap = true
+	// healthBar.Tracking = true
+	// healthBar.Icon = gi.IconName("circlebutton-on")
+	// healthBar.Max = 100
+	// healthBar.Value = HEALTH
 
 	TheGame = &Game{} // Set up game
 	TheGame.Config()  // Set up game

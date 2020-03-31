@@ -49,6 +49,7 @@ type Game struct {
 
 // TheGame is the game instance for the current game
 var TheGame *Game
+var HEALTH float32 = 100 // how much health you have
 
 type Scene struct {
 	gi3d.Scene
