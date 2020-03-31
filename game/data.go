@@ -792,7 +792,7 @@ func updatePosition(t string, value mat32.Vec3) {
 	statement := fmt.Sprintf("UPDATE players SET posX = '%v' WHERE username='%v'", value.X, USER)
 	_, err := db.Exec(statement)
 	if err != nil {
-		panic(err)
+		fmt.Printf("DB err: %v \n", err)
 	}
 
 	statement2 := fmt.Sprintf("UPDATE players SET posZ = '%v' WHERE username='%v'", value.Z, USER)
