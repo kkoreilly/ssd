@@ -29,6 +29,8 @@ var teamMainText *gi.Label
 var tv *gi.TabView
 var healthBar *gi.Slider
 var healthText *gi.Label
+var resultText *gi.Label
+var resultRow *gi.Frame
 
 // var SUPERMODE = false
 var signUpTab *gi.Frame
@@ -40,6 +42,7 @@ var resourcesTab *gi.Frame
 var simulationTab *gi.Frame
 var simulationControlsTab *gi.Frame
 var map2dTab *gi.Frame
+var weaponsTab *gi.Frame
 
 // var map3dTab *gi.Frame // to be added later
 var teamTab *gi.Frame
@@ -380,6 +383,57 @@ func initMainTabs() {
 	aboutResourcesText.SetProp("white-space", gi.WhiteSpaceNormal)
 	aboutResourcesText.SetProp("max-width", -1)
 	aboutResourcesText.SetProp("width", "20em")
+
+	weaponsTab = tv.AddNewTab(gi.KiT_Frame, "<b>Weapons</b>").(*gi.Frame)
+	weaponsTab.Lay = gi.LayoutVert
+	weaponsTab.SetStretchMaxWidth()
+	weaponsTab.SetStretchMaxHeight()
+	weaponsTab.SetProp("background-color", "lightblue")
+
+	weaponsTitle := weaponsTab.AddNewChild(gi.KiT_Label, "weaponsTitle").(*gi.Label)
+	weaponsTitle.SetProp("font-size", "60px")
+	weaponsTitle.SetProp("font-family", "Times New Roman, serif")
+	weaponsTitle.SetProp("text-align", "center")
+	weaponsTitle.Text = "<b>Weapons</b>"
+
+	yourWeaponText := weaponsTab.AddNewChild(gi.KiT_Label, "yourWeaponText").(*gi.Label)
+	yourWeaponText.SetProp("font-size", "40px")
+	yourWeaponText.SetProp("font-family", "Times New Roman, serif")
+	yourWeaponText.SetProp("text-align", "center")
+	yourWeaponText.Text = "<b>Your current weapon is:</b> " + WEAPON + "       "
+	yourWeaponText.Redrawable = true
+
+	chooseWeaponText := weaponsTab.AddNewChild(gi.KiT_Label, "chooseWeaponText").(*gi.Label)
+	chooseWeaponText.SetProp("font-size", "40px")
+	chooseWeaponText.SetProp("font-family", "Times New Roman, serif")
+	chooseWeaponText.SetProp("text-align", "center")
+	chooseWeaponText.Text = "<b>Choose a weapon below:</b>"
+
+	weaponsFrame := gi.AddNewFrame(weaponsTab, "weaponsFrame", gi.LayoutHoriz)
+	weaponsFrame.SetStretchMaxWidth()
+
+	for _, d := range TheWeapons {
+		weaponName := d.Name
+		minD := d.MinD
+		maxD := d.MaxD
+		fireRate := d.FireRate
+		weaponLayout := gi.AddNewFrame(weaponsFrame, "weaponLayout"+weaponName, gi.LayoutVert)
+		weaponLayout.SetStretchMaxWidth()
+		weaponButton := gi.AddNewButton(weaponLayout, "weaponButton")
+		weaponButton.Text = weaponName
+		weaponButton.SetProp("font-size", "30px")
+		weaponButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			if sig == int64(gi.ButtonClicked) {
+				WEAPON = weaponName
+				yourWeaponText.SetText("<b>Your current weapon is:</b> " + WEAPON)
+				yourWeaponText.SetFullReRender()
+			}
+		})
+		weaponInfoText := gi.AddNewLabel(weaponLayout, "weaponInfoText", "")
+		weaponInfoText.Text = fmt.Sprintf("%v-%v damage per shot \n%v shots per second", minD, maxD, fireRate)
+		weaponInfoText.SetProp("font-size", "20px")
+
+	}
 
 	map2dTab = tv.AddNewTab(gi.KiT_Frame, "<b>Live Map of the World</b>").(*gi.Frame)
 
@@ -811,7 +865,7 @@ func initPlayTab() {
 	healthBar.Dim = mat32.X
 	healthBar.Defaults()
 	healthBar.Max = 100
-	healthBar.SetMinPrefWidth(units.NewEm(20))
+	healthBar.SetMinPrefWidth(units.NewEm(150))
 	healthBar.SetMinPrefHeight(units.NewEm(2))
 	healthBar.SetValue(HEALTH)
 	healthBar.SetProp(":value", ki.Props{"background-color": "green"})
@@ -822,20 +876,13 @@ func initPlayTab() {
 	healthText.SetProp("font-size", "30px")
 	healthText.Redrawable = true
 
-	takeDamage := gi.AddNewButton(hrow, "takeDamage")
-	takeDamage.Text = "Take Damage from the Basic Weapon"
-	takeDamage.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(gi.ButtonClicked) {
-			removeHealthPoints("Basic")
-		}
-	})
-	takeDamage1 := gi.AddNewButton(hrow, "takeDamage1")
-	takeDamage1.Text = "Take Damage from the Sniper Weapon"
-	takeDamage1.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(gi.ButtonClicked) {
-			removeHealthPoints("Sniper")
-		}
-	})
+	resultRow = gi.AddNewFrame(playTab, "resultRow", gi.LayoutVert)
+	resultRow.SetStretchMaxWidth()
+
+	resultText = gi.AddNewLabel(resultRow, "resultText", "                                                                             ")
+	resultText.SetProp("font-size", "40px")
+	resultText.SetProp("text-align", "center")
+	resultText.Redrawable = true
 
 	// healthBar.SetInactive()
 	// healthBar.Snap = true
@@ -846,6 +893,14 @@ func initPlayTab() {
 
 	TheGame = &Game{} // Set up game
 	TheGame.Config()  // Set up game
+
+	// takeDamage1 := gi.AddNewButton(hrow, "takeDamage1")
+	// takeDamage1.Text = "Take Damage from the Sniper Weapon"
+	// takeDamage1.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	// 	if sig == int64(gi.ButtonClicked) {
+	// 		gm.removeHealthPoints("Sniper")
+	// 	}
+	// })
 
 	tv.SelectTabByName("<b>Game</b>")
 	tv.UpdateEnd(updt)

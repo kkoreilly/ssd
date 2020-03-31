@@ -23,6 +23,7 @@ var GOLD int        // Global variable for the amount of gold you have in game
 var LIVES int       // Global variable for the amount of lives you have in game
 var TEAM string     // Global variable for what team you're on
 var POINTS int      // Global variable for the currrent amount of points you have in a battle
+var WEAPON = "Basic"
 var goldNum int
 var livesNum int
 var gameOpen = true

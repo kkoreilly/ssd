@@ -321,6 +321,16 @@ func (gm *Game) Config() {
 		}
 	})
 
+	rec := ki.Node{}
+	rec.InitName(&rec, "rec")
+
+	takeDamage := gi.AddNewButton(brow, "takeDamage")
+	takeDamage.Text = "Take Damage"
+	takeDamage.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(gi.ButtonClicked) {
+			gm.removeHealthPoints(WEAPON)
+		}
+	})
 	// center_bluem :=
 	// cbm.Segs.Set(10, 10, 10) // not clear if any diff really..
 	// fpobj = gm.MakeObj(&MapObj{"FirstPerson", mat32.Vec3{0,0,0}, mat32.Vec3{1,1,1}}, "FirstPerson")
@@ -394,11 +404,65 @@ func generateDamageAmount(wp string) (damage int) {
 	damage = int(float32(addNum) + minD)
 	return damage
 }
-func removeHealthPoints(wp string) {
+func (gm *Game) removeHealthPoints(wp string) {
 	damageAmount := generateDamageAmount(wp)
 	HEALTH -= float32(damageAmount)
 	healthBar.SetValue(HEALTH)
 	healthText.SetText(fmt.Sprintf("You have %v health", HEALTH))
+	if HEALTH <= 0 {
+		pers := gm.World.ChildByName("FirstPerson", 0).(*eve.Group)
+		camOff := gm.Scene.Camera.Pose.Pos.Sub(pers.Rel.Pos) // currrent offset of camera vs. person
+		pers.Rel.Pos = mat32.Vec3{1000, 1, 1000}
+		updatePosition("pos", pers.Rel.Pos)
+		gm.Scene.Camera.Pose.Pos = pers.Rel.Pos.Add(camOff)
+		gm.World.WorldRelToAbs()
+		gm.Scene.UpdateSig()
+		resultText.SetText("<b>You were killed by...  Respawning in 5</b>")
+		resultText.SetFullReRender()
+		go gm.timerForResult()
+	}
+}
+func (gm *Game) timerForResult() {
+	time.Sleep(1 * time.Second)
+	resultText.SetText("<b>You were killed by...  Respawning in 4</b>")
+	resultText.SetFullReRender()
+	time.Sleep(1 * time.Second)
+	resultText.SetText("<b>You were killed by...  Respawning in 3</b>")
+	resultText.SetFullReRender()
+	time.Sleep(1 * time.Second)
+	resultText.SetText("<b>You were killed by...  Respawning in 2</b>")
+	resultText.SetFullReRender()
+	time.Sleep(1 * time.Second)
+	resultText.SetText("<b>You were killed by...  Respawning in 1</b>")
+	resultText.SetFullReRender()
+	time.Sleep(1 * time.Second)
+	resultText.SetText("<b>You were killed by...</b>")
+	resultButton := gi.AddNewButton(resultRow, "resultButton")
+	resultButton.Text = "<b>Respawn</b>"
+	resultButton.SetProp("horizontal-align", "center")
+	resultButton.SetProp("font-size", "40px")
+	resultButton.SetFullReRender()
+	rec := ki.Node{}
+	rec.InitName(&rec, "rec")
+	resultButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(gi.ButtonClicked) {
+			resultText.SetText("")
+			resultText.SetFullReRender()
+			resultButton.Delete(true)
+			HEALTH = 100
+			healthBar.SetValue(HEALTH)
+			healthText.SetText(fmt.Sprintf("You have %v health", HEALTH))
+			pers := gm.World.ChildByName("FirstPerson", 0).(*eve.Group)
+			camOff := gm.Scene.Camera.Pose.Pos.Sub(pers.Rel.Pos) // currrent offset of camera vs. person
+			pers.Rel.Pos = mat32.Vec3{0, 1, 50}
+			updatePosition("pos", pers.Rel.Pos)
+			gm.Scene.Camera.Pose.Pos = pers.Rel.Pos.Add(camOff)
+			gm.World.WorldRelToAbs()
+			gm.Scene.UpdateSig()
+
+		}
+	})
+	resultText.SetFullReRender()
 }
 
 func (gm *Game) UpdatePersonYPos() {
