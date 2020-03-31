@@ -538,7 +538,7 @@ func (gm *Game) GetPosFromServer() { // GetPosFromServer loops through the playe
 			return
 		}
 		gm.PosMu.Unlock()
-		gm.PosUpdtChan <- true // tells UpdatePeopleWorldPos to update to new positions!
+		gm.PosUpdtChan <- true // tells UpdatePeopleWorldPos to update to new positions
 		// todo: don't know from sender perspective if channel is still open!
 		// if !ok {
 		// 	return // game over

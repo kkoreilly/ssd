@@ -22,6 +22,7 @@ import (
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
 	"strings"
+	"time"
 )
 
 type CurPosition struct {
@@ -43,6 +44,7 @@ type Game struct {
 	GameOn      bool       // starts on when game turned out, turn off when close game
 	Winner      string
 	PersHitWall bool
+	Gravity     float32
 }
 
 // TheGame is the game instance for the current game
@@ -271,7 +273,7 @@ func (gm *Game) Config() {
 	// spot.Pose.Pos.Set(0, 0, 2)
 	sc.Camera.Pose.Pos.Y = 2
 	sc.Camera.Pose.Pos.Z = 50
-
+	gm.Gravity = 0.5
 	gm.Map = currentMap
 	gm.MakeWorld()
 
@@ -363,6 +365,39 @@ func (gm *Game) Config() {
 
 	go gm.GetPosFromServer()     // this is loop getting positions from server
 	go gm.UpdatePeopleWorldPos() // this is loop updating positions
+	go gm.UpdatePersonYPos()     // deals with jumping and gravity
+}
+
+func (gm *Game) UpdatePersonYPos() {
+	for {
+		if !gm.GameOn {
+			return
+		}
+		gm.PosMu.Lock()
+		gm.WorldMu.Lock()
+		pers := gm.World.ChildByName("FirstPerson", 0).(*eve.Group)
+
+		camOff := gm.Scene.Camera.Pose.Pos.Sub(pers.Rel.Pos) // currrent offset of camera vs. person
+
+		if pers.Rel.Pos.Y != 1 {
+			pers.Rel.LinVel.Y = pers.Rel.LinVel.Y - gm.Gravity
+
+			pers.Rel.Pos.Y += pers.Rel.LinVel.Y
+			if pers.Rel.Pos.Y <= 1 {
+				pers.Rel.Pos.Y = 1
+				pers.Rel.LinVel.Y = 0
+			}
+		}
+		gm.World.WorldRelToAbs()
+		gm.WorldMu.Unlock()
+		gm.PosMu.Unlock()
+		gm.Scene.Camera.Pose.Pos = pers.Rel.Pos.Add(camOff)
+		if pers.Rel.Pos.Y != 1 {
+			gm.Scene.UpdateSig()
+
+		}
+		time.Sleep(100 * time.Millisecond)
+	}
 }
 
 func AddNewScene(parent ki.Ki, name string) *Scene {
@@ -523,7 +558,7 @@ func (sc *Scene) Render2D() {
 			sc.NavEvents()
 		}
 		if gi.Render2DTrace {
-			fmt.Printf("3D Render2D: %v\n", sc.PathUnique())
+			// fmt.Printf("3D Render2D: %v\n", sc.PathUnique())
 		}
 		sc.Render()
 		sc.PopBounds()
@@ -657,69 +692,72 @@ func (sc *Scene) NavKeyEvents(kt *key.ChordEvent) {
 		}
 		kt.SetProcessed()
 
-	// case "UpArrow":
-	//
-	// 	sc.Camera.Pose.SetEulerRotation(orbDeg, 0, 0)
-	// kt.SetProcessed()
+		// case "UpArrow":
+		//
+		// 	sc.Camera.Pose.SetEulerRotation(orbDeg, 0, 0)
+		// kt.SetProcessed()
 
-	// case "Shift+UpArrow":
-	// 	sc.Camera.Pan(0, panDel)
-	// 	kt.SetProcessed()
-	// case "Control+UpArrow":
-	// 	sc.Camera.PanAxis(0, panDel)
-	// 	kt.SetProcessed()
-	// case "Alt+UpArrow":
-	// 	sc.Camera.PanTarget(0, panDel, 0)
-	// 	kt.SetProcessed()
-	// case "DownArrow":
-	// sc.Camera.Orbit(0, -orbDeg)
-	// kt.SetProcessed()
-	// case "Shift+DownArrow":
-	// 	sc.Camera.Pan(0, -panDel)
-	// 	kt.SetProcessed()
-	// case "Control+DownArrow":
-	// 	sc.Camera.PanAxis(0, -panDel)
-	// 	kt.SetProcessed()
-	// case "Alt+DownArrow":
-	// 	sc.Camera.PanTarget(0, -panDel, 0)
-	// 	kt.SetProcessed()
-	// case "LeftArrow":
-	// sc.Camera.Orbit(orbDeg, 0)
-	// kt.SetProcessed()
-	// case "Shift+LeftArrow":
-	// 	sc.Camera.Pan(-panDel, 0)
-	// 	kt.SetProcessed()
-	// case "Control+LeftArrow":
-	// 	sc.Camera.PanAxis(-panDel, 0)
-	// 	kt.SetProcessed()
-	// case "Alt+LeftArrow":
-	// 	sc.Camera.PanTarget(-panDel, 0, 0)
-	// 	kt.SetProcessed()
-	// case "RightArrow":
-	// sc.Camera.Orbit(-orbDeg, 0)
-	// kt.SetProcessed()
-	// case "Shift+RightArrow":
-	// 	sc.Camera.Pan(panDel, 0)
-	// 	kt.SetProcessed()
-	// case "Control+RightArrow":
-	// 	sc.Camera.PanAxis(panDel, 0)
-	// 	kt.SetProcessed()
-	// case "Alt+RightArrow":
-	// 	sc.Camera.PanTarget(panDel, 0, 0)
-	// 	kt.SetProcessed()
-	// case "Alt++", "Alt+=":
-	// 	sc.Camera.PanTarget(0, 0, panDel)
-	// 	kt.SetProcessed()
-	// case "Alt+-", "Alt+_":
-	// 	sc.Camera.PanTarget(0, 0, -panDel)
-	// 	kt.SetProcessed()
-	// case "+", "=":
-	// 	sc.Camera.Zoom(-zoomPct)
-	// 	kt.SetProcessed()
-	// case "-", "_":
-	// 	sc.Camera.Zoom(zoomPct)
-	// 	kt.SetProcessed()
+		// case "Shift+UpArrow":
+		// 	sc.Camera.Pan(0, panDel)
+		// 	kt.SetProcessed()
+		// case "Control+UpArrow":
+		// 	sc.Camera.PanAxis(0, panDel)
+		// 	kt.SetProcessed()
+		// case "Alt+UpArrow":
+		// 	sc.Camera.PanTarget(0, panDel, 0)
+		// 	kt.SetProcessed()
+		// case "DownArrow":
+		// sc.Camera.Orbit(0, -orbDeg)
+		// kt.SetProcessed()
+		// case "Shift+DownArrow":
+		// 	sc.Camera.Pan(0, -panDel)
+		// 	kt.SetProcessed()
+		// case "Control+DownArrow":
+		// 	sc.Camera.PanAxis(0, -panDel)
+		// 	kt.SetProcessed()
+		// case "Alt+DownArrow":
+		// 	sc.Camera.PanTarget(0, -panDel, 0)
+		// 	kt.SetProcessed()
+		// case "LeftArrow":
+		// sc.Camera.Orbit(orbDeg, 0)
+		// kt.SetProcessed()
+		// case "Shift+LeftArrow":
+		// 	sc.Camera.Pan(-panDel, 0)
+		// 	kt.SetProcessed()
+		// case "Control+LeftArrow":
+		// 	sc.Camera.PanAxis(-panDel, 0)
+		// 	kt.SetProcessed()
+		// case "Alt+LeftArrow":
+		// 	sc.Camera.PanTarget(-panDel, 0, 0)
+		// 	kt.SetProcessed()
+		// case "RightArrow":
+		// sc.Camera.Orbit(-orbDeg, 0)
+		// kt.SetProcessed()
+		// case "Shift+RightArrow":
+		// 	sc.Camera.Pan(panDel, 0)
+		// 	kt.SetProcessed()
+		// case "Control+RightArrow":
+		// 	sc.Camera.PanAxis(panDel, 0)
+		// 	kt.SetProcessed()
+		// case "Alt+RightArrow":
+		// 	sc.Camera.PanTarget(panDel, 0, 0)
+		// 	kt.SetProcessed()
+		// case "Alt++", "Alt+=":
+		// 	sc.Camera.PanTarget(0, 0, panDel)
+		// 	kt.SetProcessed()
+		// case "Alt+-", "Alt+_":
+		// 	sc.Camera.PanTarget(0, 0, -panDel)
+		// 	kt.SetProcessed()
+		// case "+", "=":
+		// 	sc.Camera.Zoom(-zoomPct)
+		// 	kt.SetProcessed()
+		// case "-", "_":
+		// 	sc.Camera.Zoom(zoomPct)
+		// 	kt.SetProcessed()
 	case " ":
+		pers.Rel.LinVel.Y = 1
+		pers.Rel.Pos.Y += pers.Rel.LinVel.Y
+	case "r":
 		pers.Rel.Pos.Set(0, 1, 0)
 		pers.Rel.Quat.SetFromAxisAngle(mat32.Vec3{0, 1, 0}, 0)
 	case "w":
@@ -749,7 +787,7 @@ func (sc *Scene) NavKeyEvents(kt *key.ChordEvent) {
 			prevPosZ := pers.Rel.Pos.Z
 			pers.Rel.MoveOnAxis(0, 0, 1, .5)
 			stillNessecary := gm.WorldStep(true)
-			fmt.Printf("Still for s: %v \n", stillNessecary)
+			// fmt.Printf("Still for s: %v \n", stillNessecary)
 			if stillNessecary {
 				pers.Rel.Pos.X = prevPosX
 				pers.Rel.Pos.Z = prevPosZ
@@ -800,8 +838,6 @@ func (sc *Scene) NavKeyEvents(kt *key.ChordEvent) {
 		// go updatePosition("posX", rcb.Initial.Pos.X)
 	}
 
-	// gm.World.UpdateWorld()
-	gm.World.WorldRelToAbs()
 	go updatePosition("pos", pers.Abs.Pos) // this was updated from UpdateWorld
 	// fmt.Printf("Pos Abs: %v  Pos Rel: %v \n", pers.Abs.Pos, pers.Rel.Pos)
 	sc.Camera.Pose.Pos = pers.Rel.Pos.Add(camOff)
@@ -828,11 +864,11 @@ func (ev *Game) WorldStep(specialCheck bool) (stillNessecary bool) {
 				if c.A.Name() == "person" {
 					// contacts = cl
 					// fmt.Printf("Contacts: %v \n", contacts)
-					fmt.Printf("Contact: %v \n", c)
+					// fmt.Printf("Contact: %v \n", c)
 					name := c.B.Name()
 					if strings.Contains(name, "wall") {
 						ev.PersHitWall = true
-						fmt.Printf("Hit wall! \n")
+						// fmt.Printf("Hit wall! \n")
 						if specialCheck {
 							return true
 						}
