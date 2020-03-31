@@ -515,11 +515,13 @@ func (gm *Game) UpdatePeopleWorldPos() {
 				}
 				ukt := uktt.(*gi.Label)
 				ukt.SetText(fmt.Sprintf("<b>%v:</b>         %v kills              ", k, gm.OtherPos[k].Points))
-				fmt.Printf("POINTS 2: %v \n", gm.OtherPos[k].Points)
 				text.Pose.Pos.X = text.Pose.Pos.X - 0.2
 				if gm.OtherPos[k].Points >= 10 {
-					fmt.Printf("Closing game... \n")
+					gm.PosMu.Unlock()
+					gm.WorldMu.Unlock()
 					gm.setGameOver(k)
+					gm.PosMu.Lock()
+					gm.WorldMu.Lock()
 				}
 			}
 			pers.Rel.Pos = ppos.Pos
@@ -539,7 +541,11 @@ func (gm *Game) UpdatePeopleWorldPos() {
 					POINTS = POINTS + 1
 					updateBattlePoints(USER, POINTS)
 					if POINTS >= 10 {
+						gm.PosMu.Unlock()
+						gm.WorldMu.Unlock()
 						gm.setGameOver(USER)
+						gm.PosMu.Lock()
+						gm.WorldMu.Lock()
 					}
 				}
 

@@ -216,19 +216,15 @@ func createBattleJoinLayouts() {
 	}
 }
 func (gm *Game) setGameOver(winner string) {
-	fmt.Printf("SET GAME OVER FIRST \n")
 	gm.WorldMu.Lock()
 	gm.PosMu.Lock()
-	fmt.Printf("SET GAME OVER \n")
 	gm.GameOn = false
-	fmt.Printf("GAME ON = %v \n", gm.GameOn)
 	gm.Winner = winner
 	gm.WorldMu.Unlock()
 	gm.PosMu.Unlock()
 }
 func (gm *Game) battleOver(winner string) {
 	gm.WorldMu.Lock()
-	fmt.Printf("Battle over... \n")
 	tabIndex, _ := tv.TabIndexByName("<b>Game</b>")
 	tv.DeleteTabIndex(tabIndex, true)
 	gameResultTab := tv.AddNewTab(gi.KiT_Frame, "<b>Game Result</b>").(*gi.Frame)
