@@ -727,26 +727,54 @@ func (sc *Scene) NavKeyEvents(kt *key.ChordEvent) {
 		y := pers.Rel.Pos.Y // keep height fixed -- no jumping right now.
 		if !gm.PersHitWall {
 			pers.Rel.MoveOnAxis(0, 0, -1, .5) // todo: use camera axis not fixed axis
+		} else {
+			prevPosX := pers.Rel.Pos.X
+			prevPosZ := pers.Rel.Pos.Z
+			pers.Rel.MoveOnAxis(0, 0, -1, .5)
+			stillNessecary := gm.WorldStep(true)
+			if stillNessecary {
+				pers.Rel.Pos.X = prevPosX
+				pers.Rel.Pos.Z = prevPosZ
+			}
 		}
 		pers.Rel.Pos.Y = y
-		gm.WorldStep()
+		gm.WorldStep(false)
 	case "s":
 		kt.SetProcessed()
 		y := pers.Rel.Pos.Y // keep height fixed -- no jumping right now.
 		if !gm.PersHitWall {
 			pers.Rel.MoveOnAxis(0, 0, 1, .5)
+		} else {
+			prevPosX := pers.Rel.Pos.X
+			prevPosZ := pers.Rel.Pos.Z
+			pers.Rel.MoveOnAxis(0, 0, 1, .5)
+			stillNessecary := gm.WorldStep(true)
+			fmt.Printf("Still for s: %v \n", stillNessecary)
+			if stillNessecary {
+				pers.Rel.Pos.X = prevPosX
+				pers.Rel.Pos.Z = prevPosZ
+			}
 		}
 
 		pers.Rel.Pos.Y = y
-		gm.WorldStep()
+		gm.WorldStep(false)
 	case "a":
 		kt.SetProcessed()
 		y := pers.Rel.Pos.Y // keep height fixed -- no jumping right now.
 		if !gm.PersHitWall {
 			pers.Rel.MoveOnAxis(-1, 0, 0, .5)
+		} else {
+			prevPosX := pers.Rel.Pos.X
+			prevPosZ := pers.Rel.Pos.Z
+			pers.Rel.MoveOnAxis(-1, 0, 0, .5)
+			stillNessecary := gm.WorldStep(true)
+			if stillNessecary {
+				pers.Rel.Pos.X = prevPosX
+				pers.Rel.Pos.Z = prevPosZ
+			}
 		}
 		pers.Rel.Pos.Y = y
-		gm.WorldStep()
+		gm.WorldStep(false)
 		// sc.Camera.Pan(panDel, 0)
 		// kt.SetProcessed()
 		// go updatePosition("posX", rcb.Initial.Pos.X)
@@ -755,9 +783,18 @@ func (sc *Scene) NavKeyEvents(kt *key.ChordEvent) {
 		y := pers.Rel.Pos.Y // keep height fixed -- no jumping right now.
 		if !gm.PersHitWall {
 			pers.Rel.MoveOnAxis(1, 0, 0, .5)
+		} else {
+			prevPosX := pers.Rel.Pos.X
+			prevPosZ := pers.Rel.Pos.Z
+			pers.Rel.MoveOnAxis(1, 0, 0, .5)
+			stillNessecary := gm.WorldStep(true)
+			if stillNessecary {
+				pers.Rel.Pos.X = prevPosX
+				pers.Rel.Pos.Z = prevPosZ
+			}
 		}
 		pers.Rel.Pos.Y = y
-		gm.WorldStep()
+		gm.WorldStep(false)
 		// sc.Camera.Pan(-panDel, 0)
 		// kt.SetProcessed()
 		// go updatePosition("posX", rcb.Initial.Pos.X)
@@ -773,13 +810,17 @@ func (sc *Scene) NavKeyEvents(kt *key.ChordEvent) {
 	sc.UpdateSig()
 }
 
-func (ev *Game) WorldStep() {
-// fmt.Printf("In world step! \n")
+func (ev *Game) WorldStep(specialCheck bool) (stillNessecary bool) {
+	// fmt.Printf("In world step! \n")
 	ev.World.WorldRelToAbs()
 	// var contacts eve.Contacts
 	cts := ev.World.WorldCollide(eve.DynsTopGps)
 	// fmt.Printf("Children: %v \n", ev.World.Children())
 	// fmt.Printf("Cts: %v \n", cts)
+	if cts == nil && specialCheck {
+		ev.PersHitWall = false
+		fmt.Printf("We are safe now! \n")
+	}
 	for _, cl := range cts {
 		// fmt.Printf("Cl: %v \n", cl)
 		if len(cl) >= 1 {
@@ -792,12 +833,16 @@ func (ev *Game) WorldStep() {
 					if strings.Contains(name, "wall") {
 						ev.PersHitWall = true
 						fmt.Printf("Hit wall! \n")
+						if specialCheck {
+							return true
+						}
 					}
 				}
 				// fmt.Printf("A: %v  B: %v\n", c.A.Name(), c.B.Name())
 			}
 		}
 	}
+	return false
 	// if len(contacts) > 0 { // turn around
 	// 	fmt.Printf("hit wall: turn around!\n")
 	// }
