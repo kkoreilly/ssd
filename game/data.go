@@ -519,6 +519,9 @@ func (gm *Game) GetPosFromServer() { // GetPosFromServer loops through the playe
 			fmt.Printf("DB Error: %v \n", err)
 		}
 		gm.PosMu.Lock()
+		if rows == nil {
+			continue
+		}
 		for rows.Next() {
 			var username, battleName string
 			var posX, posY, posZ float32
