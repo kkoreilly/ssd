@@ -272,7 +272,7 @@ func (gm *Game) Config() {
 	// spot := gi3d.AddNewSpotLight(sc, "spot", 1, gi3d.DirectSun)
 	// spot.Pose.Pos.Set(0, 0, 2)
 	sc.Camera.Pose.Pos.Y = 2
-	sc.Camera.Pose.Pos.Z = 50
+	sc.Camera.Pose.Pos.Z = 47
 	gm.Gravity = 0.5
 	gm.Map = currentMap
 	gm.MakeWorld()
@@ -759,9 +759,9 @@ func (sc *Scene) NavKeyEvents(kt *key.ChordEvent) {
 			pers.Rel.LinVel.Y = 1
 			pers.Rel.Pos.Y += pers.Rel.LinVel.Y
 		}
-	case "r":
-		pers.Rel.Pos.Set(0, 1, 0)
-		pers.Rel.Quat.SetFromAxisAngle(mat32.Vec3{0, 1, 0}, 0)
+	// case "r":
+	// 	pers.Rel.Pos.Set(0, 1, 0)
+	// 	pers.Rel.Quat.SetFromAxisAngle(mat32.Vec3{0, 1, 0}, 0)
 	case "w":
 		kt.SetProcessed()
 		y := pers.Rel.Pos.Y // keep height fixed -- no jumping right now.
@@ -802,11 +802,11 @@ func (sc *Scene) NavKeyEvents(kt *key.ChordEvent) {
 		kt.SetProcessed()
 		y := pers.Rel.Pos.Y // keep height fixed -- no jumping right now.
 		if !gm.PersHitWall {
-			pers.Rel.MoveOnAxis(-1, 0, 0, .5)
+			pers.Rel.MoveOnAxis(-0.75, 0, 0, .5)
 		} else {
 			prevPosX := pers.Rel.Pos.X
 			prevPosZ := pers.Rel.Pos.Z
-			pers.Rel.MoveOnAxis(-1, 0, 0, .5)
+			pers.Rel.MoveOnAxis(-0.75, 0, 0, .5)
 			stillNessecary := gm.WorldStep(true)
 			if stillNessecary {
 				pers.Rel.Pos.X = prevPosX
@@ -822,11 +822,11 @@ func (sc *Scene) NavKeyEvents(kt *key.ChordEvent) {
 		kt.SetProcessed()
 		y := pers.Rel.Pos.Y // keep height fixed -- no jumping right now.
 		if !gm.PersHitWall {
-			pers.Rel.MoveOnAxis(1, 0, 0, .5)
+			pers.Rel.MoveOnAxis(0.75, 0, 0, .5)
 		} else {
 			prevPosX := pers.Rel.Pos.X
 			prevPosZ := pers.Rel.Pos.Z
-			pers.Rel.MoveOnAxis(1, 0, 0, .5)
+			pers.Rel.MoveOnAxis(0.75, 0, 0, .5)
 			stillNessecary := gm.WorldStep(true)
 			if stillNessecary {
 				pers.Rel.Pos.X = prevPosX
