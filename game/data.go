@@ -218,7 +218,9 @@ func createBattleJoinLayouts() {
 func (gm *Game) setGameOver(winner string) {
 	gm.WorldMu.Lock()
 	gm.PosMu.Lock()
+	fmt.Printf("SET GAME OVER \n")
 	gm.GameOn = false
+	fmt.Printf("GAME ON = %v \n", gm.GameOn)
 	gm.Winner = winner
 	gm.WorldMu.Unlock()
 	gm.PosMu.Unlock()
@@ -538,7 +540,7 @@ func (gm *Game) GetPosFromServer() { // GetPosFromServer loops through the playe
 		}
 		// time.Sleep(100 * time.Millisecond)
 		// gm.OtherPos["testyother"] = &CurPosition{"testyother", mat32.Vec3{rand.Float32()*5 - 2.5, 1, rand.Float32()*5 - 2.5}, 50}
-
+		fmt.Printf("Game on: %v \n", gm.GameOn)
 		if !gm.GameOn {
 			close(gm.PosUpdtChan)
 			gm.battleOver(gm.Winner)
