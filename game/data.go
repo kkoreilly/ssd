@@ -225,6 +225,7 @@ func (gm *Game) setGameOver(winner string) {
 }
 func (gm *Game) battleOver(winner string) {
 	gm.WorldMu.Lock()
+	fmt.Printf("Battle over... \n")
 	tabIndex, _ := tv.TabIndexByName("<b>Game</b>")
 	tv.DeleteTabIndex(tabIndex, true)
 	gameResultTab := tv.AddNewTab(gi.KiT_Frame, "<b>Game Result</b>").(*gi.Frame)
@@ -527,6 +528,7 @@ func (gm *Game) GetPosFromServer() { // GetPosFromServer loops through the playe
 			var posX, posY, posZ float32
 			var points int
 			rows.Scan(&username, &posX, &posY, &posZ, &battleName, &points)
+			fmt.Printf("POINTS: %v   USER: %v \n", points, username)
 			// fmt.Printf("Username: %v \n", username)
 			// fmt.Printf("User: %v \n", USER)
 			if username != USER {
