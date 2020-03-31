@@ -516,7 +516,7 @@ func (gm *Game) GetPosFromServer() { // GetPosFromServer loops through the playe
 		getStatement := "SELECT * FROM players"
 		rows, err := db.Query(getStatement)
 		if err != nil {
-			panic(err)
+			fmt.Printf("DB Error: %v \n", err)
 		}
 		gm.PosMu.Lock()
 		for rows.Next() {
