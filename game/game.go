@@ -295,6 +295,15 @@ func (gm *Game) Config() {
 
 	gm.MakeView()
 
+	text := gi3d.AddNewText2D(&sc.Scene, &sc.Scene, "CrossText", "+")
+	text.SetProp("color", "white")
+	// text.SetProp("background-color", "black")
+	text.SetProp("text-align", "center")
+	text.Pose.Scale.SetScalar(0.5)
+	text.Pose.Pos = sc.Camera.Pose.Pos
+	text.Pose.Pos.Z -= 10
+	text.Pose.Pos.X += 2
+
 	gi.AddNewSpace(gamerow, "space1")
 
 	brow := gi.AddNewLayout(playTab, "brow", gi.LayoutHoriz)
@@ -952,7 +961,11 @@ func (sc *Scene) NavKeyEvents(kt *key.ChordEvent) {
 
 	go updatePosition("pos", pers.Abs.Pos) // this was updated from UpdateWorld
 	// fmt.Printf("Pos Abs: %v  Pos Rel: %v \n", pers.Abs.Pos, pers.Rel.Pos)
+
 	sc.Camera.Pose.Pos = pers.Rel.Pos.Add(camOff)
+	text := sc.Scene.ChildByName("CrossText", 0).(*gi3d.Text2D)
+	text.Pose.Pos = sc.Camera.Pose.Pos.Add(mat32.Vec3{2, 0, -10})
+
 	gm.World.UpdateEnd(wupdt)
 	gm.View.UpdatePose()
 	sc.UpdateSig()
