@@ -818,6 +818,17 @@ func initPlayTab() {
 	healthText := gi.AddNewLabel(hrow, "healthText", "")
 	healthText.Text = fmt.Sprintf("You have %v health", HEALTH)
 	healthText.SetProp("font-size", "30px")
+	healthText.Redrawable = true
+
+	takeDamage := gi.AddNewButton(hrow, "takeDamage")
+	takeDamage.Text = "Take 20 Damage"
+	takeDamage.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(gi.ButtonClicked) {
+			HEALTH -= 20
+			healthBar.SetValue(HEALTH)
+			healthText.SetText(fmt.Sprintf("You have %v health", HEALTH))
+		}
+	})
 
 	// healthBar.SetInactive()
 	// healthBar.Snap = true
