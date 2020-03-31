@@ -798,7 +798,7 @@ func updatePosition(t string, value mat32.Vec3) {
 	statement2 := fmt.Sprintf("UPDATE players SET posZ = '%v' WHERE username='%v'", value.Z, USER)
 	_, err = db.Exec(statement2)
 	if err != nil {
-		panic(err)
+		fmt.Printf("DB err: %v \n", err)
 	}
 }
 func addUser(user string, password string) {

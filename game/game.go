@@ -388,6 +388,11 @@ func (gm *Game) UpdatePersonYPos() {
 				pers.Rel.Pos.Y = 1
 				pers.Rel.LinVel.Y = 0
 			}
+			statement := fmt.Sprintf("UPDATE players SET posY = '%v' WHERE username='%v'", pers.Rel.Pos.Y, USER)
+			_, err := db.Exec(statement)
+			if err != nil {
+				fmt.Printf("DB err: %v \n", err)
+			}
 		}
 		gm.World.WorldRelToAbs()
 		gm.WorldMu.Unlock()
@@ -397,6 +402,7 @@ func (gm *Game) UpdatePersonYPos() {
 			gm.Scene.UpdateSig()
 
 		}
+
 		time.Sleep(100 * time.Millisecond)
 	}
 }
