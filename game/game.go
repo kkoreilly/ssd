@@ -755,8 +755,10 @@ func (sc *Scene) NavKeyEvents(kt *key.ChordEvent) {
 		// 	sc.Camera.Zoom(zoomPct)
 		// 	kt.SetProcessed()
 	case " ":
-		pers.Rel.LinVel.Y = 1
-		pers.Rel.Pos.Y += pers.Rel.LinVel.Y
+		if pers.Rel.Pos.Y == 1 {
+			pers.Rel.LinVel.Y = 1
+			pers.Rel.Pos.Y += pers.Rel.LinVel.Y
+		}
 	case "r":
 		pers.Rel.Pos.Set(0, 1, 0)
 		pers.Rel.Quat.SetFromAxisAngle(mat32.Vec3{0, 1, 0}, 0)
@@ -855,7 +857,7 @@ func (ev *Game) WorldStep(specialCheck bool) (stillNessecary bool) {
 	// fmt.Printf("Cts: %v \n", cts)
 	if cts == nil && specialCheck {
 		ev.PersHitWall = false
-		fmt.Printf("We are safe now! \n")
+		// fmt.Printf("We are safe now! \n")
 	}
 	for _, cl := range cts {
 		// fmt.Printf("Cl: %v \n", cl)
