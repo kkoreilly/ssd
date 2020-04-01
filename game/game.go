@@ -9,6 +9,11 @@ import (
 	"sort"
 	"sync"
 
+	"math"
+	"math/rand"
+	"strings"
+	"time"
+
 	"github.com/emer/eve/eve"
 	"github.com/emer/eve/evev"
 	"github.com/goki/gi/gi"
@@ -21,10 +26,6 @@ import (
 	"github.com/goki/ki/ki"
 	"github.com/goki/ki/kit"
 	"github.com/goki/mat32"
-	"math"
-	"math/rand"
-	"strings"
-	"time"
 )
 
 type CurPosition struct {
@@ -418,7 +419,7 @@ func (gm *Game) fireWeapon() { // standard event for what happens when you fire
 	endPos := cursor.Pose
 	endPos.MoveOnAxis(0, 0, -1, 100)
 	color, _ := gi.ColorFromName("red")
-	gi3d.AddNewArrow(&gm.Scene.Scene, &gm.Scene.Scene, "bullet_arrow", cursor.Pose.Pos, endPos.Pos, 1, color, false, true, 1, 1, 4)
+	gi3d.AddNewArrow(&gm.Scene.Scene, &gm.Scene.Scene, "bullet_arrow", cursor.Pose.Pos, endPos.Pos, .05, color, gi3d.NoStartArrow, gi3d.NoEndArrow, 1, 1, 4)
 
 	// done with what to fire
 	gm.AbleToFire = false
