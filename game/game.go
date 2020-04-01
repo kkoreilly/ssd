@@ -491,7 +491,12 @@ func (gm *Game) fireWeapon() { // standard event for what happens when you fire
 			// gm.removeHealthPoints(WEAPON)
 		}
 	}
+	if cts != nil {
 	endPos.Pos = closest.Point
+} else {
+	rayPos.MoveOnAxis(0, 0, -1, 100)
+	endPos.Pos = rayPos.Pos
+}
 	color, _ := gi.ColorFromName("red")
 	gi3d.AddNewArrow(&gm.Scene.Scene, &gm.Scene.Scene, "bullet_arrow_you", cursor.Pose.Pos, endPos.Pos, .05, color, gi3d.NoStartArrow, gi3d.NoEndArrow, 1, 1, 4)
 
