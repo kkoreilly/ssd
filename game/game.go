@@ -498,7 +498,7 @@ func (gm *Game) updateCursorPosition() {
 	cursor := gm.Scene.Scene.ChildByName("CrossText", 0).(*gi3d.Text2D)
 	// pers := gm.World.ChildByName("FirstPerson", 0).(*eve.Group)
 	cursor.Pose = gm.Scene.Camera.Pose
-	cursor.Pose.MoveOnAxis(0, 0, -1, 5)
+	cursor.Pose.MoveOnAxis(0, 0, -1, 3)
 }
 
 func (gm *Game) UpdatePersonYPos() {
@@ -756,7 +756,7 @@ func (sc *Scene) NavEvents() {
 			ssc.Camera.Pose.Pos.Y += 1
 			ssc.Camera.Pose.SetAxisRotation(0, 1, 0, sc.CamRotLR)
 			ssc.Camera.Pose.RotateOnAxis(1, 0, 0, sc.CamRotUD)
-			ssc.Camera.Pose.MoveOnAxis(0, 0, 1, 5)
+			ssc.Camera.Pose.MoveOnAxis(0, 0, 1, 3)
 			ssc.Camera.Pose.MoveOnAxis(1, 0, 0, 1)
 			pers.Rel.SetAxisRotation(0, 1, 0, sc.CamRotLR)
 
