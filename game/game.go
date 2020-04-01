@@ -414,8 +414,6 @@ func (gm *Game) fireWeapon() { // standard event for what happens when you fire
 	}
 	// what to do on fire in here:
 
-	// gm.removeHealthPoints(WEAPON)
-
 	// done with what to fire
 	gm.AbleToFire = false
 	numOfSeconds := TheWeapons[WEAPON].FireRate
@@ -499,6 +497,7 @@ func (gm *Game) updateCursorPosition() {
 	// pers := gm.World.ChildByName("FirstPerson", 0).(*eve.Group)
 	cursor.Pose = gm.Scene.Camera.Pose
 	cursor.Pose.MoveOnAxis(0, 0, -1, 3)
+	cursor.Pose.Scale.SetScalar(0.5)
 }
 
 func (gm *Game) UpdatePersonYPos() {
