@@ -429,6 +429,7 @@ func (gm *Game) RenderEnemyShots() {
 		gm.PosMu.Lock()
 		for k, d := range gm.FireEvents {
 			if d.Creator != USER {
+				// fmt.Printf("Still running! \n")
 				if gm.Scene.Scene.ChildByName(fmt.Sprintf("bullet_arrow_enemy%v", k), 0) == nil {
 					ray := mat32.NewRay(d.Origin, d.Dir)
 					endPos := mat32.Vec3{0, 0, 0}
@@ -450,7 +451,7 @@ func (gm *Game) RenderEnemyShots() {
 					}
 					endPos = closest.Point
 					color, _ := gi.ColorFromName("red")
-					gi3d.AddNewArrow(&gm.Scene.Scene, &gm.Scene.Scene, "bullet_arrow_you", d.Origin, endPos, .05, color, gi3d.NoStartArrow, gi3d.NoEndArrow, 1, 1, 4)
+					gi3d.AddNewArrow(&gm.Scene.Scene, &gm.Scene.Scene, fmt.Sprintf("bullet_arrow_enemy%v", k), d.Origin, endPos, .05, color, gi3d.NoStartArrow, gi3d.NoEndArrow, 1, 1, 4)
 
 				}
 			}
@@ -844,25 +845,25 @@ func (sc *Scene) NavEvents() {
 		}
 		ssc.UpdateSig()
 	})
-	sc.ConnectEvent(oswin.MouseScrollEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
-		me := d.(*mouse.ScrollEvent)
-		me.SetProcessed()
-		ssc := recv.Embed(KiT_Scene).(*Scene)
-		if ssc.SetDragCursor {
-			oswin.TheApp.Cursor(ssc.Viewport.Win.OSWin).Pop()
-			ssc.SetDragCursor = false
-		}
-		zoom := float32(me.NonZeroDelta(false))
-		zoomPct := float32(.05)
-		zoomDel := float32(.05)
-		switch {
-		case key.HasAllModifierBits(me.Modifiers, key.Alt):
-			ssc.Camera.PanTarget(0, 0, zoom*zoomDel)
-		default:
-			ssc.Camera.Zoom(zoomPct * zoom)
-		}
-		ssc.UpdateSig()
-	})
+	// sc.ConnectEvent(oswin.MouseScrollEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
+	// 	me := d.(*mouse.ScrollEvent)
+	// 	me.SetProcessed()
+	// 	ssc := recv.Embed(KiT_Scene).(*Scene)
+	// 	if ssc.SetDragCursor {
+	// 		oswin.TheApp.Cursor(ssc.Viewport.Win.OSWin).Pop()
+	// 		ssc.SetDragCursor = false
+	// 	}
+	// 	zoom := float32(me.NonZeroDelta(false))
+	// 	zoomPct := float32(.05)
+	// 	zoomDel := float32(.05)
+	// 	switch {
+	// 	case key.HasAllModifierBits(me.Modifiers, key.Alt):
+	// 		ssc.Camera.PanTarget(0, 0, zoom*zoomDel)
+	// 	default:
+	// 		ssc.Camera.Zoom(zoomPct * zoom)
+	// 	}
+	// 	ssc.UpdateSig()
+	// })
 	sc.ConnectEvent(oswin.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.Event)
 		me.SetProcessed()
