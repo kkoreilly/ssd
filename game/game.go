@@ -288,8 +288,9 @@ func (gm *Game) Config() {
 
 	// spot := gi3d.AddNewSpotLight(sc, "spot", 1, gi3d.DirectSun)
 	// spot.Pose.Pos.Set(0, 0, 2)
+	sc.Camera.FOV = 50
 	sc.Camera.Pose.Pos.Y = 2
-	sc.Camera.Pose.Pos.Z = 50
+	sc.Camera.Pose.Pos.Z = 45
 	gm.Gravity = 0.5
 	gm.Map = currentMap
 	gm.MakeWorld()
@@ -301,7 +302,7 @@ func (gm *Game) Config() {
 	text.SetProp("color", "white")
 	// text.SetProp("background-color", "black")
 	text.SetProp("text-align", "center")
-	text.Pose.Scale.SetScalar(0.5)
+	text.Pose.Scale.SetScalar(0.1)
 	text.Pose.Pos = sc.Camera.Pose.Pos
 	text.Pose.Pos.Z -= 10
 	text.Pose.Pos.X += 2
@@ -497,7 +498,7 @@ func (gm *Game) updateCursorPosition() {
 	cursor := gm.Scene.Scene.ChildByName("CrossText", 0).(*gi3d.Text2D)
 	// pers := gm.World.ChildByName("FirstPerson", 0).(*eve.Group)
 	cursor.Pose = gm.Scene.Camera.Pose
-	cursor.Pose.MoveOnAxis(0, 0, -1, 10)
+	cursor.Pose.MoveOnAxis(0, 0, -1, 5)
 }
 
 func (gm *Game) UpdatePersonYPos() {
@@ -752,10 +753,12 @@ func (sc *Scene) NavEvents() {
 			pers := TheGame.World.ChildByName("FirstPerson", 0).(*eve.Group)
 			ssc.Camera.Pose.Pos = pers.Abs.Pos
 			ssc.Camera.Pose.Quat = pers.Abs.Quat
-			ssc.Camera.Pose.MoveOnAxis(1, 0, 0, 2)
-			ssc.Camera.Pose.SetAxisRotation(0, 1, 0, -sc.CamRotLR)
-			ssc.Camera.Pose.RotateOnAxis(1, 0, 0, -sc.CamRotUD)
-			ssc.Camera.Pose.MoveOnAxis(0, 0, 1, 10)
+			ssc.Camera.Pose.Pos.Y += 1
+			ssc.Camera.Pose.SetAxisRotation(0, 1, 0, sc.CamRotLR)
+			ssc.Camera.Pose.RotateOnAxis(1, 0, 0, sc.CamRotUD)
+			ssc.Camera.Pose.MoveOnAxis(0, 0, 1, 5)
+			ssc.Camera.Pose.MoveOnAxis(1, 0, 0, 1)
+			pers.Rel.SetAxisRotation(0, 1, 0, sc.CamRotLR)
 
 			TheGame.updateCursorPosition()
 		}
