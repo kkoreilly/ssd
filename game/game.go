@@ -262,8 +262,8 @@ func (gm *Game) MakeView() {
 	gm.MakeMeshes()
 	wgp := gi3d.AddNewGroup(sc, sc, "world")
 	gm.View = evev.NewView(gm.World, sc, wgp)
-	// gm.View.InitLibrary() // this makes a basic library based on body shapes, sizes
-	gm.MakeLibrary()
+	gm.View.InitLibrary() // this makes a basic library based on body shapes, sizes
+	// gm.MakeLibrary()
 	gm.View.Sync()
 }
 
@@ -424,10 +424,10 @@ func (gm *Game) fireWeapon() { // standard event for what happens when you fire
 	ray := mat32.NewRay(cursor.Pose.Pos, rayPos.Pos)
 	fmt.Printf("Ray: %v \n", ray)
 	cts := gm.World.RayBodyIntersections(*ray)
-	for _, d := range cts {
-		fmt.Printf("Body: %v  Point: %v \n", d.Body, d.Point)
+	for k, d := range cts {
+		fmt.Printf("Key: %v Body: %v  Point: %v \n", k, d.Body, d.Point)
 		endPos.Pos = d.Point
-		break
+		// break
 	}
 	color, _ := gi.ColorFromName("red")
 	gi3d.AddNewArrow(&gm.Scene.Scene, &gm.Scene.Scene, "bullet_arrow", cursor.Pose.Pos, endPos.Pos, .05, color, gi3d.NoStartArrow, gi3d.NoEndArrow, 1, 1, 4)
