@@ -54,6 +54,7 @@ type Game struct {
 	Winner      string
 	PersHitWall bool
 	Gravity     float32
+	AbleToFire  bool
 }
 
 // TheGame is the game instance for the current game
@@ -63,7 +64,7 @@ type Weapons map[string]*Weapon
 
 var TheWeapons = Weapons{
 	"Basic":  {"Basic", 10, 30, 2},
-	"Sniper": {"Sniper", 60, 100, 0.5},
+	"Sniper": {"Sniper", 60, 100, 0.25},
 }
 
 type Scene struct {
@@ -294,6 +295,7 @@ func (gm *Game) Config() {
 	gm.MakeWorld()
 
 	gm.MakeView()
+	gm.AbleToFire = true
 
 	text := gi3d.AddNewText2D(&sc.Scene, &sc.Scene, "CrossText", "+")
 	text.SetProp("color", "white")
@@ -337,7 +339,7 @@ func (gm *Game) Config() {
 	takeDamage.Text = "Take Damage"
 	takeDamage.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
-			gm.removeHealthPoints(WEAPON)
+			go gm.fireWeapon()
 		}
 	})
 	// center_bluem :=
@@ -401,6 +403,23 @@ func (gm *Game) Config() {
 	go gm.GetPosFromServer()     // this is loop getting positions from server
 	go gm.UpdatePeopleWorldPos() // this is loop updating positions
 	go gm.UpdatePersonYPos()     // deals with jumping and gravity
+}
+
+func (gm *Game) fireWeapon() { // standard event for what happens when you fire
+	// Currently just deal damage to yourself, at interval
+	// todo: actually fire and deal damage to others
+	if !gm.AbleToFire {
+		return
+	}
+	// what to do on fire in here:
+
+	// gm.removeHealthPoints(WEAPON)
+
+	// done with what to fire
+	gm.AbleToFire = false
+	numOfSeconds := TheWeapons[WEAPON].FireRate
+	time.Sleep(time.Duration(1/numOfSeconds) * time.Second)
+	gm.AbleToFire = true
 }
 
 func generateDamageAmount(wp string) (damage int) {
@@ -472,6 +491,13 @@ func (gm *Game) timerForResult() {
 		}
 	})
 	resultText.SetFullReRender()
+}
+
+func (gm *Game) updateCursorPosition() {
+	cursor := gm.Scene.Scene.ChildByName("CrossText", 0).(*gi3d.Text2D)
+	// pers := gm.World.ChildByName("FirstPerson", 0).(*eve.Group)
+	cursor.Pose = gm.Scene.Camera.Pose
+	cursor.Pose.MoveOnAxis(0, 0, -1, 10)
 }
 
 func (gm *Game) UpdatePersonYPos() {
@@ -723,8 +749,15 @@ func (sc *Scene) NavEvents() {
 			}
 
 			sc.CamRotLR += dx * orbDels * 2
-			ssc.Camera.Pose.SetAxisRotation(0, 1, 0, sc.CamRotLR)
-			ssc.Camera.Pose.RotateOnAxis(1, 0, 0, sc.CamRotUD)
+			pers := TheGame.World.ChildByName("FirstPerson", 0).(*eve.Group)
+			ssc.Camera.Pose.Pos = pers.Abs.Pos
+			ssc.Camera.Pose.Quat = pers.Abs.Quat
+			ssc.Camera.Pose.MoveOnAxis(1, 0, 0, 2)
+			ssc.Camera.Pose.SetAxisRotation(0, 1, 0, -sc.CamRotLR)
+			ssc.Camera.Pose.RotateOnAxis(1, 0, 0, -sc.CamRotUD)
+			ssc.Camera.Pose.MoveOnAxis(0, 0, 1, 10)
+
+			TheGame.updateCursorPosition()
 		}
 		ssc.UpdateSig()
 	})
@@ -751,12 +784,15 @@ func (sc *Scene) NavEvents() {
 		me := d.(*mouse.Event)
 		me.SetProcessed()
 		ssc := recv.Embed(KiT_Scene).(*Scene)
+
 		if ssc.SetDragCursor {
 			oswin.TheApp.Cursor(ssc.Viewport.Win.OSWin).Pop()
 			ssc.SetDragCursor = false
 		}
 		if !ssc.IsInactive() && !ssc.HasFocus() {
 			ssc.GrabFocus()
+		} else {
+			go TheGame.fireWeapon()
 		}
 		// obj := ssc.FirstContainingPoint(me.Where, true)
 		// if me.Action == mouse.Release && me.Button == mouse.Right {
@@ -878,9 +914,9 @@ func (sc *Scene) NavKeyEvents(kt *key.ChordEvent) {
 			pers.Rel.LinVel.Y = 1
 			pers.Rel.Pos.Y += pers.Rel.LinVel.Y
 		}
-	// case "r":
-	// 	pers.Rel.Pos.Set(0, 1, 0)
-	// 	pers.Rel.Quat.SetFromAxisAngle(mat32.Vec3{0, 1, 0}, 0)
+	case "r":
+		pers.Rel.Pos.Set(0, 1, 0)
+		pers.Rel.Quat.SetFromAxisAngle(mat32.Vec3{0, 1, 0}, 0)
 	case "w":
 		kt.SetProcessed()
 		y := pers.Rel.Pos.Y // keep height fixed -- no jumping right now.
@@ -961,10 +997,11 @@ func (sc *Scene) NavKeyEvents(kt *key.ChordEvent) {
 
 	go updatePosition("pos", pers.Abs.Pos) // this was updated from UpdateWorld
 	// fmt.Printf("Pos Abs: %v  Pos Rel: %v \n", pers.Abs.Pos, pers.Rel.Pos)
-
 	sc.Camera.Pose.Pos = pers.Rel.Pos.Add(camOff)
-	text := sc.Scene.ChildByName("CrossText", 0).(*gi3d.Text2D)
-	text.Pose.Pos = sc.Camera.Pose.Pos.Add(mat32.Vec3{2, 0, -10})
+	gm.updateCursorPosition()
+	// text.TrackCamera(&sc.Scene)
+	// text.Pose.Pos.Z -= 10
+	// text.Pose.Pos.X += 2
 
 	gm.World.UpdateEnd(wupdt)
 	gm.View.UpdatePose()
@@ -991,7 +1028,7 @@ func (ev *Game) WorldStep(specialCheck bool) (stillNessecary bool) {
 					// fmt.Printf("Contacts: %v \n", contacts)
 					// fmt.Printf("Contact: %v \n", c)
 					name := c.B.Name()
-					if strings.Contains(name, "wall") {
+					if strings.Contains(name, "wall") || strings.Contains(name, "Wall") {
 						ev.PersHitWall = true
 						// fmt.Printf("Hit wall! \n")
 						if specialCheck {
