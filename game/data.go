@@ -90,6 +90,33 @@ func addTeamUpdateButtons() {
 
 	}
 }
+func (gm *Game) GetFireEvents() {
+	for {
+		if !gm.GameOn {
+			return
+		}
+		gm.FireEventMu.Lock()
+		rows, _ := db.Query("SELECT * FROM fireEvents")
+		var i = 0
+		for rows.Next() {
+			var creator string
+			var damage int
+			var origin, dir mat32.Vec3
+			rows.Scan(&creator, &damage, &origin.X, &origin.Y, &origin.Z, &dir.X, &dir.Y, &dir.Z)
+			gm.FireEvents[i] = &FireEventInfo{creator, damage, origin, dir}
+			// fmt.Printf("Fire Event Creator: %v   Damage: %v  Origin: %v   Dir: %v\n", gm.FireEvents[i].Creator, gm.FireEvents[i].Damage, gm.FireEvents[i].Origin, gm.FireEvents[i].Dir)
+			i += 1
+		}
+		gm.FireEventMu.Unlock()
+	}
+}
+func addFireEventToDB(creator string, damage int, origin mat32.Vec3, dir mat32.Vec3) {
+	statement := fmt.Sprintf("INSERT INTO fireEvents(creator, damage, originX, originY, originZ, dirX, dirY, dirZ) VALUES ('%v', '%v', '%v', '%v', '%v', '%v', '%v', '%v')", creator, damage, origin.X, origin.Y, origin.Z, dir.X, dir.Y, dir.Z)
+	_, err := db.Exec(statement)
+	if err != nil {
+		panic(err)
+	}
+}
 func initBorders() {
 	for _, d := range FirstWorldBorders {
 		territory1 := d.Territory1

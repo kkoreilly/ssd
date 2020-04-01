@@ -18,8 +18,12 @@ import (
 // in par = parent group.
 func (gm *Game) PhysMakePerson(par *eve.Group, name string, first bool) *eve.Group {
 	// fmt.Printf("Making person \n")
-	pgroup := eve.AddNewGroup(par, name) // note: this is probably redundant
-	person := eve.AddNewBox(pgroup, "person", mat32.Vec3{0, 0, 0}, mat32.Vec3{0.5, 2, 0.5})
+	pgroup := eve.AddNewGroup(par, name) // note: this is probably redundant'
+	var pname = "OppPerson"
+	if first {
+		pname = "FirstPerson"
+	}
+	person := eve.AddNewBox(pgroup, pname, mat32.Vec3{0, 0, 0}, mat32.Vec3{0.5, 2, 0.5})
 	person.Color = "blue" // for debugging
 	if first {
 		person.Vis = "PersonYou"

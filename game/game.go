@@ -41,6 +41,13 @@ type Weapon struct {
 	FireRate float32 `desc:"How many times this weapon can be fired in a second"`
 }
 
+type FireEventInfo struct {
+	Creator string
+	Damage  int
+	Origin  mat32.Vec3
+	Dir     mat32.Vec3
+}
+
 type Game struct {
 	World       *eve.Group
 	View        *evev.View
@@ -56,6 +63,8 @@ type Game struct {
 	PersHitWall bool
 	Gravity     float32
 	AbleToFire  bool
+	FireEvents  map[int]*FireEventInfo
+	FireEventMu sync.Mutex
 }
 
 // TheGame is the game instance for the current game
@@ -400,13 +409,56 @@ func (gm *Game) Config() {
 	gm.PosUpdtChan = make(chan bool) // todo: close channel when ending game, will terminate goroutines
 
 	gm.OtherPos = make(map[string]*CurPosition)
+	gm.FireEvents = make(map[int]*FireEventInfo)
 	gm.GameOn = true
 
 	go gm.GetPosFromServer()     // this is loop getting positions from server
 	go gm.UpdatePeopleWorldPos() // this is loop updating positions
 	go gm.UpdatePersonYPos()     // deals with jumping and gravity
+	go gm.GetFireEvents()
+	go gm.RenderEnemyShots()
 }
 
+func (gm *Game) RenderEnemyShots() {
+	for {
+		_, ok := <-gm.PosUpdtChan // we wait here to receive channel message sent when positions have been updated
+		if !ok {                  // this means channel was closed, we need to bail, game over!
+			return
+		}
+		gm.WorldMu.Lock()
+		gm.PosMu.Lock()
+		for k, d := range gm.FireEvents {
+			if d.Creator != USER {
+				if gm.Scene.Scene.ChildByName(fmt.Sprintf("bullet_arrow_enemy%v", k), 0) == nil {
+					ray := mat32.NewRay(d.Origin, d.Dir)
+					endPos := mat32.Vec3{0, 0, 0}
+					// fmt.Printf("Ray: %v \n", ray)
+					cts := gm.World.RayBodyIntersections(*ray)
+					var closest *eve.BodyPoint
+					for _, d1 := range cts {
+						// fmt.Printf("Key: %v Body: %v  Point: %v \n", k, d.Body, d.Point)
+						if closest == nil {
+							closest = d1
+						} else {
+							if d.Origin.DistTo(closest.Point) > d.Origin.DistTo(d1.Point) {
+								closest = d1
+							}
+						}
+						if d1.Body.Name() == "FirstPerson" {
+							gm.removeHealthPoints(d.Damage, d.Creator)
+						}
+					}
+					endPos = closest.Point
+					color, _ := gi.ColorFromName("red")
+					gi3d.AddNewArrow(&gm.Scene.Scene, &gm.Scene.Scene, "bullet_arrow_you", d.Origin, endPos, .05, color, gi3d.NoStartArrow, gi3d.NoEndArrow, 1, 1, 4)
+
+				}
+			}
+		}
+		gm.WorldMu.Unlock()
+		gm.PosMu.Unlock()
+	}
+}
 func (gm *Game) fireWeapon() { // standard event for what happens when you fire
 	// Currently just deal damage to yourself, at interval
 	// todo: actually fire and deal damage to others
@@ -425,7 +477,7 @@ func (gm *Game) fireWeapon() { // standard event for what happens when you fire
 	// fmt.Printf("Ray: %v \n", ray)
 	cts := gm.World.RayBodyIntersections(*ray)
 	var closest *eve.BodyPoint
-	for k, d := range cts {
+	for _, d := range cts {
 		// fmt.Printf("Key: %v Body: %v  Point: %v \n", k, d.Body, d.Point)
 		if closest == nil {
 			closest = d
@@ -434,13 +486,17 @@ func (gm *Game) fireWeapon() { // standard event for what happens when you fire
 				closest = d
 			}
 		}
+		if d.Body.Name() == "FirstPerson" {
+			// gm.removeHealthPoints(WEAPON)
+		}
 	}
 	endPos.Pos = closest.Point
 	color, _ := gi.ColorFromName("red")
-	gi3d.AddNewArrow(&gm.Scene.Scene, &gm.Scene.Scene, "bullet_arrow", cursor.Pose.Pos, endPos.Pos, .05, color, gi3d.NoStartArrow, gi3d.NoEndArrow, 1, 1, 4)
+	gi3d.AddNewArrow(&gm.Scene.Scene, &gm.Scene.Scene, "bullet_arrow_you", cursor.Pose.Pos, endPos.Pos, .05, color, gi3d.NoStartArrow, gi3d.NoEndArrow, 1, 1, 4)
 
 	// done with what to fire
 	gm.AbleToFire = false
+	addFireEventToDB(USER, generateDamageAmount(WEAPON), cursor.Pose.Pos, rayPos.Pos)
 	numOfSeconds := TheWeapons[WEAPON].FireRate
 	time.Sleep(time.Duration(1/numOfSeconds) * time.Second)
 	gm.AbleToFire = true
@@ -456,9 +512,8 @@ func generateDamageAmount(wp string) (damage int) {
 	damage = int(float32(addNum) + minD)
 	return damage
 }
-func (gm *Game) removeHealthPoints(wp string) {
-	damageAmount := generateDamageAmount(wp)
-	HEALTH -= float32(damageAmount)
+func (gm *Game) removeHealthPoints(dmg int, from string) {
+	HEALTH -= float32(dmg)
 	healthBar.SetValue(HEALTH)
 	healthText.SetText(fmt.Sprintf("You have %v health", HEALTH))
 	if HEALTH <= 0 {
@@ -469,26 +524,27 @@ func (gm *Game) removeHealthPoints(wp string) {
 		gm.Scene.Camera.Pose.Pos = pers.Rel.Pos.Add(camOff)
 		gm.World.WorldRelToAbs()
 		gm.Scene.UpdateSig()
-		resultText.SetText("<b>You were killed by...  Respawning in 5</b>")
+		resultText.SetText("<b>You were killed by " + from + " - Respawning in 5</b>")
 		resultText.SetFullReRender()
-		go gm.timerForResult()
+		updateBattlePoints(from, gm.OtherPos[from].Points+1)
+		go gm.timerForResult(from)
 	}
 }
-func (gm *Game) timerForResult() {
+func (gm *Game) timerForResult(from string) {
 	time.Sleep(1 * time.Second)
-	resultText.SetText("<b>You were killed by...  Respawning in 4</b>")
+	resultText.SetText("<b>You were killed by " + from + " - Respawning in 4</b>")
 	resultText.SetFullReRender()
 	time.Sleep(1 * time.Second)
-	resultText.SetText("<b>You were killed by...  Respawning in 3</b>")
+	resultText.SetText("<b>You were killed by " + from + " - Respawning in 3</b>")
 	resultText.SetFullReRender()
 	time.Sleep(1 * time.Second)
-	resultText.SetText("<b>You were killed by...  Respawning in 2</b>")
+	resultText.SetText("<b>You were killed by " + from + " - Respawning in 2</b>")
 	resultText.SetFullReRender()
 	time.Sleep(1 * time.Second)
-	resultText.SetText("<b>You were killed by...  Respawning in 1</b>")
+	resultText.SetText("<b>You were killed by " + from + " - Respawning in 1</b>")
 	resultText.SetFullReRender()
 	time.Sleep(1 * time.Second)
-	resultText.SetText("<b>You were killed by...</b>")
+	resultText.SetText("<b>You were killed by " + from + "</b>")
 	resultButton := gi.AddNewButton(resultRow, "resultButton")
 	resultButton.Text = "<b>Respawn</b>"
 	resultButton.SetProp("horizontal-align", "center")
@@ -522,7 +578,7 @@ func (gm *Game) updateCursorPosition() {
 	// pers := gm.World.ChildByName("FirstPerson", 0).(*eve.Group)
 	cursor.Pose = gm.Scene.Camera.Pose
 	cursor.Pose.MoveOnAxis(0, 0, -1, 3)
-	cursor.Pose.Scale.SetScalar(0.5)
+	cursor.Pose.Scale.SetScalar(0.3)
 }
 
 func (gm *Game) UpdatePersonYPos() {
