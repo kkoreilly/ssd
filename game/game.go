@@ -434,6 +434,7 @@ func (gm *Game) RenderEnemyShots() {
 				if gm.Scene.Scene.ChildByName(fmt.Sprintf("bullet_arrow_enemy%v", k), 0) == nil {
 					ray := mat32.NewRay(d.Origin, d.Dir)
 					endPos := mat32.Vec3{0, 0, 0}
+					sepPos := d.Dir.Mul(mat32.Vec3{100, 100, 100})
 					// fmt.Printf("Ray: %v \n", ray)
 					cts := gm.World.RayBodyIntersections(*ray)
 					var closest *eve.BodyPoint
@@ -450,7 +451,12 @@ func (gm *Game) RenderEnemyShots() {
 							gm.removeHealthPoints(d.Damage, d.Creator)
 						}
 					}
-					endPos = closest.Point
+					if cts != nil {
+						endPos = closest.Point
+					} else {
+
+						endPos = sepPos
+					}
 					color, _ := gi.ColorFromName("red")
 					gi3d.AddNewArrow(&gm.Scene.Scene, &gm.Scene.Scene, fmt.Sprintf("bullet_arrow_enemy%v", k), d.Origin, endPos, .05, color, gi3d.NoStartArrow, gi3d.NoEndArrow, 1, 1, 4)
 
