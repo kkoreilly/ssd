@@ -417,7 +417,18 @@ func (gm *Game) fireWeapon() { // standard event for what happens when you fire
 
 	cursor := gm.Scene.Scene.ChildByName("CrossText", 0).(*gi3d.Text2D)
 	endPos := cursor.Pose
-	endPos.MoveOnAxis(0, 0, -1, 100)
+	rayPos := cursor.Pose
+	// endPos.MoveOnAxis(0, 0, -1, 100)
+	rayPos.Pos = mat32.Vec3{0, 0, 0}
+	rayPos.MoveOnAxis(0, 0, -1, 1)
+	ray := mat32.NewRay(cursor.Pose.Pos, rayPos.Pos)
+	fmt.Printf("Ray: %v \n", ray)
+	cts := gm.World.RayBodyIntersections(*ray)
+	for _, d := range cts {
+		fmt.Printf("Body: %v  Point: %v \n", d.Body, d.Point)
+		endPos.Pos = d.Point
+		break
+	}
 	color, _ := gi.ColorFromName("red")
 	gi3d.AddNewArrow(&gm.Scene.Scene, &gm.Scene.Scene, "bullet_arrow", cursor.Pose.Pos, endPos.Pos, .05, color, gi3d.NoStartArrow, gi3d.NoEndArrow, 1, 1, 4)
 
