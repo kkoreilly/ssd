@@ -414,6 +414,12 @@ func (gm *Game) fireWeapon() { // standard event for what happens when you fire
 	}
 	// what to do on fire in here:
 
+	cursor := gm.Scene.Scene.ChildByName("CrossText", 0).(*gi3d.Text2D)
+	endPos := cursor.Pose
+	endPos.MoveOnAxis(0, 0, -1, 100)
+	color, _ := gi.ColorFromName("red")
+	gi3d.AddNewArrow(&gm.Scene.Scene, &gm.Scene.Scene, "bullet_arrow", cursor.Pose.Pos, endPos.Pos, 1, color, false, true, 1, 1, 4)
+
 	// done with what to fire
 	gm.AbleToFire = false
 	numOfSeconds := TheWeapons[WEAPON].FireRate
