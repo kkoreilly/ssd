@@ -49,22 +49,23 @@ type FireEventInfo struct {
 }
 
 type Game struct {
-	World       *eve.Group
-	View        *evev.View
-	Scene       *Scene
-	Map         Map
-	MapObjs     map[string]bool
-	OtherPos    map[string]*CurPosition
-	PosUpdtChan chan bool  `desc:"channel connecting server pos updates with world state update"`
-	PosMu       sync.Mutex `desc:"protects updates to OtherPos map"`
-	WorldMu     sync.Mutex `desc:"protects updates to World physics and view"`
-	GameOn      bool       // starts on when game turned out, turn off when close game
-	Winner      string
-	PersHitWall bool
-	Gravity     float32
-	AbleToFire  bool
-	FireEvents  map[int]*FireEventInfo
-	FireEventMu sync.Mutex
+	World        *eve.Group
+	View         *evev.View
+	Scene        *Scene
+	Map          Map
+	MapObjs      map[string]bool
+	OtherPos     map[string]*CurPosition
+	PosUpdtChan  chan bool  `desc:"channel connecting server pos updates with world state update"`
+	PosMu        sync.Mutex `desc:"protects updates to OtherPos map"`
+	WorldMu      sync.Mutex `desc:"protects updates to World physics and view"`
+	GameOn       bool       // starts on when game turned out, turn off when close game
+	Winner       string
+	PersHitWall  bool
+	Gravity      float32
+	AbleToFire   bool
+	FireEvents   map[int]*FireEventInfo
+	FireEventMu  sync.Mutex
+	FireUpdtChan chan bool
 }
 
 // TheGame is the game instance for the current game
@@ -408,6 +409,7 @@ func (gm *Game) Config() {
 	gi.FilterLaggyKeyEvents = true // fix key lag
 
 	gm.PosUpdtChan = make(chan bool) // todo: close channel when ending game, will terminate goroutines
+	gm.FireUpdtChan = make(chan bool)
 
 	gm.OtherPos = make(map[string]*CurPosition)
 	gm.FireEvents = make(map[int]*FireEventInfo)
@@ -419,9 +421,9 @@ func (gm *Game) Config() {
 		line.SetInvisible()
 	}
 
-	go gm.GetPosFromServer()     // this is loop getting positions from server
+	go gm.GetPosFromServer() // this is loop getting positions from server
 	go gm.UpdatePeopleWorldPos() // this is loop updating positions
-	go gm.UpdatePersonYPos()     // deals with jumping and gravity
+	go gm.UpdatePersonYPos() // deals with jumping and gravity
 	go gm.GetFireEvents()
 	go gm.RenderEnemyShots()
 }
@@ -429,8 +431,8 @@ func (gm *Game) Config() {
 func (gm *Game) RenderEnemyShots() {
 	RayGroup := gm.Scene.Scene.ChildByName("RayGroup", 0).(*gi3d.Group)
 	for {
-		_, ok := <-gm.PosUpdtChan // we wait here to receive channel message sent when positions have been updated
-		if !ok {                  // this means channel was closed, we need to bail, game over!
+		_, ok := <-gm.FireUpdtChan // we wait here to receive channel message sent when positions have been updated
+		if !ok {                   // this means channel was closed, we need to bail, game over!
 			return
 		}
 		gm.FireEventMu.Lock()
@@ -815,6 +817,9 @@ func (gm *Game) UpdatePeopleWorldPos() {
 		} else {
 			ukt := uk.ChildByName("ukt_"+USER, 0).(*gi.Label)
 			ukt.SetText(fmt.Sprintf("<b>%v:</b>         %v kills            ", USER, POINTS))
+		}
+		if POINTS >= 10 {
+			gm.setGameOver(USER)
 		}
 		if mods {
 			gm.View.Sync() // if something was created or destroyed, it must use Sync to update Scene

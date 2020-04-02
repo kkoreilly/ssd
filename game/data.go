@@ -576,12 +576,14 @@ func (gm *Game) GetPosFromServer() { // GetPosFromServer loops through the playe
 		// fmt.Printf("Game on: %v \n", gm.GameOn)
 		if !gm.GameOn {
 			close(gm.PosUpdtChan)
+			close(gm.FireUpdtChan)
 			gm.battleOver(gm.Winner)
 			gm.PosMu.Unlock()
 			return
 		}
 		gm.PosMu.Unlock()
 		gm.PosUpdtChan <- true // tells UpdatePeopleWorldPos to update to new positions
+		gm.FireUpdtChan <- true
 		// todo: don't know from sender perspective if channel is still open!
 		// if !ok {
 		// 	return // game over
