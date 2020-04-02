@@ -558,6 +558,8 @@ func (gm *Game) GetPosFromServer() { // GetPosFromServer loops through the playe
 			if username != USER {
 				gm.OtherPos[username] = &CurPosition{username, mat32.Vec3{posX, posY, posZ}, points}
 				// fmt.Printf("Other Pos: %v \n", gm.OtherPos[username])
+			} else {
+				POINTS = points
 			}
 		}
 		// time.Sleep(100 * time.Millisecond)

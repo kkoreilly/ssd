@@ -92,6 +92,7 @@ func (gm *Game) BuildMap() {
 	ogp.Initial.Pos.Set(0.25, 1, 40)
 
 	eve.AddNewGroup(gm.World, "PeopleGroup")
+	gi3d.AddNewGroup(&gm.Scene.Scene, &gm.Scene.Scene, "RayGroup")
 	gi3d.AddNewGroup(&gm.Scene.Scene, &gm.Scene.Scene, "PeopleTextGroup")
 	for nm, obj := range gm.Map {
 		// fmt.Printf("Object type: %v \n", obj.ObjType)
@@ -420,6 +421,7 @@ func (gm *Game) Config() {
 }
 
 func (gm *Game) RenderEnemyShots() {
+	RayGroup := gm.Scene.Scene.ChildByName("RayGroup", 0).(*gi3d.Group)
 	for {
 		_, ok := <-gm.PosUpdtChan // we wait here to receive channel message sent when positions have been updated
 		if !ok {                  // this means channel was closed, we need to bail, game over!
@@ -430,16 +432,13 @@ func (gm *Game) RenderEnemyShots() {
 		gm.FireEventMu.Lock()
 		for k, d := range gm.FireEvents {
 			if d.Creator != USER {
-				// fmt.Printf("Still running! \n")
-				if gm.Scene.Scene.ChildByName(fmt.Sprintf("bullet_arrow_enemy%v", k), 0) == nil {
+				if RayGroup.ChildByName(fmt.Sprintf("bullet_arrow_enemy%v", k), 0) == nil {
 					ray := mat32.NewRay(d.Origin, d.Dir)
 					endPos := mat32.Vec3{0, 0, 0}
 					sepPos := d.Dir.Mul(mat32.Vec3{100, 100, 100})
-					// fmt.Printf("Ray: %v \n", ray)
 					cts := gm.World.RayBodyIntersections(*ray)
 					var closest *eve.BodyPoint
 					for _, d1 := range cts {
-						// fmt.Printf("Key: %v Body: %v  Point: %v \n", k, d.Body, d.Point)
 						if closest == nil {
 							closest = d1
 						} else {
@@ -448,7 +447,13 @@ func (gm *Game) RenderEnemyShots() {
 							}
 						}
 						if d1.Body.Name() == "FirstPerson" {
+							gm.WorldMu.Unlock()
+							gm.PosMu.Unlock()
+							gm.FireEventMu.Unlock()
 							gm.removeHealthPoints(d.Damage, d.Creator)
+							gm.WorldMu.Lock()
+							gm.PosMu.Lock()
+							gm.FireEventMu.Lock()
 						}
 					}
 					if cts != nil {
@@ -458,8 +463,7 @@ func (gm *Game) RenderEnemyShots() {
 						endPos = sepPos
 					}
 					color, _ := gi.ColorFromName("red")
-					gi3d.AddNewArrow(&gm.Scene.Scene, &gm.Scene.Scene, fmt.Sprintf("bullet_arrow_enemy%v", k), d.Origin, endPos, .05, color, gi3d.NoStartArrow, gi3d.NoEndArrow, 1, 1, 4)
-
+					gi3d.AddNewLine(&gm.Scene.Scene, RayGroup, fmt.Sprintf("bullet_arrow_enemy%v", k), d.Origin, endPos, .05, color)
 				}
 			}
 		}
@@ -506,7 +510,8 @@ func (gm *Game) fireWeapon() { // standard event for what happens when you fire
 		endPos.Pos = rayPos.Pos
 	}
 	color, _ := gi.ColorFromName("red")
-	gi3d.AddNewArrow(&gm.Scene.Scene, &gm.Scene.Scene, "bullet_arrow_you", cursor.Pose.Pos, endPos.Pos, .05, color, gi3d.NoStartArrow, gi3d.NoEndArrow, 1, 1, 4)
+	RayGroup := gm.Scene.Scene.ChildByName("RayGroup", 0).(*gi3d.Group)
+	gi3d.AddNewLine(&gm.Scene.Scene, RayGroup, "bullet_arrow_you", cursor.Pose.Pos, endPos.Pos, .05, color)
 
 	// done with what to fire
 	gm.AbleToFire = false
