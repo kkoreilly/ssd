@@ -450,9 +450,6 @@ func (gm *Game) RenderEnemyShots() {
 					}
 
 					endPos = d1.Point
-					gm.FireEventMu.Unlock()
-					gm.removeBulletLoop(rayObj, d.Origin, endPos)
-					gm.FireEventMu.Lock()
 					break
 				}
 				if cts == nil {
@@ -468,6 +465,7 @@ func (gm *Game) RenderEnemyShots() {
 			if gm.FireEvents[i] == nil {
 				rayObj := RayGroup.ChildByName(fmt.Sprintf("bullet_arrow_enemy%v", i), 0).(*gi3d.Solid)
 				rayObj.SetInactive()
+				gi3d.SetLineStartEnd(rayObj, mat32.Vec3{500, 500, 500}, mat32.Vec3{500, 500, 500})
 			}
 		}
 		gm.FireEventMu.Unlock()
@@ -522,7 +520,7 @@ func (gm *Game) fireWeapon() { // standard event for what happens when you fire
 	gi3d.SetLineStartEnd(rayObj, cursor.Pose.Pos, endPos.Pos)
 	rayObj.ClearInvisible()
 	// bullet = gi3d.AddNewLine(&gm.Scene.Scene, RayGroup, "bullet_arrow_you", cursor.Pose.Pos, endPos.Pos, .05, color)
-	// go gm.removeBulletLoop(bullet, cursor.Pose.Pos, rayPos.Pos)
+	go gm.removeBulletLoop(rayObj, cursor.Pose.Pos, rayPos.Pos)
 	// done with what to fire
 	gm.AbleToFire = false
 	addFireEventToDB(USER, generateDamageAmount(WEAPON), cursor.Pose.Pos, rayPos.Pos)
@@ -532,7 +530,7 @@ func (gm *Game) fireWeapon() { // standard event for what happens when you fire
 }
 
 func (gm *Game) removeBulletLoop(bullet *gi3d.Solid, origin mat32.Vec3, dir mat32.Vec3) {
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(300 * time.Millisecond)
 	gm.FireEventMu.Lock()
 	removeBulletFromDB(origin, dir)
 	for k, d := range gm.FireEvents {
@@ -567,6 +565,7 @@ func (gm *Game) removeHealthPoints(dmg int, from string) {
 	} else {
 		healthBar.SetProp(":value", ki.Props{"background-color": "yellow"})
 	}
+	healthBar.SetFullReRender()
 	if HEALTH <= 0 {
 		pers := gm.World.ChildByName("FirstPerson", 0).(*eve.Group)
 		camOff := gm.Scene.Camera.Pose.Pos.Sub(pers.Rel.Pos) // currrent offset of camera vs. person
@@ -610,6 +609,8 @@ func (gm *Game) timerForResult(from string) {
 			resultButton.Delete(true)
 			HEALTH = 100
 			healthBar.SetValue(HEALTH)
+			healthBar.SetProp(":value", ki.Props{"background-color": "green"})
+			healthBar.SetFullReRender()
 			healthText.SetText(fmt.Sprintf("You have %v health", HEALTH))
 			pers := gm.World.ChildByName("FirstPerson", 0).(*eve.Group)
 			camOff := gm.Scene.Camera.Pose.Pos.Sub(pers.Rel.Pos) // currrent offset of camera vs. person
