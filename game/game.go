@@ -511,14 +511,19 @@ func (gm *Game) fireWeapon() { // standard event for what happens when you fire
 	}
 	color, _ := gi.ColorFromName("red")
 	RayGroup := gm.Scene.Scene.ChildByName("RayGroup", 0).(*gi3d.Group)
-	gi3d.AddNewLine(&gm.Scene.Scene, RayGroup, "bullet_arrow_you", cursor.Pose.Pos, endPos.Pos, .05, color)
-
+	bullet := gi3d.AddNewLine(&gm.Scene.Scene, RayGroup, "bullet_arrow_you", cursor.Pose.Pos, endPos.Pos, .05, color)
+	go removeBulletLoop(bullet)
 	// done with what to fire
 	gm.AbleToFire = false
 	addFireEventToDB(USER, generateDamageAmount(WEAPON), cursor.Pose.Pos, rayPos.Pos)
 	numOfSeconds := TheWeapons[WEAPON].FireRate
 	time.Sleep(time.Duration(1/numOfSeconds) * time.Second)
 	gm.AbleToFire = true
+}
+
+func removeBulletLoop(bullet *gi3d.Solid) {
+	time.Sleep(100 * time.Millisecond)
+	removeBulletFromDB(bullet.st)
 }
 
 func generateDamageAmount(wp string) (damage int) {
@@ -535,6 +540,13 @@ func (gm *Game) removeHealthPoints(dmg int, from string) {
 	HEALTH -= float32(dmg)
 	healthBar.SetValue(HEALTH)
 	healthText.SetText(fmt.Sprintf("You have %v health", HEALTH))
+	if HEALTH >= 67 {
+		healthBar.SetProp(":value", ki.Props{"background-color": "green"})
+	} else if HEALTH <= 33 {
+		healthBar.SetProp(":value", ki.Props{"background-color": "red"})
+	} else {
+		healthBar.SetProp(":value", ki.Props{"background-color": "yellow"})
+	}
 	if HEALTH <= 0 {
 		pers := gm.World.ChildByName("FirstPerson", 0).(*eve.Group)
 		camOff := gm.Scene.Camera.Pose.Pos.Sub(pers.Rel.Pos) // currrent offset of camera vs. person
