@@ -415,15 +415,15 @@ func (gm *Game) Config() {
 	gm.FireEvents = make(map[int]*FireEventInfo)
 	gm.GameOn = true
 	RayGroup := gm.Scene.Scene.ChildByName("RayGroup", 0).(*gi3d.Group)
-	for i := 0; i < 10; i++ {
+	for i := 0; i < 30; i++ {
 		color, _ := gi.ColorFromName("red")
 		line := gi3d.AddNewLine(&gm.Scene.Scene, RayGroup, fmt.Sprintf("bullet_arrow_enemy%v", i), mat32.Vec3{0, 0, 0}, mat32.Vec3{1, 1, 1}, .05, color)
 		line.SetInvisible()
 	}
 
-	go gm.GetPosFromServer() // this is loop getting positions from server
+	go gm.GetPosFromServer()     // this is loop getting positions from server
 	go gm.UpdatePeopleWorldPos() // this is loop updating positions
-	go gm.UpdatePersonYPos() // deals with jumping and gravity
+	go gm.UpdatePersonYPos()     // deals with jumping and gravity
 	go gm.GetFireEvents()
 	go gm.RenderEnemyShots()
 }
@@ -436,10 +436,10 @@ func (gm *Game) RenderEnemyShots() {
 			return
 		}
 		gm.FireEventMu.Lock()
-		for i := 0; i < 10; i++ {
+		for i := 0; i < 30; i++ {
 			if gm.FireEvents[i] == nil {
 				rayObj := RayGroup.ChildByName(fmt.Sprintf("bullet_arrow_enemy%v", i), 0).(*gi3d.Solid)
-				rayObj.SetInactive()
+				rayObj.SetInvisible()
 				gi3d.SetLineStartEnd(rayObj, mat32.Vec3{500, 500, 500}, mat32.Vec3{500, 500, 500})
 			}
 		}
@@ -455,7 +455,7 @@ func (gm *Game) RenderEnemyShots() {
 					if d1.Body.Name() == "FirstPerson" {
 						gm.FireEventMu.Unlock()
 						gm.removeHealthPoints(d.Damage, d.Creator)
-						rayObj.SetInactive()
+						rayObj.SetInvisibleg()
 						gi3d.SetLineStartEnd(rayObj, mat32.Vec3{500, 500, 500}, mat32.Vec3{500, 500, 500})
 						gm.FireEventMu.Lock()
 					}
@@ -514,7 +514,7 @@ func (gm *Game) fireWeapon() { // standard event for what happens when you fire
 		endPos.Pos = rayPos.Pos
 	}
 	var index int
-	for index = 0; index < 10; index++ {
+	for index = 0; index < 30; index++ {
 		if gm.FireEvents[index] == nil {
 			break
 		}
@@ -535,8 +535,8 @@ func (gm *Game) fireWeapon() { // standard event for what happens when you fire
 }
 
 func (gm *Game) removeBulletLoop(bullet *gi3d.Solid, origin mat32.Vec3, dir mat32.Vec3) {
-	time.Sleep(300 * time.Millisecond)
 	gm.FireEventMu.Lock()
+	time.Sleep(300 * time.Millisecond)
 	removeBulletFromDB(origin, dir)
 	for k, d := range gm.FireEvents {
 		if d.Origin == origin && d.Dir == dir {
