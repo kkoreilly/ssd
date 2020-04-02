@@ -430,10 +430,12 @@ func (gm *Game) RenderEnemyShots() {
 	RayGroup := gm.Scene.Scene.ChildByName("RayGroup", 0).(*gi3d.Group)
 	for {
 		_, ok := <-gm.PosUpdtChan // we wait here to receive channel message sent when positions have been updated
-		if !ok {                  // this means channel was closed, we need to bail, game over!
+		fmt.Printf("Ok: %v \n", ok)
+		if !ok { // this means channel was closed, we need to bail, game over!
 			return
 		}
 		gm.FireEventMu.Lock()
+
 		for k, d := range gm.FireEvents {
 			if d.Creator != USER {
 				rayObj := RayGroup.ChildByName(fmt.Sprintf("bullet_arrow_enemy%v", k), 0).(*gi3d.Solid)
@@ -446,11 +448,12 @@ func (gm *Game) RenderEnemyShots() {
 						gm.FireEventMu.Unlock()
 						gm.removeHealthPoints(d.Damage, d.Creator)
 						gm.FireEventMu.Lock()
-fmt.Printf("HEALTH: %v \n", HEALTH)
 					}
 
 					endPos = d1.Point
+					gm.FireEventMu.Unlock()
 					gm.removeBulletLoop(rayObj, d.Origin, endPos)
+					gm.FireEventMu.Lock()
 					break
 				}
 				if cts == nil {
