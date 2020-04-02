@@ -446,11 +446,13 @@ func (gm *Game) RenderEnemyShots() {
 
 		for k, d := range gm.FireEvents {
 			if d.Creator != USER {
-				rayObj := RayGroup.ChildByName(fmt.Sprintf("bullet_arrow_enemy%v", k), 0).(*gi3d.Solid)
+				bi := k % 30
+				rayObj := RayGroup.ChildByName(fmt.Sprintf("bullet_arrow_enemy%v", bi), 0).(*gi3d.Solid)
 				ray := mat32.NewRay(d.Origin, d.Dir)
 				endPos := mat32.Vec3{0, 0, 0}
 				sepPos := d.Dir.Mul(mat32.Vec3{100, 100, 100})
 				cts := gm.World.RayBodyIntersections(*ray)
+				killed := false
 				for _, d1 := range cts {
 					if d1.Body.Name() == "FirstPerson" {
 						gm.FireEventMu.Unlock()
@@ -458,6 +460,7 @@ func (gm *Game) RenderEnemyShots() {
 						rayObj.SetInvisible()
 						gi3d.SetLineStartEnd(rayObj, mat32.Vec3{500, 500, 500}, mat32.Vec3{500, 500, 500})
 						gm.FireEventMu.Lock()
+						killed = true
 					}
 
 					endPos = d1.Point
@@ -467,9 +470,10 @@ func (gm *Game) RenderEnemyShots() {
 
 					endPos = sepPos
 				}
-				gi3d.SetLineStartEnd(rayObj, d.Origin, endPos)
-				rayObj.ClearInvisible()
-
+				if !killed {
+					gi3d.SetLineStartEnd(rayObj, d.Origin, endPos)
+					rayObj.ClearInvisible()
+				}
 			}
 		}
 
