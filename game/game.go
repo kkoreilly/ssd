@@ -442,14 +442,15 @@ func (gm *Game) RenderEnemyShots() {
 				sepPos := d.Dir.Mul(mat32.Vec3{100, 100, 100})
 				cts := gm.World.RayBodyIntersections(*ray)
 				for _, d1 := range cts {
-					gm.removeBulletLoop(rayObj, d.Origin, endPos)
 					if d1.Body.Name() == "FirstPerson" {
 						gm.FireEventMu.Unlock()
 						gm.removeHealthPoints(d.Damage, d.Creator)
 						gm.FireEventMu.Lock()
 
 					}
+
 					endPos = d1.Point
+					gm.removeBulletLoop(rayObj, d.Origin, endPos)
 					break
 				}
 				if cts == nil {
