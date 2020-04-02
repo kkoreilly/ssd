@@ -257,6 +257,7 @@ func (gm *Game) setGameOver(winner string) {
 	gm.WorldMu.Lock()
 	gm.PosMu.Lock()
 	gm.Scene.Win.OSWin.SetCursorEnabled(true, false)
+	gm.Scene.TrackMouse = false
 	gm.GameOn = false
 	gm.Winner = winner
 	gm.WorldMu.Unlock()
