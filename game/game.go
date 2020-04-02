@@ -430,8 +430,7 @@ func (gm *Game) RenderEnemyShots() {
 	RayGroup := gm.Scene.Scene.ChildByName("RayGroup", 0).(*gi3d.Group)
 	for {
 		_, ok := <-gm.PosUpdtChan // we wait here to receive channel message sent when positions have been updated
-		fmt.Printf("Ok: %v \n", ok)
-		if !ok { // this means channel was closed, we need to bail, game over!
+		if !ok {                  // this means channel was closed, we need to bail, game over!
 			return
 		}
 		gm.FireEventMu.Lock()
@@ -533,7 +532,7 @@ func (gm *Game) fireWeapon() { // standard event for what happens when you fire
 }
 
 func (gm *Game) removeBulletLoop(bullet *gi3d.Solid, origin mat32.Vec3, dir mat32.Vec3) {
-	time.Sleep(1000 * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 	gm.FireEventMu.Lock()
 	removeBulletFromDB(origin, dir)
 	for k, d := range gm.FireEvents {
@@ -543,6 +542,7 @@ func (gm *Game) removeBulletLoop(bullet *gi3d.Solid, origin mat32.Vec3, dir mat3
 		}
 	}
 	bullet.SetInvisible()
+	gi3d.SetLineStartEnd(bullet, mat32.Vec3{500, 500, 500}, mat32.Vec3{500, 500, 500})
 	gm.FireEventMu.Unlock()
 }
 
