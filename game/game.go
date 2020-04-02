@@ -522,8 +522,8 @@ func (gm *Game) fireWeapon() { // standard event for what happens when you fire
 }
 
 func (gm *Game) removeBulletLoop(bullet *gi3d.Solid, origin mat32.Vec3, dir mat32.Vec3) {
+	time.Sleep(1000 * time.Millisecond)
 	gm.FireEventMu.Lock()
-	time.Sleep(100 * time.Millisecond)
 	removeBulletFromDB(origin, dir)
 	for k, d := range gm.FireEvents {
 		if d.Origin == origin && d.Dir == dir {
