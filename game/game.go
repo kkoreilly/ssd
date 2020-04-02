@@ -446,7 +446,7 @@ func (gm *Game) RenderEnemyShots() {
 						gm.FireEventMu.Unlock()
 						gm.removeHealthPoints(d.Damage, d.Creator)
 						gm.FireEventMu.Lock()
-
+fmt.Printf("HEALTH: %v \n", HEALTH)
 					}
 
 					endPos = d1.Point
@@ -530,7 +530,7 @@ func (gm *Game) fireWeapon() { // standard event for what happens when you fire
 }
 
 func (gm *Game) removeBulletLoop(bullet *gi3d.Solid, origin mat32.Vec3, dir mat32.Vec3) {
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(1000 * time.Millisecond)
 	gm.FireEventMu.Lock()
 	removeBulletFromDB(origin, dir)
 	for k, d := range gm.FireEvents {
