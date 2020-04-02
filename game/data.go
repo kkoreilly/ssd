@@ -6,14 +6,11 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	// "math/rand"
-	"strings"
-	// "time"
-
 	"github.com/goki/gi/gi"
 	"github.com/goki/ki/ki"
 	"github.com/goki/mat32"
 	_ "github.com/lib/pq"
+	"strings"
 )
 
 var db *sql.DB
@@ -80,14 +77,12 @@ func addTeamUpdateButtons() {
 		} else if strings.Contains(teamName, "human") {
 			button = gi.AddNewButton(tbrowH, fmt.Sprintf("teamButton%v", teamName))
 		}
-
 		button.Text = fmt.Sprintf("Join the team %v", teamName)
 		button.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 			if sig == int64(gi.ButtonClicked) {
 				joinTeam(teamName)
 			}
 		})
-
 	}
 }
 func (gm *Game) GetFireEvents() {

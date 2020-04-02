@@ -512,7 +512,7 @@ func (gm *Game) fireWeapon() { // standard event for what happens when you fire
 	cts := gm.World.RayBodyIntersections(*ray)
 	var closest *eve.BodyPoint
 	// fmt.Printf("Contacts: %v \n", cts)
-	for k, d := range cts {
+	for _, d := range cts {
 		// fmt.Printf("Key: %v Body: %v  Point: %v \n", k, d.Body, d.Point)
 		if closest == nil {
 			closest = d
