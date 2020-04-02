@@ -556,11 +556,11 @@ func removeBulletFromDB(originP, dirP mat32.Vec3) {
 	if err != nil {
 		panic(err)
 	}
-	for rowsF.Next() {
+	for rows.Next() {
 		var creator string
 		var damage int
 		var origin, dir mat32.Vec3
-		rowsF.Scan(&creator, &damage, &origin.X, &origin.Y, &origin.Z, &dir.X, &dir.Y, &dir.Z)
+		rows.Scan(&creator, &damage, &origin.X, &origin.Y, &origin.Z, &dir.X, &dir.Y, &dir.Z)
 		if origin.Round() == originP.Round() && dir.Round() == dirP.Round() {
 			statement := fmt.Sprintf("DELETE FROM fireEvents WHERE originX='%v' AND originY='%v' AND originZ='%v' AND dirX = '%v' AND dirY = '%v' AND dirZ = '%v'", origin.X, origin.Y, origin.Z, dir.X, dir.Y, dir.Z)
 			_, err := db.Exec(statement)
