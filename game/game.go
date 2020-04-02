@@ -412,6 +412,12 @@ func (gm *Game) Config() {
 	gm.OtherPos = make(map[string]*CurPosition)
 	gm.FireEvents = make(map[int]*FireEventInfo)
 	gm.GameOn = true
+	RayGroup := gm.Scene.Scene.ChildByName("RayGroup", 0).(*gi3d.Group)
+	for i := 0; i < 10; i++ {
+		color, _ := gi.ColorFromName("red")
+		line := gi3d.AddNewLine(&gm.Scene.Scene, RayGroup, fmt.Sprintf("bullet_arrow_enemy%v", i), mat32.Vec3{0, 0, 0}, mat32.Vec3{1, 1, 1}, .05, color)
+		line.SetInvisible()
+	}
 
 	go gm.GetPosFromServer()     // this is loop getting positions from server
 	go gm.UpdatePeopleWorldPos() // this is loop updating positions
@@ -427,48 +433,39 @@ func (gm *Game) RenderEnemyShots() {
 		if !ok {                  // this means channel was closed, we need to bail, game over!
 			return
 		}
-		gm.WorldMu.Lock()
-		gm.PosMu.Lock()
 		gm.FireEventMu.Lock()
 		for k, d := range gm.FireEvents {
 			if d.Creator != USER {
-				if RayGroup.ChildByName(fmt.Sprintf("bullet_arrow_enemy%v", k), 0) == nil {
-					ray := mat32.NewRay(d.Origin, d.Dir)
-					endPos := mat32.Vec3{0, 0, 0}
-					sepPos := d.Dir.Mul(mat32.Vec3{100, 100, 100})
-					cts := gm.World.RayBodyIntersections(*ray)
-					var closest *eve.BodyPoint
-					for _, d1 := range cts {
-						if closest == nil {
-							closest = d1
-						} else {
-							if d.Origin.DistTo(closest.Point) > d.Origin.DistTo(d1.Point) {
-								closest = d1
-							}
-						}
-						if d1.Body.Name() == "FirstPerson" {
-							gm.WorldMu.Unlock()
-							gm.PosMu.Unlock()
-							gm.FireEventMu.Unlock()
-							gm.removeHealthPoints(d.Damage, d.Creator)
-							gm.WorldMu.Lock()
-							gm.PosMu.Lock()
-							gm.FireEventMu.Lock()
-						}
-					}
-					if cts != nil {
-						endPos = closest.Point
-					} else {
+				rayObj := RayGroup.ChildByName(fmt.Sprintf("bullet_arrow_enemy%v", k), 0).(*gi3d.Solid)
+				ray := mat32.NewRay(d.Origin, d.Dir)
+				endPos := mat32.Vec3{0, 0, 0}
+				sepPos := d.Dir.Mul(mat32.Vec3{100, 100, 100})
+				cts := gm.World.RayBodyIntersections(*ray)
+				for _, d1 := range cts {
 
-						endPos = sepPos
+					if d1.Body.Name() == "FirstPerson" {
+						gm.FireEventMu.Unlock()
+						gm.removeHealthPoints(d.Damage, d.Creator)
+						gm.FireEventMu.Lock()
 					}
-					color, _ := gi.ColorFromName("red")
-					gi3d.AddNewLine(&gm.Scene.Scene, RayGroup, fmt.Sprintf("bullet_arrow_enemy%v", k), d.Origin, endPos, .05, color)
+					endPos = d1.Point
+					break
 				}
+				if cts == nil {
+
+					endPos = sepPos
+				}
+				gi3d.SetLineStartEnd(rayObj, d.Origin, endPos)
+				rayObj.ClearInvisible()
+
 			}
 		}
-		gm.WorldMu.Unlock()
-		gm.PosMu.Unlock()
+		for i := 0; i < 10; i++ {
+			if gm.FireEvents[i] == nil {
+				rayObj := RayGroup.ChildByName(fmt.Sprintf("bullet_arrow_enemy%v", i), 0).(*gi3d.Solid)
+				rayObj.SetInactive()
+			}
+		}
 		gm.FireEventMu.Unlock()
 	}
 }
@@ -509,10 +506,19 @@ func (gm *Game) fireWeapon() { // standard event for what happens when you fire
 		rayPos.MoveOnAxis(0, 0, -1, 100)
 		endPos.Pos = rayPos.Pos
 	}
-	color, _ := gi.ColorFromName("red")
+	var index int
+	for index = 0; index < 10; index++ {
+		if gm.FireEvents[index] == nil {
+			break
+		}
+	}
 	RayGroup := gm.Scene.Scene.ChildByName("RayGroup", 0).(*gi3d.Group)
-	bullet := gi3d.AddNewLine(&gm.Scene.Scene, RayGroup, "bullet_arrow_you", cursor.Pose.Pos, endPos.Pos, .05, color)
-	go gm.removeBulletLoop(bullet, cursor.Pose.Pos, rayPos.Pos)
+	fmt.Printf("Name: bullet_arrow_enemy%v \n", index)
+	rayObj := RayGroup.ChildByName(fmt.Sprintf("bullet_arrow_enemy%v", index), 0).(*gi3d.Solid)
+	gi3d.SetLineStartEnd(rayObj, cursor.Pose.Pos, endPos.Pos)
+	rayObj.ClearInvisible()
+	// bullet = gi3d.AddNewLine(&gm.Scene.Scene, RayGroup, "bullet_arrow_you", cursor.Pose.Pos, endPos.Pos, .05, color)
+	// go gm.removeBulletLoop(bullet, cursor.Pose.Pos, rayPos.Pos)
 	// done with what to fire
 	gm.AbleToFire = false
 	addFireEventToDB(USER, generateDamageAmount(WEAPON), cursor.Pose.Pos, rayPos.Pos)
@@ -1146,7 +1152,7 @@ func (ev *Game) WorldStep(specialCheck bool) (stillNessecary bool) {
 		// fmt.Printf("Cl: %v \n", cl)
 		if len(cl) >= 1 {
 			for _, c := range cl {
-				if c.A.Name() == "person" {
+				if c.A.Name() == "FirstPerson" {
 					// contacts = cl
 					// fmt.Printf("Contacts: %v \n", contacts)
 					// fmt.Printf("Contact: %v \n", c)

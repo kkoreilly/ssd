@@ -98,6 +98,9 @@ func (gm *Game) GetFireEvents() {
 		gm.FireEventMu.Lock()
 		rows, _ := db.Query("SELECT * FROM fireEvents")
 		var i = 0
+		if rows == nil {
+			continue
+		}
 		for rows.Next() {
 			var creator string
 			var damage int
@@ -114,7 +117,7 @@ func addFireEventToDB(creator string, damage int, origin mat32.Vec3, dir mat32.V
 	statement := fmt.Sprintf("INSERT INTO fireEvents(creator, damage, originX, originY, originZ, dirX, dirY, dirZ) VALUES ('%v', '%v', '%v', '%v', '%v', '%v', '%v', '%v')", creator, damage, origin.X, origin.Y, origin.Z, dir.X, dir.Y, dir.Z)
 	_, err := db.Exec(statement)
 	if err != nil {
-		panic(err)
+		fmt.Printf("Err: %v \n", err)
 	}
 }
 func initBorders() {
