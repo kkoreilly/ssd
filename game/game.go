@@ -583,6 +583,7 @@ func (gm *Game) removeHealthPoints(dmg int, from string) {
 		gm.Scene.Camera.Pose.Pos = pers.Rel.Pos.Add(camOff)
 		gm.World.WorldRelToAbs()
 		gm.Scene.UpdateSig()
+		sc.Win.OSWin.SetCursorEnabled(true, false)
 		resultText.SetText("<b>You were killed by " + from + " - Respawning in 5</b>")
 		resultText.SetFullReRender()
 		updateBattlePoints(from, gm.OtherPos[from].Points+1)
