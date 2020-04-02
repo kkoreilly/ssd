@@ -34,6 +34,15 @@ func (gm *Game) PhysMakePerson(par *eve.Group, name string, first bool) *eve.Gro
 	return pgroup
 }
 
+func (gm *Game) PhysMakeGrass(par *eve.Group, name string) *eve.Group {
+	// fmt.Printf("Making person \n")
+	pgroup := eve.AddNewGroup(par, name) // note: this is probably redundant'
+	person := eve.AddNewBox(pgroup, "Grass", mat32.Vec3{0, 0.05, 0}, mat32.Vec3{200, 0.1, 200})
+	person.Color = "green" // for debugging
+	person.Vis = "Grass"
+	return pgroup
+}
+
 func (gm *Game) PhysMakeBrickHouse(par *eve.Group, name string) *eve.Group {
 	width := float32(15)
 	depth := float32(15)
@@ -173,6 +182,17 @@ func (gm *Game) LibMakePerson() {
 	pwm := gi3d.AddNewBox(sc, pnm, 0.5, 2, 0.5)
 	pws := gi3d.AddNewSolid(sc, pwg, pnm, pwm.Name())
 	pws.Mat.Color.SetName("blue")
+}
+
+func (gm *Game) LibMakeGrass() {
+	sc := &gm.Scene.Scene
+	pnm := "Grass"
+	pwg := sc.NewInLibrary(pnm)
+	pwm := gi3d.AddNewBox(sc, pnm, 200, 0.1, 200)
+	pws := gi3d.AddNewSolid(sc, pwg, pnm, pwm.Name())
+	gi3d.AddNewTextureFile(sc, "grass", "objs/grass.jpg")
+	pws.Mat.Texture = gi3d.TexName("grass")
+	pws.Mat.Tiling.Repeat.Set(50, 50)
 }
 
 func (gm *Game) LibMakeRoad() {

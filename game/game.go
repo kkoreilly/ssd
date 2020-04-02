@@ -224,6 +224,7 @@ func (gm *Game) MakeLibrary() {
 	gm.LibMakePerson()
 	gm.LibMakePerson1()
 	gm.LibMakeRoad()
+	gm.LibMakeGrass()
 }
 
 func (gm *Game) MakeMeshes() {
@@ -309,15 +310,24 @@ func (gm *Game) Config() {
 
 	gm.MakeView()
 	gm.AbleToFire = true
-
-	text := gi3d.AddNewText2D(&sc.Scene, &sc.Scene, "CrossText", "+")
-	text.SetProp("color", "white")
-	// text.SetProp("background-color", "black")
-	text.SetProp("text-align", "center")
-	text.Pose.Scale.SetScalar(0.1)
-	text.Pose.Pos = sc.Camera.Pose.Pos
-	text.Pose.Pos.Z -= 10
-	text.Pose.Pos.X += 2
+	crossGroup := gi3d.AddNewGroup(&sc.Scene, &sc.Scene, "CrossGroup")
+	color := gi.Color{255, 255, 255, 200}
+	right := gi3d.AddNewLine(&sc.Scene, crossGroup, "RightLine", mat32.Vec3{0.1, 0, 0}, mat32.Vec3{0.5, 0, 0}, 0.1, color)
+	left := gi3d.AddNewLine(&sc.Scene, crossGroup, "LeftLine", mat32.Vec3{-0.1, 0, 0}, mat32.Vec3{-0.5, 0, 0}, 0.1, color)
+	bottom := gi3d.AddNewLine(&sc.Scene, crossGroup, "BottomLine", mat32.Vec3{0, -0.1, 0}, mat32.Vec3{0, -0.5, 0}, 0.1, color)
+	top := gi3d.AddNewLine(&sc.Scene, crossGroup, "TopLine", mat32.Vec3{0, 0.1, 0}, mat32.Vec3{0, 0.5, 0}, 0.1, color)
+	right.Mat.Emissive = color
+	left.Mat.Emissive = color
+	bottom.Mat.Emissive = color
+	top.Mat.Emissive = color
+	// text := gi3d.AddNewText2D(&sc.Scene, &sc.Scene, "CrossText", "+")
+	// text.SetProp("color", "white")
+	// // text.SetProp("background-color", "black")
+	// text.SetProp("text-align", "center")
+	// text.Pose.Scale.SetScalar(0.1)
+	// text.Pose.Pos = sc.Camera.Pose.Pos
+	// text.Pose.Pos.Z -= 10
+	// text.Pose.Pos.X += 2
 
 	gi.AddNewSpace(gamerow, "space1")
 
@@ -398,13 +408,15 @@ func (gm *Game) Config() {
 	// // // market1.Mat.Color.SetString("red", nil)
 	// // market1.Mat.SetTexture(&sc.Scene, tbtx.Name())
 	clearAllBullets()
-	floorp := gi3d.AddNewPlane(&sc.Scene, "floor-plane", 200, 200)
-	floor := gi3d.AddNewSolid(&sc.Scene, &sc.Scene, "floor", floorp.Name())
-	floor.Pose.Pos.Set(0, 0, 0)
-	// floor.Mat.Emissive.SetString("green", nil)
-	grtx := gi3d.AddNewTextureFile(&sc.Scene, "ground", "objs/grass.jpg")
-	floor.Mat.SetTexture(&sc.Scene, grtx)
-	floor.Mat.Tiling.Repeat.Set(50, 50)
+	ogp := eve.AddNewGroup(gm.World, "Grass")
+	gm.PhysMakeGrass(ogp, "Grass")
+	// floorp := gi3d.AddNewPlane(&sc.Scene, "floor-plane", 200, 200)
+	// floor := gi3d.AddNewSolid(&sc.Scene, &sc.Scene, "floor", floorp.Name())
+	// floor.Pose.Pos.Set(0, 0, 0)
+	// // floor.Mat.Emissive.SetString("green", nil)
+	// grtx := gi3d.AddNewTextureFile(&sc.Scene, "ground", "objs/grass.jpg")
+	// floor.Mat.SetTexture(&sc.Scene, grtx)
+	// floor.Mat.Tiling.Repeat.Set(50, 50)
 
 	gi.FilterLaggyKeyEvents = true // fix key lag
 
@@ -416,7 +428,7 @@ func (gm *Game) Config() {
 	gm.GameOn = true
 	RayGroup := gm.Scene.Scene.ChildByName("RayGroup", 0).(*gi3d.Group)
 	for i := 0; i < 30; i++ {
-		color, _ := gi.ColorFromName("red")
+		color := gi.Color{255, 0, 0, 200}
 		line := gi3d.AddNewLine(&gm.Scene.Scene, RayGroup, fmt.Sprintf("bullet_arrow_enemy%v", i), mat32.Vec3{0, 0, 0}, mat32.Vec3{1, 1, 1}, .05, color)
 		line.SetInvisible()
 	}
@@ -488,9 +500,10 @@ func (gm *Game) fireWeapon() { // standard event for what happens when you fire
 	}
 	// what to do on fire in here:
 
-	cursor := gm.Scene.Scene.ChildByName("CrossText", 0).(*gi3d.Text2D)
+	cursor := gm.Scene.Scene.ChildByName("CrossGroup", 0).(*gi3d.Group)
 	endPos := cursor.Pose
 	rayPos := cursor.Pose
+	sPos := cursor.Pose
 	// endPos.MoveOnAxis(0, 0, -1, 100)
 	rayPos.Pos = mat32.Vec3{0, 0, 0}
 	rayPos.MoveOnAxis(0, 0, -1, 1)
@@ -498,7 +511,8 @@ func (gm *Game) fireWeapon() { // standard event for what happens when you fire
 	// fmt.Printf("Ray: %v \n", ray)
 	cts := gm.World.RayBodyIntersections(*ray)
 	var closest *eve.BodyPoint
-	for _, d := range cts {
+	// fmt.Printf("Contacts: %v \n", cts)
+	for k, d := range cts {
 		// fmt.Printf("Key: %v Body: %v  Point: %v \n", k, d.Body, d.Point)
 		if closest == nil {
 			closest = d
@@ -514,8 +528,8 @@ func (gm *Game) fireWeapon() { // standard event for what happens when you fire
 	if cts != nil {
 		endPos.Pos = closest.Point
 	} else {
-		rayPos.MoveOnAxis(0, 0, -1, 100)
-		endPos.Pos = rayPos.Pos
+		sPos.MoveOnAxis(0, 0, -1, 100)
+		endPos.Pos = sPos.Pos
 	}
 	var index int
 	for index = 0; index < 29; index++ {
@@ -640,7 +654,7 @@ func (gm *Game) timerForResult(from string) {
 }
 
 func (gm *Game) updateCursorPosition() {
-	cursor := gm.Scene.Scene.ChildByName("CrossText", 0).(*gi3d.Text2D)
+	cursor := gm.Scene.Scene.ChildByName("CrossGroup", 0).(*gi3d.Group)
 	// pers := gm.World.ChildByName("FirstPerson", 0).(*eve.Group)
 	cursor.Pose = gm.Scene.Camera.Pose
 	cursor.Pose.MoveOnAxis(0, 0, -1, 3)
