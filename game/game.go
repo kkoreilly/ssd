@@ -828,7 +828,11 @@ func (gm *Game) UpdatePeopleWorldPos() {
 			ukt.SetText(fmt.Sprintf("<b>%v:</b>         %v kills            ", USER, POINTS))
 		}
 		if POINTS >= 10 {
+			gm.PosMu.Unlock()
+			gm.WorldMu.Unlock()
 			gm.setGameOver(USER)
+			gm.PosMu.Lock()
+			gm.WorldMu.Lock()
 		}
 		if mods {
 			gm.View.Sync() // if something was created or destroyed, it must use Sync to update Scene
