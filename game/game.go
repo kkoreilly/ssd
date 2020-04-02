@@ -455,7 +455,7 @@ func (gm *Game) RenderEnemyShots() {
 					if d1.Body.Name() == "FirstPerson" {
 						gm.FireEventMu.Unlock()
 						gm.removeHealthPoints(d.Damage, d.Creator)
-						rayObj.SetInvisibleg()
+						rayObj.SetInvisible()
 						gi3d.SetLineStartEnd(rayObj, mat32.Vec3{500, 500, 500}, mat32.Vec3{500, 500, 500})
 						gm.FireEventMu.Lock()
 					}
