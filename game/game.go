@@ -287,6 +287,7 @@ func (gm *Game) Config() {
 	gm.Scene = sc
 	sc.SetStretchMaxWidth()
 	sc.SetStretchMaxHeight()
+	sc.Win.OSWin.SetCursorEnabled(false, true)
 
 	// first, add lights, set camera
 	sc.BgColor.SetUInt8(230, 230, 255, 255) // sky blue-ish
@@ -583,7 +584,7 @@ func (gm *Game) removeHealthPoints(dmg int, from string) {
 		gm.Scene.Camera.Pose.Pos = pers.Rel.Pos.Add(camOff)
 		gm.World.WorldRelToAbs()
 		gm.Scene.UpdateSig()
-		sc.Win.OSWin.SetCursorEnabled(true, false)
+		gm.Scene.Win.OSWin.SetCursorEnabled(true, false)
 		resultText.SetText("<b>You were killed by " + from + " - Respawning in 5</b>")
 		resultText.SetFullReRender()
 		updateBattlePoints(from, gm.OtherPos[from].Points+1)
@@ -625,6 +626,7 @@ func (gm *Game) timerForResult(from string) {
 			healthText.SetText(fmt.Sprintf("You have %v health", HEALTH))
 			pers := gm.World.ChildByName("FirstPerson", 0).(*eve.Group)
 			camOff := gm.Scene.Camera.Pose.Pos.Sub(pers.Rel.Pos) // currrent offset of camera vs. person
+			gm.Scene.Win.OSWin.SetCursorEnabled(false, true)
 			pers.Rel.Pos = mat32.Vec3{0, 1, 50}
 			updatePosition("pos", pers.Rel.Pos)
 			gm.Scene.Camera.Pose.Pos = pers.Rel.Pos.Add(camOff)
