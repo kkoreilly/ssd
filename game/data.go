@@ -249,6 +249,7 @@ func createBattleJoinLayouts() {
 func (gm *Game) setGameOver(winner string) {
 	gm.WorldMu.Lock()
 	gm.PosMu.Lock()
+	gm.Scene.Win.OSWin.SetCursorEnabled(true, false)
 	gm.GameOn = false
 	gm.Winner = winner
 	gm.WorldMu.Unlock()
@@ -539,6 +540,13 @@ func joinTeam(name string) {
 }
 func removeBulletFromDB(origin, dir mat32.Vec3) {
 	statement := fmt.Sprintf("DELETE FROM fireEvents WHERE originX='%v' AND originY='%v' AND originZ='%v' AND dirX = '%v' AND dirY = '%v' AND dirZ = '%v'", origin.X, origin.Y, origin.Z, dir.X, dir.Y, dir.Z)
+	_, err := db.Exec(statement)
+	if err != nil {
+		panic(err)
+	}
+}
+func clearAllBullets() {
+	statement := "DELETE FROM fireEvents"
 	_, err := db.Exec(statement)
 	if err != nil {
 		panic(err)

@@ -397,7 +397,7 @@ func (gm *Game) Config() {
 	// // market1.Pose.Scale.Set(5, 2.5, 5)
 	// // // market1.Mat.Color.SetString("red", nil)
 	// // market1.Mat.SetTexture(&sc.Scene, tbtx.Name())
-
+	clearAllBullets()
 	floorp := gi3d.AddNewPlane(&sc.Scene, "floor-plane", 200, 200)
 	floor := gi3d.AddNewSolid(&sc.Scene, &sc.Scene, "floor", floorp.Name())
 	floor.Pose.Pos.Set(0, 0, 0)
@@ -613,6 +613,7 @@ func (gm *Game) timerForResult(from string) {
 	rec.InitName(&rec, "rec")
 	resultButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
+			clearAllBullets()
 			resultText.SetText("")
 			resultText.SetFullReRender()
 			resultButton.Delete(true)
