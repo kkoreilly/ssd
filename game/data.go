@@ -113,7 +113,7 @@ func (gm *Game) GetFireEvents() {
 			i += 1
 		}
 		for k, d := range gm.FireEvents {
-			if TempFireEvents[d] == nil { // it has been deleted in the database
+			if TempFireEvents[d] == 0 { // it has been deleted in the database
 				delete(gm.FireEvents, k)
 			}
 		}
