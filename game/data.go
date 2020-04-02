@@ -107,14 +107,18 @@ func (gm *Game) GetFireEvents() {
 			var damage int
 			var origin, dir mat32.Vec3
 			rows.Scan(&creator, &damage, &origin.X, &origin.Y, &origin.Z, &dir.X, &dir.Y, &dir.Z)
-			gm.FireEvents[i] = &FireEventInfo{creator, damage, origin, dir}
-			TempFireEvents[&FireEventInfo{creator, damage, origin, dir}] = 1
+			data := &FireEventInfo{creator, damage, origin, dir}
+			gm.FireEvents[i] = data
+			TempFireEvents[data] = 1
 			// fmt.Printf("Fire Event Creator: %v   Damage: %v  Origin: %v   Dir: %v\n", gm.FireEvents[i].Creator, gm.FireEvents[i].Damage, gm.FireEvents[i].Origin, gm.FireEvents[i].Dir)
 			i += 1
 		}
 		for k, d := range gm.FireEvents {
+			// fmt.Printf("Temp fire events: %v    Key: %v \n", TempFireEvents[d], d)
 			if TempFireEvents[d] == 0 { // it has been deleted in the database
+				// fmt.Printf("Deleting... \n")
 				delete(gm.FireEvents, k)
+				// fmt.Printf("Should be nil... %v \n", gm.FireEvents[k])
 			}
 		}
 		gm.FireEventMu.Unlock()
@@ -546,12 +550,27 @@ func joinTeam(name string) {
 	createBattleJoinLayouts()
 
 }
-func removeBulletFromDB(origin, dir mat32.Vec3) {
-	statement := fmt.Sprintf("DELETE FROM fireEvents WHERE originX='%v' AND originY='%v' AND originZ='%v' AND dirX = '%v' AND dirY = '%v' AND dirZ = '%v'", origin.X, origin.Y, origin.Z, dir.X, dir.Y, dir.Z)
-	_, err := db.Exec(statement)
+func removeBulletFromDB(originP, dirP mat32.Vec3) {
+	readStatement := "SELECT * FROM fireEvents"
+	rows, err := db.Query(readStatement)
 	if err != nil {
 		panic(err)
 	}
+	for rowsF.Next() {
+		var creator string
+		var damage int
+		var origin, dir mat32.Vec3
+		rowsF.Scan(&creator, &damage, &origin.X, &origin.Y, &origin.Z, &dir.X, &dir.Y, &dir.Z)
+		if origin.Round() == originP.Round() && dir.Round() == dirP.Round() {
+			statement := fmt.Sprintf("DELETE FROM fireEvents WHERE originX='%v' AND originY='%v' AND originZ='%v' AND dirX = '%v' AND dirY = '%v' AND dirZ = '%v'", origin.X, origin.Y, origin.Z, dir.X, dir.Y, dir.Z)
+			_, err := db.Exec(statement)
+			if err != nil {
+				panic(err)
+			}
+		}
+
+	}
+
 }
 func clearAllBullets() {
 	statement := "DELETE FROM fireEvents"
