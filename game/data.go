@@ -101,14 +101,21 @@ func (gm *Game) GetFireEvents() {
 		if rows == nil {
 			continue
 		}
+		TempFireEvents = make(map[*FireEventInfo]int)
 		for rows.Next() {
 			var creator string
 			var damage int
 			var origin, dir mat32.Vec3
 			rows.Scan(&creator, &damage, &origin.X, &origin.Y, &origin.Z, &dir.X, &dir.Y, &dir.Z)
 			gm.FireEvents[i] = &FireEventInfo{creator, damage, origin, dir}
+			TempFireEvents[&FireEventInfo{creator, damage, origin, dir}] = 1
 			// fmt.Printf("Fire Event Creator: %v   Damage: %v  Origin: %v   Dir: %v\n", gm.FireEvents[i].Creator, gm.FireEvents[i].Damage, gm.FireEvents[i].Origin, gm.FireEvents[i].Dir)
 			i += 1
+		}
+		for k, d := range gm.FireEvents {
+			if TempFireEvents[d] == nil { // it has been deleted in the database
+				delete(gm.FireEvents, k)
+			}
 		}
 		gm.FireEventMu.Unlock()
 	}
