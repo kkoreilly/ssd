@@ -434,6 +434,13 @@ func (gm *Game) RenderEnemyShots() {
 			return
 		}
 		gm.FireEventMu.Lock()
+		for i := 0; i < 10; i++ {
+			if gm.FireEvents[i] == nil {
+				rayObj := RayGroup.ChildByName(fmt.Sprintf("bullet_arrow_enemy%v", i), 0).(*gi3d.Solid)
+				rayObj.SetInactive()
+				gi3d.SetLineStartEnd(rayObj, mat32.Vec3{500, 500, 500}, mat32.Vec3{500, 500, 500})
+			}
+		}
 
 		for k, d := range gm.FireEvents {
 			if d.Creator != USER {
@@ -446,6 +453,8 @@ func (gm *Game) RenderEnemyShots() {
 					if d1.Body.Name() == "FirstPerson" {
 						gm.FireEventMu.Unlock()
 						gm.removeHealthPoints(d.Damage, d.Creator)
+						rayObj.SetInactive()
+						gi3d.SetLineStartEnd(rayObj, mat32.Vec3{500, 500, 500}, mat32.Vec3{500, 500, 500})
 						gm.FireEventMu.Lock()
 					}
 
@@ -461,13 +470,7 @@ func (gm *Game) RenderEnemyShots() {
 
 			}
 		}
-		for i := 0; i < 10; i++ {
-			if gm.FireEvents[i] == nil {
-				rayObj := RayGroup.ChildByName(fmt.Sprintf("bullet_arrow_enemy%v", i), 0).(*gi3d.Solid)
-				rayObj.SetInactive()
-				gi3d.SetLineStartEnd(rayObj, mat32.Vec3{500, 500, 500}, mat32.Vec3{500, 500, 500})
-			}
-		}
+
 		gm.FireEventMu.Unlock()
 	}
 }
