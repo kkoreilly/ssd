@@ -101,7 +101,7 @@ func (gm *Game) GetFireEvents() {
 		if rows == nil {
 			continue
 		}
-		TempFireEvents = make(map[*FireEventInfo]int)
+		TempFireEvents := make(map[*FireEventInfo]int)
 		for rows.Next() {
 			var creator string
 			var damage int
