@@ -534,7 +534,13 @@ func joinTeam(name string) {
 	createBattleJoinLayouts()
 
 }
-
+func removeBulletFromDB(origin, dir mat32.Vec3) {
+	statement := fmt.Sprintf("DELETE FROM fireEvents WHERE originX='%v' AND originY='%v' AND originZ='%v' AND dirX = '%v' AND dirY = '%v' AND dirZ = '%v'", origin.X, origin.Y, origin.Z, dir.X, dir.Y, dir.Z)
+	_, err := db.Exec(statement)
+	if err != nil {
+		panic(err)
+	}
+}
 func (gm *Game) GetPosFromServer() { // GetPosFromServer loops through the players database and updates gm.OtherPos with the new data
 	for {
 		// fmt.Printf("Working 1 \n")

@@ -512,7 +512,7 @@ func (gm *Game) fireWeapon() { // standard event for what happens when you fire
 	color, _ := gi.ColorFromName("red")
 	RayGroup := gm.Scene.Scene.ChildByName("RayGroup", 0).(*gi3d.Group)
 	bullet := gi3d.AddNewLine(&gm.Scene.Scene, RayGroup, "bullet_arrow_you", cursor.Pose.Pos, endPos.Pos, .05, color)
-	go removeBulletLoop(bullet)
+	go gm.removeBulletLoop(bullet, cursor.Pose.Pos, rayPos.Pos)
 	// done with what to fire
 	gm.AbleToFire = false
 	addFireEventToDB(USER, generateDamageAmount(WEAPON), cursor.Pose.Pos, rayPos.Pos)
@@ -521,9 +521,18 @@ func (gm *Game) fireWeapon() { // standard event for what happens when you fire
 	gm.AbleToFire = true
 }
 
-func removeBulletLoop(bullet *gi3d.Solid) {
+func (gm *Game) removeBulletLoop(bullet *gi3d.Solid, origin mat32.Vec3, dir mat32.Vec3) {
+	gm.FireEventMu.Lock()
 	time.Sleep(100 * time.Millisecond)
-	removeBulletFromDB(bullet.st)
+	removeBulletFromDB(origin, dir)
+	for k, d := range gm.FireEvents {
+		if d.Origin == origin && d.Dir == dir {
+			delete(gm.FireEvents, k)
+			break
+		}
+	}
+	bullet.Delete(true)
+	gm.FireEventMu.Unlock()
 }
 
 func generateDamageAmount(wp string) (damage int) {
