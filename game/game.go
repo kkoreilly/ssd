@@ -442,11 +442,12 @@ func (gm *Game) RenderEnemyShots() {
 				sepPos := d.Dir.Mul(mat32.Vec3{100, 100, 100})
 				cts := gm.World.RayBodyIntersections(*ray)
 				for _, d1 := range cts {
-
+					gm.removeBulletLoop(rayObj, d.Origin, endPos)
 					if d1.Body.Name() == "FirstPerson" {
 						gm.FireEventMu.Unlock()
 						gm.removeHealthPoints(d.Damage, d.Creator)
 						gm.FireEventMu.Lock()
+
 					}
 					endPos = d1.Point
 					break
@@ -513,7 +514,7 @@ func (gm *Game) fireWeapon() { // standard event for what happens when you fire
 		}
 	}
 	RayGroup := gm.Scene.Scene.ChildByName("RayGroup", 0).(*gi3d.Group)
-	fmt.Printf("Name: bullet_arrow_enemy%v \n", index)
+	// fmt.Printf("Name: bullet_arrow_enemy%v \n", index)
 	rayObj := RayGroup.ChildByName(fmt.Sprintf("bullet_arrow_enemy%v", index), 0).(*gi3d.Solid)
 	gi3d.SetLineStartEnd(rayObj, cursor.Pose.Pos, endPos.Pos)
 	rayObj.ClearInvisible()
@@ -528,7 +529,7 @@ func (gm *Game) fireWeapon() { // standard event for what happens when you fire
 }
 
 func (gm *Game) removeBulletLoop(bullet *gi3d.Solid, origin mat32.Vec3, dir mat32.Vec3) {
-	time.Sleep(1000 * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 	gm.FireEventMu.Lock()
 	removeBulletFromDB(origin, dir)
 	for k, d := range gm.FireEvents {
