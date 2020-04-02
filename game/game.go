@@ -518,7 +518,7 @@ func (gm *Game) fireWeapon() { // standard event for what happens when you fire
 		endPos.Pos = rayPos.Pos
 	}
 	var index int
-	for index = 0; index < 30; index++ {
+	for index = 0; index < 29; index++ {
 		if gm.FireEvents[index] == nil {
 			break
 		}
