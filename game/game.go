@@ -539,7 +539,7 @@ func (gm *Game) removeBulletLoop(bullet *gi3d.Solid, origin mat32.Vec3, dir mat3
 			break
 		}
 	}
-	bullet.Delete(true)
+	bullet.SetInvisible()
 	gm.FireEventMu.Unlock()
 }
 
