@@ -13,6 +13,7 @@ import (
 	_ "github.com/lib/pq"
 	"net/http"
 	"strings"
+	"bytes"
 )
 
 var db *sql.DB
@@ -57,12 +58,24 @@ func serverGetPlayerPos() {
 	}
 	defer resp.Body.Close()
 	scanner := bufio.NewScanner(resp.Body)
-	for i := 0; scanner.Scan(); i++ {
+	// for i := 0; scanner.Scan(); i++ {
 		fmt.Printf("Got data: %v \n", scanner.Text())
-	}
 	if err := scanner.Err(); err != nil {
 		panic(err)
 	}
+}
+
+func serverPostPlayerPos() {
+	b := []byte(fmt.Sprintf("username: clientTest, battleName: testBattle, posX: 1, posY: 2, posZ: 3, points: 4"))
+	fmt.Printf("Byte: %v \n", b)
+	buff := bytes.NewBuffer(b)
+	fmt.Printf("Buff: %v \n", buff)
+	resp, err := http.Post("http://ssdserver.herokuapp.com/playerPosPost", "application/json", buff)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("Resp: %v \n", resp)
+	defer resp.Body.Close()
 }
 
 func readTeam() {
