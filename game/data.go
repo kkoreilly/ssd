@@ -4,12 +4,14 @@
 package main
 
 import (
+	"bufio"
 	"database/sql"
 	"fmt"
 	"github.com/goki/gi/gi"
 	"github.com/goki/ki/ki"
 	"github.com/goki/mat32"
 	_ "github.com/lib/pq"
+	"net/http"
 	"strings"
 )
 
@@ -46,6 +48,21 @@ func data() {
 
 	// fmt.Printf("Connected!  %T \n", db)
 
+}
+
+func serverGetPlayerPos() {
+	resp, err := http.Get("http://ssdserver.herokuapp.com/playerPosGet")
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+	scanner := bufio.NewScanner(resp.Body)
+	for i := 0; scanner.Scan(); i++ {
+		fmt.Printf("Got data: %v \n", scanner.Text())
+	}
+	if err := scanner.Err(); err != nil {
+		panic(err)
+	}
 }
 
 func readTeam() {

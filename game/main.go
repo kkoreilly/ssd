@@ -232,6 +232,7 @@ func initMainTabs() {
 
 	rec := ki.Node{}
 	rec.InitName(&rec, "rec")
+	serverGetPlayerPos()
 	homeTab = tv.AddNewTab(gi.KiT_Frame, "<b>Home</b>").(*gi.Frame)
 
 	homeTab.Lay = gi.LayoutVert
