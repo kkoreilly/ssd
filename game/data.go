@@ -15,6 +15,7 @@ import (
 	_ "github.com/lib/pq"
 	"net/http"
 	"strings"
+	// "io/ioutil"
 )
 
 var db *sql.DB
@@ -610,34 +611,51 @@ func clearAllBullets() {
 }
 func (gm *Game) GetPosFromServer() { // GetPosFromServer loops through the players database and updates gm.OtherPos with the new data
 	for {
-		// fmt.Printf("Working 1 \n")
-		getStatement := "SELECT * FROM players"
-		rows, err := db.Query(getStatement)
-		if err != nil {
-			fmt.Printf("DB Error: %v \n", err)
-		}
+		// // fmt.Printf("Working 1 \n")
+		// getStatement := "SELECT * FROM players"
+		// rows, err := db.Query(getStatement)
+		// if err != nil {
+		// 	fmt.Printf("DB Error: %v \n", err)
+		// }
 		gm.PosMu.Lock()
-		if rows == nil {
-			continue
+		// if rows == nil {
+		// 	continue
+		// }
+		// for rows.Next() {
+		// 	var username, battleName string
+		// 	var posX, posY, posZ float32
+		// 	var points int
+		// 	rows.Scan(&username, &posX, &posY, &posZ, &battleName, &points)
+		// 	// fmt.Printf("POINTS: %v   USER: %v \n", points, username)
+		// 	// fmt.Printf("Username: %v \n", username)
+		// 	// fmt.Printf("User: %v \n", USER)
+		// 	if username != USER {
+		// 		gm.OtherPos[username] = &CurPosition{username, CURBATTLE, points, mat32.Vec3{posX, posY, posZ}}
+		// 		// fmt.Printf("Other Pos: %v \n", gm.OtherPos[username])
+		// 	} else {
+		// 		POINTS = points
+		// 	}
+		// }
+		// // time.Sleep(100 * time.Millisecond)
+		// // gm.OtherPos["testyother"] = &CurPosition{"testyother", mat32.Vec3{rand.Float32()*5 - 2.5, 1, rand.Float32()*5 - 2.5}, 50}
+		// // fmt.Printf("Game on: %v \n", gm.GameOn)
+		resp, err := http.Get("http://ssdserver.herokuapp.com/playerPosGet")
+		if err != nil {
+			panic(err)
 		}
-		for rows.Next() {
-			var username, battleName string
-			var posX, posY, posZ float32
-			var points int
-			rows.Scan(&username, &posX, &posY, &posZ, &battleName, &points)
-			// fmt.Printf("POINTS: %v   USER: %v \n", points, username)
-			// fmt.Printf("Username: %v \n", username)
-			// fmt.Printf("User: %v \n", USER)
-			if username != USER {
-				gm.OtherPos[username] = &CurPosition{username, CURBATTLE, points, mat32.Vec3{posX, posY, posZ}}
-				// fmt.Printf("Other Pos: %v \n", gm.OtherPos[username])
-			} else {
-				POINTS = points
+		defer resp.Body.Close()
+		scanner := bufio.NewScanner(resp.Body)
+		for i := 0; scanner.Scan(); i++ {
+			jsonStruct := &CurPosition{}
+			decoder := json.NewDecoder(resp.Body)
+			_ = decoder.Decode(jsonStruct)
+			if jsonStruct.Username != USER {
+				gm.OtherPos[jsonStruct.Username] = jsonStruct
 			}
+		if err := scanner.Err(); err != nil {
+			panic(err)
 		}
-		// time.Sleep(100 * time.Millisecond)
-		// gm.OtherPos["testyother"] = &CurPosition{"testyother", mat32.Vec3{rand.Float32()*5 - 2.5, 1, rand.Float32()*5 - 2.5}, 50}
-		// fmt.Printf("Game on: %v \n", gm.GameOn)
+	}
 		if !gm.GameOn {
 			close(gm.PosUpdtChan)
 			close(gm.FireUpdtChan)
