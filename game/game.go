@@ -756,6 +756,10 @@ func (gm *Game) UpdatePeopleWorldPos() {
 		}
 		// now, the children of pGp are the keys of OtherPos in order
 		for i, k := range keys {
+			if k == USER {
+				delete(gm.OtherPos, k)
+				continue
+			}
 			ppos := gm.OtherPos[k]
 			pers := pGp.Child(i).(*eve.Group) // this is guaranteed to be for person "k"
 			if !pers.HasChildren() {          // if has not already been made
