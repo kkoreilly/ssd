@@ -639,23 +639,36 @@ func (gm *Game) GetPosFromServer() { // GetPosFromServer loops through the playe
 		// // time.Sleep(100 * time.Millisecond)
 		// // gm.OtherPos["testyother"] = &CurPosition{"testyother", mat32.Vec3{rand.Float32()*5 - 2.5, 1, rand.Float32()*5 - 2.5}, 50}
 		// // fmt.Printf("Game on: %v \n", gm.GameOn)
-		resp, err := http.Get("http://ssdserver.herokuapp.com/playerPosGet")
+		resp, err := http.Get("http://ssdserver.herokuapp.com/playerPosGet/?battleName=" + CURBATTLE)
 		if err != nil {
 			panic(err)
 		}
-		defer resp.Body.Close()
-		scanner := bufio.NewScanner(resp.Body)
-		for i := 0; scanner.Scan(); i++ {
-			jsonStruct := &CurPosition{}
-			_ = json.Unmarshal([]byte(scanner.Text()), jsonStruct)
-			fmt.Printf("JSON struct: %v \n", jsonStruct)
-			if jsonStruct.Username != USER {
-				gm.OtherPos[jsonStruct.Username] = jsonStruct
-			}
-		if err := scanner.Err(); err != nil {
-			panic(err)
+		if resp.Status == "422" {
+			fmt.Printf("422, Battle maps nil or battle name nil")
+			gm.PosMu.Unlock()
+			gm.PosUpdtChan <- true // tells UpdatePeopleWorldPos to update to new positions
+			gm.FireUpdtChan <- true
+			continue
 		}
-	}
+		defer resp.Body.Close()
+		decoder := json.NewDecoder(resp.Body)
+		decoder.Decode(&gm.OtherPos)
+		// fmt.Printf("Other Pos: %v \n", gm.OtherPos)
+	// 	for i := 0; scanner.Scan(); i++ {
+	// 		jsonStruct := &CurPosition{}
+	// 		fmt.Println(scanner.Text())
+	// 		err := json.Unmarshal([]byte(scanner.Text()), jsonStruct)
+	// 		if err != nil {
+	// 			panic(err)
+	// 		}
+	// 		fmt.Printf("JSON struct: %v \n", jsonStruct)
+	// 		if jsonStruct.Username != USER {
+	// 			gm.OtherPos[jsonStruct.Username] = jsonStruct
+	// 		}
+	// 	if err := scanner.Err(); err != nil {
+	// 		panic(err)
+	// 	}
+	// }
 		if !gm.GameOn {
 			close(gm.PosUpdtChan)
 			close(gm.FireUpdtChan)

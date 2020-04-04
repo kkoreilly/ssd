@@ -681,11 +681,12 @@ func (gm *Game) UpdatePersonYPos() {
 				pers.Rel.Pos.Y = 1
 				pers.Rel.LinVel.Y = 0
 			}
-			statement := fmt.Sprintf("UPDATE players SET posY = '%v' WHERE username='%v'", pers.Rel.Pos.Y, USER)
-			_, err := db.Exec(statement)
-			if err != nil {
-				fmt.Printf("DB err: %v \n", err)
-			}
+			writePlayerPosToServer(pers.Rel.Pos, CURBATTLE)
+			// statement := fmt.Sprintf("UPDATE players SET posY = '%v' WHERE username='%v'", pers.Rel.Pos.Y, USER)
+			// _, err := db.Exec(statement)
+			// if err != nil {
+			// 	fmt.Printf("DB err: %v \n", err)
+			// }
 		}
 		gm.World.WorldRelToAbs()
 		gm.WorldMu.Unlock()
