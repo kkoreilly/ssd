@@ -29,9 +29,10 @@ import (
 )
 
 type CurPosition struct {
-	Username string
-	Pos      mat32.Vec3
-	Points   int
+	Username   string
+	BattleName string
+	Points     int
+	Pos        mat32.Vec3
 }
 
 type Weapon struct {

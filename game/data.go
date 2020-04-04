@@ -5,7 +5,9 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"github.com/goki/gi/gi"
 	"github.com/goki/ki/ki"
@@ -13,7 +15,6 @@ import (
 	_ "github.com/lib/pq"
 	"net/http"
 	"strings"
-	"bytes"
 )
 
 var db *sql.DB
@@ -28,6 +29,7 @@ var goldNum int
 var livesNum int
 var gameOpen = true
 var curBattleTerritory1, curBattleTerritory2 string
+var CURBATTLE string
 
 func data() {
 	var str string
@@ -59,22 +61,22 @@ func serverGetPlayerPos() {
 	defer resp.Body.Close()
 	scanner := bufio.NewScanner(resp.Body)
 	// for i := 0; scanner.Scan(); i++ {
-		fmt.Printf("Got data: %v \n", scanner.Text())
+	fmt.Printf("Got data: %v \n", scanner.Text())
 	if err := scanner.Err(); err != nil {
 		panic(err)
 	}
 }
 
-func serverPostPlayerPos() {
-	b := []byte(fmt.Sprintf("username: clientTest, battleName: testBattle, posX: 1, posY: 2, posZ: 3, points: 4"))
-	fmt.Printf("Byte: %v \n", b)
+func writePlayerPosToServer(pos mat32.Vec3, battleName string) {
+	// fmt.Printf("Battle Name: %v \n", battleName)
+	info := &CurPosition{USER, battleName, POINTS, pos}
+	b, _ := json.Marshal(info)
+	// b := []byte(fmt.Sprintf("username: %v, battleName: %v, posX: %v, posY: %v, posZ: %v, points: %v", USER, battleName, pos.X, pos.Y, pos.Z, POINTS))
 	buff := bytes.NewBuffer(b)
-	fmt.Printf("Buff: %v \n", buff)
 	resp, err := http.Post("http://ssdserver.herokuapp.com/playerPosPost", "application/json", buff)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("Resp: %v \n", resp)
 	defer resp.Body.Close()
 }
 
@@ -174,13 +176,15 @@ func initBorders() {
 	}
 }
 func joinPlayersTable(battleName string) {
-	statement := fmt.Sprintf("INSERT INTO players(username, posX, posY, posZ, battleName, points) VALUES ('%v', '%v', '%v', '%v', '%v', 0)", USER, 0, 1, 0, battleName)
+	writePlayerPosToServer(mat32.Vec3{0, 1, 0}, battleName)
+	CURBATTLE = battleName
+	// statement := fmt.Sprintf("INSERT INTO players(username, posX, posY, posZ, battleName, points) VALUES ('%v', '%v', '%v', '%v', '%v', 0)", USER, 0, 1, 0, battleName)
 	POINTS = 0
-	// fmt.Printf("Points Data: %v", POINTS)
-	_, err := db.Exec(statement)
-	if err != nil {
-		panic(err)
-	}
+	// // fmt.Printf("Points Data: %v", POINTS)
+	// _, err := db.Exec(statement)
+	// if err != nil {
+	// 	panic(err)
+	// }
 }
 func createBattleJoinLayouts() {
 
@@ -246,8 +250,8 @@ func createBattleJoinLayouts() {
 				if sig == int64(gi.ButtonClicked) {
 					currentMapString = "Training Map 1"
 					currentMap = FirstMap
-					initPlayTab()
 					joinPlayersTable(territory1 + territory2)
+					initPlayTab()
 					curBattleTerritory1 = territory1
 					curBattleTerritory2 = territory2
 				}
@@ -625,7 +629,7 @@ func (gm *Game) GetPosFromServer() { // GetPosFromServer loops through the playe
 			// fmt.Printf("Username: %v \n", username)
 			// fmt.Printf("User: %v \n", USER)
 			if username != USER {
-				gm.OtherPos[username] = &CurPosition{username, mat32.Vec3{posX, posY, posZ}, points}
+				gm.OtherPos[username] = &CurPosition{username, CURBATTLE, points, mat32.Vec3{posX, posY, posZ}}
 				// fmt.Printf("Other Pos: %v \n", gm.OtherPos[username])
 			} else {
 				POINTS = points
@@ -891,17 +895,18 @@ func removeMessage(message string, username string) {
 	}
 }
 func updatePosition(t string, value mat32.Vec3) {
-	statement := fmt.Sprintf("UPDATE players SET posX = '%v' WHERE username='%v'", value.X, USER)
-	_, err := db.Exec(statement)
-	if err != nil {
-		fmt.Printf("DB err: %v \n", err)
-	}
-
-	statement2 := fmt.Sprintf("UPDATE players SET posZ = '%v' WHERE username='%v'", value.Z, USER)
-	_, err = db.Exec(statement2)
-	if err != nil {
-		fmt.Printf("DB err: %v \n", err)
-	}
+	writePlayerPosToServer(mat32.Vec3{value.X, value.Y, value.Z}, CURBATTLE)
+	// statement := fmt.Sprintf("UPDATE players SET posX = '%v' WHERE username='%v'", value.X, USER)
+	// _, err := db.Exec(statement)
+	// if err != nil {
+	// 	fmt.Printf("DB err: %v \n", err)
+	// }
+	//
+	// statement2 := fmt.Sprintf("UPDATE players SET posZ = '%v' WHERE username='%v'", value.Z, USER)
+	// _, err = db.Exec(statement2)
+	// if err != nil {
+	// 	fmt.Printf("DB err: %v \n", err)
+	// }
 }
 func addUser(user string, password string) {
 	tableCreateStatement := `CREATE TABLE IF NOT EXISTS users (
