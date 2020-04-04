@@ -150,31 +150,40 @@ func (gm *Game) GetFireEvents() {
 			return
 		}
 		gm.FireEventMu.Lock()
-		rows, _ := db.Query("SELECT * FROM fireEvents")
-		var i = 0
-		if rows == nil {
+		resp, err := http.Get("http://ssdserver.herokuapp.com/fireEventsGet/?battleName=" + CURBATTLE)
+		if err != nil {
+			panic(err)
+		}
+		if resp.Status == "422" {
+			fmt.Printf("422, Battle maps nil or battle name nil")
+			gm.PosMu.Unlock()
+			gm.PosUpdtChan <- true // tells UpdatePeopleWorldPos to update to new positions
+			gm.FireUpdtChan <- true
 			continue
 		}
-		TempFireEvents := make(map[*FireEventInfo]int)
-		for rows.Next() {
-			var creator string
-			var damage int
-			var origin, dir mat32.Vec3
-			rows.Scan(&creator, &damage, &origin.X, &origin.Y, &origin.Z, &dir.X, &dir.Y, &dir.Z)
-			data := &FireEventInfo{creator, origin, dir, damage, CURBATTLE}
-			gm.FireEvents[i] = data
-			TempFireEvents[data] = 1
-			// fmt.Printf("Fire Event Creator: %v   Damage: %v  Origin: %v   Dir: %v\n", gm.FireEvents[i].Creator, gm.FireEvents[i].Damage, gm.FireEvents[i].Origin, gm.FireEvents[i].Dir)
-			i += 1
-		}
-		for k, d := range gm.FireEvents {
-			// fmt.Printf("Temp fire events: %v    Key: %v \n", TempFireEvents[d], d)
-			if TempFireEvents[d] == 0 { // it has been deleted in the database
-				// fmt.Printf("Deleting... \n")
-				delete(gm.FireEvents, k)
-				// fmt.Printf("Should be nil... %v \n", gm.FireEvents[k])
-			}
-		}
+		defer resp.Body.Close()
+		decoder := json.NewDecoder(resp.Body)
+		decoder.Decode(&gm.FireEvents)
+		// TempFireEvents := make(map[*FireEventInfo]int)
+		// for rows.Next() {
+		// 	var creator string
+		// 	var damage int
+		// 	var origin, dir mat32.Vec3
+		// 	rows.Scan(&creator, &damage, &origin.X, &origin.Y, &origin.Z, &dir.X, &dir.Y, &dir.Z)
+		// 	data := &FireEventInfo{creator, origin, dir, damage, CURBATTLE}
+		// 	gm.FireEvents[i] = data
+		// 	TempFireEvents[data] = 1
+		// 	// fmt.Printf("Fire Event Creator: %v   Damage: %v  Origin: %v   Dir: %v\n", gm.FireEvents[i].Creator, gm.FireEvents[i].Damage, gm.FireEvents[i].Origin, gm.FireEvents[i].Dir)
+		// 	i += 1
+		// }
+		// for k, d := range gm.FireEvents {
+		// 	// fmt.Printf("Temp fire events: %v    Key: %v \n", TempFireEvents[d], d)
+		// 	if TempFireEvents[d] == 0 { // it has been deleted in the database
+		// 		// fmt.Printf("Deleting... \n")
+		// 		delete(gm.FireEvents, k)
+		// 		// fmt.Printf("Should be nil... %v \n", gm.FireEvents[k])
+		// 	}
+		// }
 		gm.FireEventMu.Unlock()
 	}
 }
