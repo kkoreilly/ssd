@@ -647,8 +647,8 @@ func (gm *Game) GetPosFromServer() { // GetPosFromServer loops through the playe
 		scanner := bufio.NewScanner(resp.Body)
 		for i := 0; scanner.Scan(); i++ {
 			jsonStruct := &CurPosition{}
-			decoder := json.NewDecoder(resp.Body)
-			_ = decoder.Decode(jsonStruct)
+			_ = json.Unmarshal([]byte(scanner.Text()), jsonStruct)
+			fmt.Printf("JSON struct: %v \n", jsonStruct)
 			if jsonStruct.Username != USER {
 				gm.OtherPos[jsonStruct.Username] = jsonStruct
 			}
