@@ -43,10 +43,11 @@ type Weapon struct {
 }
 
 type FireEventInfo struct {
-	Creator string
-	Damage  int
-	Origin  mat32.Vec3
-	Dir     mat32.Vec3
+	Creator    string
+	Origin     mat32.Vec3
+	Dir        mat32.Vec3
+	Damage     int
+	BattleName string
 }
 
 type Game struct {
@@ -547,6 +548,7 @@ func (gm *Game) fireWeapon() { // standard event for what happens when you fire
 	go gm.removeBulletLoop(rayObj, cursor.Pose.Pos, rayPos.Pos)
 	// done with what to fire
 	gm.AbleToFire = false
+	writeFireEventToServer(cursor.Pose.Pos, rayPos.Pos, generateDamageAmount(WEAPON), CURBATTLE)
 	addFireEventToDB(USER, generateDamageAmount(WEAPON), cursor.Pose.Pos, rayPos.Pos)
 	numOfSeconds := TheWeapons[WEAPON].FireRate
 	time.Sleep(time.Duration(1/numOfSeconds) * time.Second)
@@ -603,7 +605,7 @@ func (gm *Game) removeHealthPoints(dmg int, from string) {
 		resultText.SetText("<b>You were killed by " + from + " - Respawning in 5</b>")
 		resultText.SetFullReRender()
 		// updateBattlePoints(from, gm.OtherPos[from].Points+1)
-		writeEnemyPlayerPosToServer(from, gm.OtherPos[from].Pos, CURBATTLE, gm.OtherPos[from].Points + 1)
+		writeEnemyPlayerPosToServer(from, gm.OtherPos[from].Pos, CURBATTLE, gm.OtherPos[from].Points+1)
 		go gm.timerForResult(from)
 	}
 }
@@ -735,12 +737,12 @@ func (gm *Game) UpdatePeopleWorldPos() {
 			if uk.ChildByName("ukt_"+k, 0) != nil {
 				config1.Add(gi.KiT_Label, "ukt_"+k)
 			}
-			if uk.ChildByName("ukt_"+k+"_button", 0) != nil {
-				config1.Add(gi.KiT_Button, "ukt_"+k+"_button")
-			}
+			// if uk.ChildByName("ukt_"+k+"_button", 0) != nil {
+			// 	config1.Add(gi.KiT_Button, "ukt_"+k+"_button")
+			// }
 			if i >= 1 {
 				config1.Add(gi.KiT_Label, "ukt_"+USER)
-				config1.Add(gi.KiT_Button, "ukt_"+USER+"_button")
+				// config1.Add(gi.KiT_Button, "ukt_"+USER+"_button")
 			}
 		}
 		mods, updt := pGp.ConfigChildren(config, ki.NonUniqueNames)

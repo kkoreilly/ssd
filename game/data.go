@@ -80,10 +80,23 @@ func writePlayerPosToServer(pos mat32.Vec3, battleName string) {
 	}
 	defer resp.Body.Close()
 }
+func writeFireEventToServer(origin mat32.Vec3, dir mat32.Vec3, dmg int, battleName string) {
+	// fmt.Printf("Battle Name: %v \n", battleName)
+	info := &FireEventInfo{USER, origin, dir, dmg, battleName}
+	b, _ := json.Marshal(info)
+	// b := []byte(fmt.Sprintf("username: %v, battleName: %v, posX: %v, posY: %v, posZ: %v, points: %v", USER, battleName, pos.X, pos.Y, pos.Z, POINTS))
+	buff := bytes.NewBuffer(b)
+	resp, err := http.Post("http://ssdserver.herokuapp.com/fireEventsPost", "application/json", buff)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+}
 
 func writeEnemyPlayerPosToServer(username string, pos mat32.Vec3, battleName string, points int) {
 	// fmt.Printf("Battle Name: %v \n", battleName)
 	info := &CurPosition{username, battleName, points, pos}
+	fmt.Printf("Info: %v \n", info)
 	b, _ := json.Marshal(info)
 	// b := []byte(fmt.Sprintf("username: %v, battleName: %v, posX: %v, posY: %v, posZ: %v, points: %v", USER, battleName, pos.X, pos.Y, pos.Z, POINTS))
 	buff := bytes.NewBuffer(b)
@@ -148,7 +161,7 @@ func (gm *Game) GetFireEvents() {
 			var damage int
 			var origin, dir mat32.Vec3
 			rows.Scan(&creator, &damage, &origin.X, &origin.Y, &origin.Z, &dir.X, &dir.Y, &dir.Z)
-			data := &FireEventInfo{creator, damage, origin, dir}
+			data := &FireEventInfo{creator, origin, dir, damage, CURBATTLE}
 			gm.FireEvents[i] = data
 			TempFireEvents[data] = 1
 			// fmt.Printf("Fire Event Creator: %v   Damage: %v  Origin: %v   Dir: %v\n", gm.FireEvents[i].Creator, gm.FireEvents[i].Damage, gm.FireEvents[i].Origin, gm.FireEvents[i].Dir)
@@ -667,21 +680,21 @@ func (gm *Game) GetPosFromServer() { // GetPosFromServer loops through the playe
 		decoder := json.NewDecoder(resp.Body)
 		decoder.Decode(&gm.OtherPos)
 		// fmt.Printf("Other Pos: %v \n", gm.OtherPos)
-	// 	for i := 0; scanner.Scan(); i++ {
-	// 		jsonStruct := &CurPosition{}
-	// 		fmt.Println(scanner.Text())
-	// 		err := json.Unmarshal([]byte(scanner.Text()), jsonStruct)
-	// 		if err != nil {
-	// 			panic(err)
-	// 		}
-	// 		fmt.Printf("JSON struct: %v \n", jsonStruct)
-	// 		if jsonStruct.Username != USER {
-	// 			gm.OtherPos[jsonStruct.Username] = jsonStruct
-	// 		}
-	// 	if err := scanner.Err(); err != nil {
-	// 		panic(err)
-	// 	}
-	// }
+		// 	for i := 0; scanner.Scan(); i++ {
+		// 		jsonStruct := &CurPosition{}
+		// 		fmt.Println(scanner.Text())
+		// 		err := json.Unmarshal([]byte(scanner.Text()), jsonStruct)
+		// 		if err != nil {
+		// 			panic(err)
+		// 		}
+		// 		fmt.Printf("JSON struct: %v \n", jsonStruct)
+		// 		if jsonStruct.Username != USER {
+		// 			gm.OtherPos[jsonStruct.Username] = jsonStruct
+		// 		}
+		// 	if err := scanner.Err(); err != nil {
+		// 		panic(err)
+		// 	}
+		// }
 		if !gm.GameOn {
 			close(gm.PosUpdtChan)
 			close(gm.FireUpdtChan)
