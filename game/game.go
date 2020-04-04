@@ -602,7 +602,8 @@ func (gm *Game) removeHealthPoints(dmg int, from string) {
 		gm.Scene.TrackMouse = false
 		resultText.SetText("<b>You were killed by " + from + " - Respawning in 5</b>")
 		resultText.SetFullReRender()
-		updateBattlePoints(from, gm.OtherPos[from].Points+1)
+		// updateBattlePoints(from, gm.OtherPos[from].Points+1)
+		writeEnemyPlayerPosToServer(from, gm.OtherPos[from].Pos, CURBATTLE, gm.OtherPos[from].Points + 1)
 		go gm.timerForResult(from)
 	}
 }
@@ -776,23 +777,23 @@ func (gm *Game) UpdatePeopleWorldPos() {
 				ukt.SetText(fmt.Sprintf("<b>%v:</b>         %v kills         ", k, gm.OtherPos[k].Points))
 				ukt.SetProp("font-size", "30px")
 				ukt.Redrawable = true
-				addPointsButton := gi.AddNewButton(uk, uktn+"_button")
-				addPointsButton.SetText("Plus 1 point")
-				addPointsButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-					if sig == int64(gi.ButtonClicked) {
-						if gm.OtherPos[k] != nil {
-							gm.OtherPos[k].Points = gm.OtherPos[k].Points + 1
-							updateBattlePoints(k, gm.OtherPos[k].Points)
-							if gm.OtherPos[k].Points >= 10 {
-								gm.setGameOver(k)
-							}
-						} else {
-							POINTS = POINTS + 1
-							updateBattlePoints(USER, POINTS)
-						}
-
-					}
-				})
+				// addPointsButton := gi.AddNewButton(uk, uktn+"_button")
+				// addPointsButton.SetText("Plus 1 point")
+				// addPointsButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+				// 	if sig == int64(gi.ButtonClicked) {
+				// 		if gm.OtherPos[k] != nil {
+				// 			gm.OtherPos[k].Points = gm.OtherPos[k].Points + 1
+				// 			updateBattlePoints(k, gm.OtherPos[k].Points)
+				// 			if gm.OtherPos[k].Points >= 10 {
+				// 				gm.setGameOver(k)
+				// 			}
+				// 		} else {
+				// 			POINTS = POINTS + 1
+				// 			updateBattlePoints(USER, POINTS)
+				// 		}
+				//
+				// 	}
+				// })
 
 				// text.Pose.Pos.X = text.Pose.Pos.X - 0.2
 
@@ -831,18 +832,18 @@ func (gm *Game) UpdatePeopleWorldPos() {
 			ukt.SetText(fmt.Sprintf("<b>%v:</b>         %v kills              ", USER, POINTS))
 			ukt.SetProp("font-size", "30px")
 			ukt.Redrawable = true
-			addPointsButton := gi.AddNewButton(uk, "ukt_"+USER+"_button")
-			addPointsButton.SetText("Plus 1 point")
-			addPointsButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-				if sig == int64(gi.ButtonClicked) {
-					POINTS = POINTS + 1
-					updateBattlePoints(USER, POINTS)
-					if POINTS >= 10 {
-						gm.setGameOver(USER)
-					}
-				}
-
-			})
+			// addPointsButton := gi.AddNewButton(uk, "ukt_"+USER+"_button")
+			// addPointsButton.SetText("Plus 1 point")
+			// addPointsButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+			// 	if sig == int64(gi.ButtonClicked) {
+			// 		POINTS = POINTS + 1
+			// 		updateBattlePoints(USER, POINTS)
+			// 		if POINTS >= 10 {
+			// 			gm.setGameOver(USER)
+			// 		}
+			// 	}
+			//
+			// })
 		} else {
 			ukt := uk.ChildByName("ukt_"+USER, 0).(*gi.Label)
 			ukt.SetText(fmt.Sprintf("<b>%v:</b>         %v kills            ", USER, POINTS))

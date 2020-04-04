@@ -81,6 +81,19 @@ func writePlayerPosToServer(pos mat32.Vec3, battleName string) {
 	defer resp.Body.Close()
 }
 
+func writeEnemyPlayerPosToServer(username string, pos mat32.Vec3, battleName string, points int) {
+	// fmt.Printf("Battle Name: %v \n", battleName)
+	info := &CurPosition{username, battleName, points, pos}
+	b, _ := json.Marshal(info)
+	// b := []byte(fmt.Sprintf("username: %v, battleName: %v, posX: %v, posY: %v, posZ: %v, points: %v", USER, battleName, pos.X, pos.Y, pos.Z, POINTS))
+	buff := bytes.NewBuffer(b)
+	resp, err := http.Post("http://ssdserver.herokuapp.com/playerPosPost", "application/json", buff)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+}
+
 func readTeam() {
 	findUserStatement := fmt.Sprintf("SELECT * FROM users WHERE username='%v'", USER)
 
@@ -434,11 +447,11 @@ func getEnemyTeamFromName(username string) (team string) {
 	return team
 }
 func updateBattlePoints(username string, value int) {
-	statement := fmt.Sprintf("UPDATE players SET points = '%v' WHERE username = '%v'", value, username)
-	_, err := db.Exec(statement)
-	if err != nil {
-		panic(err)
-	}
+	// statement := fmt.Sprintf("UPDATE players SET points = '%v' WHERE username = '%v'", value, username)
+	// _, err := db.Exec(statement)
+	// if err != nil {
+	// 	panic(err)
+	// }
 }
 func setActive() {
 	for _, d := range FirstWorldBorders {
