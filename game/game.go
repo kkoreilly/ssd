@@ -337,6 +337,7 @@ func (gm *Game) Config() {
 	// text.Pose.Pos = sc.Camera.Pose.Pos
 	// text.Pose.Pos.Z -= 10
 	// text.Pose.Pos.X += 2
+	joinPlayersTable(curBattleTerritory1 + curBattleTerritory2)
 
 	gi.AddNewSpace(gamerow, "space1")
 
@@ -366,6 +367,7 @@ func (gm *Game) Config() {
 
 	rec := ki.Node{}
 	rec.InitName(&rec, "rec")
+
 
 	takeDamage := gi.AddNewButton(brow, "takeDamage")
 	takeDamage.Text = "Take Damage"
@@ -881,6 +883,7 @@ func (gm *Game) UpdatePeopleWorldPos() {
 		if mods {
 			gm.View.Sync() // if something was created or destroyed, it must use Sync to update Scene
 		} else {
+			gm.View.Sync()
 			gm.View.UpdatePose() // UpdatePose is much faster and assumes no changes in objects
 		}
 		gm.PosMu.Unlock()

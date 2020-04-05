@@ -299,7 +299,6 @@ func createBattleJoinLayouts() {
 				if sig == int64(gi.ButtonClicked) {
 					currentMapString = "Training Map 1"
 					currentMap = FirstMap
-					joinPlayersTable(territory1 + territory2)
 					initPlayTab()
 					curBattleTerritory1 = territory1
 					curBattleTerritory2 = territory2
