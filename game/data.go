@@ -14,8 +14,9 @@ import (
 	"github.com/goki/mat32"
 	_ "github.com/lib/pq"
 	"net/http"
-	"strconv"
+	// "strconv"
 	"strings"
+	"time"
 	// "io/ioutil"
 )
 
@@ -83,7 +84,7 @@ func writePlayerPosToServer(pos mat32.Vec3, battleName string) {
 }
 func writeFireEventToServer(origin mat32.Vec3, dir mat32.Vec3, dmg int, battleName string) {
 	// fmt.Printf("Battle Name: %v \n", battleName)
-	info := &FireEventInfo{USER, origin, dir, dmg, battleName}
+	info := &FireEventInfo{USER, origin, dir, dmg, battleName, time.Now()}
 	b, _ := json.Marshal(info)
 	// b := []byte(fmt.Sprintf("username: %v, battleName: %v, posX: %v, posY: %v, posZ: %v, points: %v", USER, battleName, pos.X, pos.Y, pos.Z, POINTS))
 	buff := bytes.NewBuffer(b)
@@ -108,15 +109,15 @@ func writeEnemyPlayerPosToServer(username string, pos mat32.Vec3, battleName str
 	defer resp.Body.Close()
 }
 
-func removeFireEventFromServer(key int, battleName string) {
-	keyS := strconv.Itoa(key)
-	buff := bytes.NewBuffer([]byte(""))
-	resp, err := http.Post("http://ssdserver.herokuapp.com/fireEventsDelete?battleName="+battleName+"&key="+keyS, "application/json", buff)
-	if err != nil {
-		panic(err)
-	}
-	defer resp.Body.Close()
-}
+// func removeFireEventFromServer(key int, battleName string) {
+// 	keyS := strconv.Itoa(key)
+// 	buff := bytes.NewBuffer([]byte(""))
+// 	resp, err := http.Post("http://ssdserver.herokuapp.com/fireEventsDelete?battleName="+battleName+"&key="+keyS, "application/json", buff)
+// 	if err != nil {
+// 		panic(err)
+// 	}
+// 	defer resp.Body.Close()
+// }
 func readTeam() {
 	findUserStatement := fmt.Sprintf("SELECT * FROM users WHERE username='%v'", USER)
 
@@ -648,9 +649,9 @@ func removeBulletFromDB(originP, dirP mat32.Vec3) {
 
 }
 func (gm *Game) clearAllBullets() {
-	for k, _ := range gm.FireEvents {
-		removeFireEventFromServer(k, CURBATTLE)
-	}
+	// for k, _ := range gm.FireEvents {
+	// 	// removeFireEventFromServer(k, CURBATTLE)
+	// }
 }
 func (gm *Game) GetPosFromServer() { // GetPosFromServer loops through the players database and updates gm.OtherPos with the new data
 	for {

@@ -28,6 +28,10 @@ import (
 	"github.com/goki/mat32"
 )
 
+const (
+	BulletTimeMsec = 300
+)
+
 type CurPosition struct {
 	Username   string
 	BattleName string
@@ -48,6 +52,7 @@ type FireEventInfo struct {
 	Dir        mat32.Vec3
 	Damage     int
 	BattleName string
+	StartTime  time.Time
 }
 
 type Game struct {
@@ -450,13 +455,16 @@ func (gm *Game) RenderEnemyShots() {
 			return
 		}
 		gm.FireEventMu.Lock()
-		for i := 0; i < 30; i++ {
-			if gm.FireEvents[i] == nil {
-				rayObj := RayGroup.ChildByName(fmt.Sprintf("bullet_arrow_enemy%v", i), 0).(*gi3d.Solid)
-				rayObj.SetInvisible()
-				gi3d.SetLineStartEnd(rayObj, mat32.Vec3{500, 500, 500}, mat32.Vec3{500, 500, 500})
-			}
-		}
+		// for i := 0; i < 30; i++ {
+		// 	if gm.FireEvents[i] == nil {
+		// 		// fmt.Printf("Nil, index: %v \n", i)
+		// 		delete(gm.FireEvents, i)
+		// 		rayObj := RayGroup.ChildByName(fmt.Sprintf("bullet_arrow_enemy%v", i), 0).(*gi3d.Solid)
+		// 		// fmt.Printf("Ray obj: %v \n", rayObj)
+		// 		rayObj.SetInvisible()
+		// 		gi3d.SetLineStartEnd(rayObj, mat32.Vec3{500, 500, 500}, mat32.Vec3{500, 500, 500})
+		// 	}
+		// }
 
 		for k, d := range gm.FireEvents {
 			if d.Creator != USER {
@@ -488,6 +496,11 @@ func (gm *Game) RenderEnemyShots() {
 					gi3d.SetLineStartEnd(rayObj, d.Origin, endPos)
 					rayObj.ClearInvisible()
 				}
+			}
+			if time.Now().Sub(d.StartTime) >= time.Millisecond*BulletTimeMsec {
+				rayObj := RayGroup.ChildByName(fmt.Sprintf("bullet_arrow_enemy%v", k), 0).(*gi3d.Solid)
+				rayObj.SetInvisible()
+				gi3d.SetLineStartEnd(rayObj, mat32.Vec3{500, 500, 500}, mat32.Vec3{500, 500, 500})
 			}
 		}
 
@@ -559,7 +572,7 @@ func (gm *Game) removeBulletLoop(bullet *gi3d.Solid, origin mat32.Vec3, dir mat3
 	gm.FireEventMu.Lock()
 	time.Sleep(300 * time.Millisecond)
 	delete(gm.FireEvents, index)
-	removeFireEventFromServer(index, CURBATTLE)
+	// removeFireEventFromServer(index, CURBATTLE)
 	// removeBulletFromDB(origin, dir)
 	bullet.SetInvisible()
 	gi3d.SetLineStartEnd(bullet, mat32.Vec3{500, 500, 500}, mat32.Vec3{500, 500, 500})
