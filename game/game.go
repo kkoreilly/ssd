@@ -37,6 +37,7 @@ type CurPosition struct {
 	BattleName string
 	Points     int
 	Pos        mat32.Vec3
+	KilledBy string
 }
 
 type Weapon struct {
@@ -73,6 +74,7 @@ type Game struct {
 	FireEvents   []*FireEventInfo
 	FireEventMu  sync.Mutex
 	FireUpdtChan chan bool
+	KilledBy string
 }
 
 // TheGame is the game instance for the current game
@@ -616,7 +618,7 @@ func (gm *Game) removeHealthPoints(dmg int, from string) {
 		resultText.SetText("<b>You were killed by " + from + " - Respawning in 5</b>")
 		resultText.SetFullReRender()
 		// updateBattlePoints(from, gm.OtherPos[from].Points+1)
-		writeEnemyPlayerPosToServer(from, gm.OtherPos[from].Pos, CURBATTLE, gm.OtherPos[from].Points+1)
+		gm.KilledBy = from
 		go gm.timerForResult(from)
 	}
 }
@@ -776,6 +778,9 @@ func (gm *Game) UpdatePeopleWorldPos() {
 			}
 			ppos := gm.OtherPos[k]
 			pers := pGp.Child(i).(*eve.Group) // this is guaranteed to be for person "k"
+			if (ppos.KilledBy == USER) && (pers.Rel.Pos != mat32.Vec3{1000, 1, 1000}) {
+				POINTS += 1
+			}
 			if !pers.HasChildren() {          // if has not already been made
 				gm.PhysMakePerson(pers, k, false) // make
 				text := gi3d.AddNewText2D(&gm.Scene.Scene, &gm.Scene.Scene, k+"Text", k)
@@ -790,6 +795,8 @@ func (gm *Game) UpdatePeopleWorldPos() {
 				ukt.SetText(fmt.Sprintf("<b>%v:</b>         %v kills         ", k, gm.OtherPos[k].Points))
 				ukt.SetProp("font-size", "30px")
 				ukt.Redrawable = true
+				ukt.SetFullReRender()
+				// uk.SetFullReRender()
 				// addPointsButton := gi.AddNewButton(uk, uktn+"_button")
 				// addPointsButton.SetText("Plus 1 point")
 				// addPointsButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -845,6 +852,9 @@ func (gm *Game) UpdatePeopleWorldPos() {
 			ukt.SetText(fmt.Sprintf("<b>%v:</b>         %v kills              ", USER, POINTS))
 			ukt.SetProp("font-size", "30px")
 			ukt.Redrawable = true
+			ukt.SetFullReRender()
+			// uk.SetFullReRender()
+			// 	if sig == int64(gi.ButtonClicked) {
 			// addPointsButton := gi.AddNewButton(uk, "ukt_"+USER+"_button")
 			// addPointsButton.SetText("Plus 1 point")
 			// addPointsButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {

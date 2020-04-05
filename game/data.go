@@ -72,7 +72,7 @@ func serverGetPlayerPos() {
 
 func writePlayerPosToServer(pos mat32.Vec3, battleName string) {
 	// fmt.Printf("Battle Name: %v \n", battleName)
-	info := &CurPosition{USER, battleName, POINTS, pos}
+	info := &CurPosition{USER, battleName, POINTS, pos, TheGame.KilledBy}
 	b, _ := json.Marshal(info)
 	// b := []byte(fmt.Sprintf("username: %v, battleName: %v, posX: %v, posY: %v, posZ: %v, points: %v", USER, battleName, pos.X, pos.Y, pos.Z, POINTS))
 	buff := bytes.NewBuffer(b)
@@ -97,7 +97,7 @@ func writeFireEventToServer(origin mat32.Vec3, dir mat32.Vec3, dmg int, battleNa
 
 func writeEnemyPlayerPosToServer(username string, pos mat32.Vec3, battleName string, points int) {
 	// fmt.Printf("Battle Name: %v \n", battleName)
-	info := &CurPosition{username, battleName, points, pos}
+	info := &CurPosition{username, battleName, points, pos, ""}
 	fmt.Printf("Info: %v \n", info)
 	b, _ := json.Marshal(info)
 	// b := []byte(fmt.Sprintf("username: %v, battleName: %v, posX: %v, posY: %v, posZ: %v, points: %v", USER, battleName, pos.X, pos.Y, pos.Z, POINTS))
