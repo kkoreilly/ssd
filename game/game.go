@@ -479,7 +479,6 @@ func (gm *Game) RenderEnemyShots() {
 					if d1.Body.Name() == "FirstPerson" {
 						gm.FireEventMu.Unlock()
 						gm.removeHealthPoints(d.Damage, d.Creator)
-						rayObj.SetInvisible()
 						gi3d.SetLineStartEnd(rayObj, mat32.Vec3{500, 500, 500}, mat32.Vec3{500, 500, 500})
 						gm.FireEventMu.Lock()
 						killed = true
@@ -498,7 +497,10 @@ func (gm *Game) RenderEnemyShots() {
 				}
 			}
 			if time.Now().Sub(d.StartTime) >= time.Millisecond*BulletTimeMsec {
-				rayObjKi := RayGroup.ChildByName(fmt.Sprintf("bullet_arrow_enemy%v", k), 0)
+				bi := k % 30
+				rayObjKi := RayGroup.ChildByName(fmt.Sprintf("bullet_arrow_enemy%v", bi), 0)
+				gm.FireEvents[k].Origin = mat32.Vec3{500,500,500}
+				gm.FireEvents[k].Dir = mat32.Vec3{-1, 0, 0}
 				if rayObjKi == nil {
 					continue
 				}
@@ -552,6 +554,7 @@ func (gm *Game) fireWeapon() { // standard event for what happens when you fire
 	}
 	index := len(gm.FireEvents)
 	RayGroup := gm.Scene.Scene.ChildByName("RayGroup", 0).(*gi3d.Group)
+	index = index % 30
 	// fmt.Printf("Name: bullet_arrow_enemy%v \n", index)
 	rayObj := RayGroup.ChildByName(fmt.Sprintf("bullet_arrow_enemy%v", index), 0).(*gi3d.Solid)
 	gi3d.SetLineStartEnd(rayObj, cursor.Pose.Pos, endPos.Pos)
