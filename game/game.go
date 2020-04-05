@@ -409,7 +409,7 @@ func (gm *Game) Config() {
 	// // market1.Pose.Scale.Set(5, 2.5, 5)
 	// // // market1.Mat.Color.SetString("red", nil)
 	// // market1.Mat.SetTexture(&sc.Scene, tbtx.Name())
-	clearAllBullets()
+	gm.clearAllBullets()
 	ogp := eve.AddNewGroup(gm.World, "Grass")
 	gm.PhysMakeGrass(ogp, "Grass")
 	// floorp := gi3d.AddNewPlane(&sc.Scene, "floor-plane", 200, 200)
@@ -629,7 +629,7 @@ func (gm *Game) timerForResult(from string) {
 	rec.InitName(&rec, "rec")
 	resultButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
-			clearAllBullets()
+			gm.clearAllBullets()
 			resultText.SetText("")
 			resultText.SetFullReRender()
 			resultButton.Delete(true)
@@ -643,13 +643,13 @@ func (gm *Game) timerForResult(from string) {
 			gm.Scene.TrackMouse = true
 			gm.Scene.Win.OSWin.SetCursorEnabled(false, true)
 			pers.Rel.Pos = mat32.Vec3{0, 1, 50}
-			updatePosition("pos", pers.Rel.Pos)
 			gm.Scene.Camera.Pose.Pos = pers.Rel.Pos.Add(camOff)
 			gm.World.WorldRelToAbs()
 			gm.Scene.UpdateSig()
 
 		}
 	})
+	resultButton.SetFullReRender()
 	resultText.SetFullReRender()
 }
 

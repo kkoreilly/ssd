@@ -647,11 +647,9 @@ func removeBulletFromDB(originP, dirP mat32.Vec3) {
 	}
 
 }
-func clearAllBullets() {
-	statement := "DELETE FROM fireEvents"
-	_, err := db.Exec(statement)
-	if err != nil {
-		panic(err)
+func (gm *Game) clearAllBullets() {
+	for k, _ := range gm.FireEvents {
+		removeFireEventFromServer(k, CURBATTLE)
 	}
 }
 func (gm *Game) GetPosFromServer() { // GetPosFromServer loops through the players database and updates gm.OtherPos with the new data
