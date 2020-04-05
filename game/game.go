@@ -37,7 +37,7 @@ type CurPosition struct {
 	BattleName string
 	Points     int
 	Pos        mat32.Vec3
-	KilledBy string
+	KilledBy   string
 }
 
 type Weapon struct {
@@ -74,7 +74,7 @@ type Game struct {
 	FireEvents   []*FireEventInfo
 	FireEventMu  sync.Mutex
 	FireUpdtChan chan bool
-	KilledBy string
+	KilledBy     string
 }
 
 // TheGame is the game instance for the current game
@@ -368,7 +368,6 @@ func (gm *Game) Config() {
 	rec := ki.Node{}
 	rec.InitName(&rec, "rec")
 
-
 	takeDamage := gi.AddNewButton(brow, "takeDamage")
 	takeDamage.Text = "Take Damage"
 	takeDamage.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
@@ -503,7 +502,7 @@ func (gm *Game) RenderEnemyShots() {
 			if time.Now().Sub(d.StartTime) >= time.Millisecond*BulletTimeMsec {
 				bi := k % 30
 				rayObjKi := RayGroup.ChildByName(fmt.Sprintf("bullet_arrow_enemy%v", bi), 0)
-				gm.FireEvents[k].Origin = mat32.Vec3{500,500,500}
+				gm.FireEvents[k].Origin = mat32.Vec3{500, 500, 500}
 				gm.FireEvents[k].Dir = mat32.Vec3{-1, 0, 0}
 				if rayObjKi == nil {
 					continue
@@ -780,10 +779,10 @@ func (gm *Game) UpdatePeopleWorldPos() {
 			}
 			ppos := gm.OtherPos[k]
 			pers := pGp.Child(i).(*eve.Group) // this is guaranteed to be for person "k"
-			if (ppos.KilledBy == USER) && (pers.Rel.Pos != mat32.Vec3{1000, 1, 1000}) {
-				POINTS += 1
-			}
-			if !pers.HasChildren() {          // if has not already been made
+			// if (ppos.KilledBy == USER) && (pers.Rel.Pos != mat32.Vec3{1000, 1, 1000}) {
+			// 	POINTS += 1
+			// }
+			if !pers.HasChildren() { // if has not already been made
 				gm.PhysMakePerson(pers, k, false) // make
 				text := gi3d.AddNewText2D(&gm.Scene.Scene, &gm.Scene.Scene, k+"Text", k)
 				text.SetProp("color", "black")
