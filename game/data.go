@@ -161,7 +161,7 @@ func (gm *Game) GetFireEvents() {
 			return
 		}
 		gm.FireEventMu.Lock()
-		resp, err := http.Get("http://ssdserver.herokuapp.com/fireEventsGet/?battleName=" + CURBATTLE)
+		resp, err := http.Get("http://ssdserver.herokuapp.com/fireEventsGet/?battleName=" + CURBATTLE + "&username=" + USER)
 		if err != nil {
 			panic(err)
 		}
@@ -174,7 +174,9 @@ func (gm *Game) GetFireEvents() {
 		}
 		defer resp.Body.Close()
 		decoder := json.NewDecoder(resp.Body)
-		decoder.Decode(&gm.FireEvents)
+		newInfo := make([]*FireEventInfo, 0)
+		decoder.Decode(&newInfo)
+		gm.FireEvents = append(gm.FireEvents, newInfo...)
 		// TempFireEvents := make(map[*FireEventInfo]int)
 		// for rows.Next() {
 		// 	var creator string

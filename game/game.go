@@ -70,7 +70,7 @@ type Game struct {
 	PersHitWall  bool
 	Gravity      float32
 	AbleToFire   bool
-	FireEvents   map[int]*FireEventInfo
+	FireEvents   []*FireEventInfo
 	FireEventMu  sync.Mutex
 	FireUpdtChan chan bool
 }
@@ -431,7 +431,7 @@ func (gm *Game) Config() {
 	gm.FireUpdtChan = make(chan bool)
 
 	gm.OtherPos = make(map[string]*CurPosition)
-	gm.FireEvents = make(map[int]*FireEventInfo)
+	gm.FireEvents = make([]*FireEventInfo, 0)
 	gm.GameOn = true
 	RayGroup := gm.Scene.Scene.ChildByName("RayGroup", 0).(*gi3d.Group)
 	for i := 0; i < 30; i++ {
@@ -498,7 +498,11 @@ func (gm *Game) RenderEnemyShots() {
 				}
 			}
 			if time.Now().Sub(d.StartTime) >= time.Millisecond*BulletTimeMsec {
-				rayObj := RayGroup.ChildByName(fmt.Sprintf("bullet_arrow_enemy%v", k), 0).(*gi3d.Solid)
+				rayObjKi := RayGroup.ChildByName(fmt.Sprintf("bullet_arrow_enemy%v", k), 0)
+				if rayObjKi == nil {
+					continue
+				}
+				rayObj := rayObjKi.(*gi3d.Solid)
 				rayObj.SetInvisible()
 				gi3d.SetLineStartEnd(rayObj, mat32.Vec3{500, 500, 500}, mat32.Vec3{500, 500, 500})
 			}
@@ -546,12 +550,7 @@ func (gm *Game) fireWeapon() { // standard event for what happens when you fire
 		sPos.MoveOnAxis(0, 0, -1, 100)
 		endPos.Pos = sPos.Pos
 	}
-	var index int
-	for index = 0; index < 29; index++ {
-		if gm.FireEvents[index] == nil {
-			break
-		}
-	}
+	index := len(gm.FireEvents)
 	RayGroup := gm.Scene.Scene.ChildByName("RayGroup", 0).(*gi3d.Group)
 	// fmt.Printf("Name: bullet_arrow_enemy%v \n", index)
 	rayObj := RayGroup.ChildByName(fmt.Sprintf("bullet_arrow_enemy%v", index), 0).(*gi3d.Solid)
@@ -571,7 +570,7 @@ func (gm *Game) fireWeapon() { // standard event for what happens when you fire
 func (gm *Game) removeBulletLoop(bullet *gi3d.Solid, origin mat32.Vec3, dir mat32.Vec3, index int) {
 	gm.FireEventMu.Lock()
 	time.Sleep(300 * time.Millisecond)
-	delete(gm.FireEvents, index)
+	// delete(gm.FireEvents, index)
 	// removeFireEventFromServer(index, CURBATTLE)
 	// removeBulletFromDB(origin, dir)
 	bullet.SetInvisible()
