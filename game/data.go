@@ -14,6 +14,7 @@ import (
 	"github.com/goki/mat32"
 	_ "github.com/lib/pq"
 	"net/http"
+	"strconv"
 	"strings"
 	// "io/ioutil"
 )
@@ -107,6 +108,15 @@ func writeEnemyPlayerPosToServer(username string, pos mat32.Vec3, battleName str
 	defer resp.Body.Close()
 }
 
+func removeFireEventFromServer(key int, battleName string) {
+	keyS := strconv.Itoa(key)
+	buff := bytes.NewBuffer([]byte(""))
+	resp, err := http.Post("http://ssdserver.herokuapp.com/fireEventsDelete?battleName="+battleName+"&key="+keyS, "application/json", buff)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+}
 func readTeam() {
 	findUserStatement := fmt.Sprintf("SELECT * FROM users WHERE username='%v'", USER)
 

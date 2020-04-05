@@ -545,7 +545,7 @@ func (gm *Game) fireWeapon() { // standard event for what happens when you fire
 	gi3d.SetLineStartEnd(rayObj, cursor.Pose.Pos, endPos.Pos)
 	rayObj.ClearInvisible()
 	// bullet = gi3d.AddNewLine(&gm.Scene.Scene, RayGroup, "bullet_arrow_you", cursor.Pose.Pos, endPos.Pos, .05, color)
-	go gm.removeBulletLoop(rayObj, cursor.Pose.Pos, rayPos.Pos)
+	go gm.removeBulletLoop(rayObj, cursor.Pose.Pos, rayPos.Pos, index)
 	// done with what to fire
 	gm.AbleToFire = false
 	writeFireEventToServer(cursor.Pose.Pos, rayPos.Pos, generateDamageAmount(WEAPON), CURBATTLE)
@@ -555,16 +555,12 @@ func (gm *Game) fireWeapon() { // standard event for what happens when you fire
 	gm.AbleToFire = true
 }
 
-func (gm *Game) removeBulletLoop(bullet *gi3d.Solid, origin mat32.Vec3, dir mat32.Vec3) {
+func (gm *Game) removeBulletLoop(bullet *gi3d.Solid, origin mat32.Vec3, dir mat32.Vec3, index int) {
 	gm.FireEventMu.Lock()
 	time.Sleep(300 * time.Millisecond)
-	removeBulletFromDB(origin, dir)
-	for k, d := range gm.FireEvents {
-		if d.Origin == origin && d.Dir == dir {
-			delete(gm.FireEvents, k)
-			break
-		}
-	}
+	delete(gm.FireEvents, index)
+	removeFireEventFromServer(index, CURBATTLE)
+	// removeBulletFromDB(origin, dir)
 	bullet.SetInvisible()
 	gi3d.SetLineStartEnd(bullet, mat32.Vec3{500, 500, 500}, mat32.Vec3{500, 500, 500})
 	gm.FireEventMu.Unlock()
