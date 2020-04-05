@@ -161,6 +161,7 @@ func (gm *Game) GetFireEvents() {
 			return
 		}
 		gm.FireEventMu.Lock()
+		fmt.Printf("Curbattle: %v \n", CURBATTLE)
 		resp, err := http.Get("http://ssdserver.herokuapp.com/fireEventsGet/?battleName=" + CURBATTLE + "&username=" + USER)
 		if err != nil {
 			panic(err)
@@ -226,7 +227,9 @@ func initBorders() {
 }
 func joinPlayersTable(battleName string) {
 	writePlayerPosToServer(mat32.Vec3{0, 1, 0}, battleName)
+	// fmt.Printf("Battle Name 1: %v \n", battleName)
 	CURBATTLE = battleName
+	// fmt.Printf("Curbattle 1: %v \n", CURBATTLE)
 	// statement := fmt.Sprintf("INSERT INTO players(username, posX, posY, posZ, battleName, points) VALUES ('%v', '%v', '%v', '%v', '%v', 0)", USER, 0, 1, 0, battleName)
 	POINTS = 0
 	// // fmt.Printf("Points Data: %v", POINTS)
@@ -299,9 +302,9 @@ func createBattleJoinLayouts() {
 				if sig == int64(gi.ButtonClicked) {
 					currentMapString = "Training Map 1"
 					currentMap = FirstMap
-					initPlayTab()
 					curBattleTerritory1 = territory1
 					curBattleTerritory2 = territory2
+					initPlayTab()
 				}
 			})
 		}
