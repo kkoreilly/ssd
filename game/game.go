@@ -76,7 +76,7 @@ type Game struct {
 	FireEventMu  sync.Mutex
 	FireUpdtChan chan bool
 	KilledBy     string
-	SpawnCount int
+	SpawnCount   int
 }
 
 // TheGame is the game instance for the current game

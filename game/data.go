@@ -95,6 +95,7 @@ func writeFireEventToServer(origin mat32.Vec3, dir mat32.Vec3, dmg int, battleNa
 	}
 	defer resp.Body.Close()
 }
+
 //
 // func writeEnemyPlayerPosToServer(username string, pos mat32.Vec3, battleName string, points int) {
 // 	// fmt.Printf("Battle Name: %v \n", battleName)
@@ -712,12 +713,14 @@ func (gm *Game) GetPosFromServer() { // GetPosFromServer loops through the playe
 		decoder := json.NewDecoder(resp.Body)
 		decoder.Decode(&tempOtherPos)
 		for _, d := range tempOtherPos {
+			if gm.OtherPos[d.Username] == nil {
+				continue
+			}
 			if (d.KilledBy == USER) && ((d.SpawnCount - 1) == gm.OtherPos[d.Username].SpawnCount) {
 				POINTS += 1
 			}
 		}
-		decoder = json.NewDecoder(resp.Body)
-		decoder.Decode(&gm.OtherPos)
+		gm.OtherPos = tempOtherPos
 		// fmt.Printf("Other Pos: %v \n", gm.OtherPos)
 		// 	for i := 0; scanner.Scan(); i++ {
 		// 		jsonStruct := &CurPosition{}
