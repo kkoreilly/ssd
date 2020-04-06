@@ -382,7 +382,7 @@ func (gm *Game) battleOver(winner string) {
 		if sig == int64(gi.ButtonClicked) {
 			tv.DeleteTabIndex(tabIndexResult, true)
 			tv.SelectTabIndex(0)
-			go removePlayer()
+			go resetServer()
 		}
 	})
 
@@ -399,6 +399,14 @@ func (gm *Game) battleOver(winner string) {
 	go createBattleJoinLayouts()
 	tv.SelectTabIndex(tabIndexResult)
 	gm.WorldMu.Unlock()
+}
+func resetServer() {
+	buff := bytes.NewBuffer([]byte(""))
+	resp, err := http.Post("http://ssdserver.herokuapp.com/cleanUpBattle?battleName="+battleName, buff)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
 }
 func updateBorderPoints(team string, changeNum int, territory1, territory2 string) {
 	rowsB, err := db.Query(fmt.Sprintf("SELECT * FROM borders WHERE territory1 = '%v' AND territory2 = '%v'", territory1, territory2))
