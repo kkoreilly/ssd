@@ -159,11 +159,11 @@ func addTeamUpdateButtons() {
 }
 func (gm *Game) GetFireEvents() {
 	for {
+		startTime := time.Now()
 		if !gm.GameOn {
 			return
 		}
-		gm.FireEventMu.Lock()
-		// fmt.Printf("Curbattle: %v \n", CURBATTLE)
+
 		resp, err := http.Get("http://ssdserver.herokuapp.com/fireEventsGet/?battleName=" + CURBATTLE + "&username=" + USER)
 		if err != nil {
 			panic(err)
@@ -172,35 +172,17 @@ func (gm *Game) GetFireEvents() {
 			fmt.Printf("422, Battle maps nil or battle name nil")
 			gm.PosMu.Unlock()
 			gm.PosUpdtChan <- true // tells UpdatePeopleWorldPos to update to new positions
-			gm.FireUpdtChan <- true
+			// gm.FireUpdtChan <- true
 			continue
 		}
 		defer resp.Body.Close()
+		gm.FireEventMu.Lock()
 		decoder := json.NewDecoder(resp.Body)
 		newInfo := make([]*FireEventInfo, 0)
 		decoder.Decode(&newInfo)
 		gm.FireEvents = append(gm.FireEvents, newInfo...)
-		// TempFireEvents := make(map[*FireEventInfo]int)
-		// for rows.Next() {
-		// 	var creator string
-		// 	var damage int
-		// 	var origin, dir mat32.Vec3
-		// 	rows.Scan(&creator, &damage, &origin.X, &origin.Y, &origin.Z, &dir.X, &dir.Y, &dir.Z)
-		// 	data := &FireEventInfo{creator, origin, dir, damage, CURBATTLE}
-		// 	gm.FireEvents[i] = data
-		// 	TempFireEvents[data] = 1
-		// 	// fmt.Printf("Fire Event Creator: %v   Damage: %v  Origin: %v   Dir: %v\n", gm.FireEvents[i].Creator, gm.FireEvents[i].Damage, gm.FireEvents[i].Origin, gm.FireEvents[i].Dir)
-		// 	i += 1
-		// }
-		// for k, d := range gm.FireEvents {
-		// 	// fmt.Printf("Temp fire events: %v    Key: %v \n", TempFireEvents[d], d)
-		// 	if TempFireEvents[d] == 0 { // it has been deleted in the database
-		// 		// fmt.Printf("Deleting... \n")
-		// 		delete(gm.FireEvents, k)
-		// 		// fmt.Printf("Should be nil... %v \n", gm.FireEvents[k])
-		// 	}
-		// }
 		gm.FireEventMu.Unlock()
+		fmt.Printf("Total time for GetFireEvents: %v \n", time.Since(startTime).Milliseconds())
 	}
 }
 func addFireEventToDB(creator string, damage int, origin mat32.Vec3, dir mat32.Vec3) {
@@ -669,34 +651,10 @@ func (gm *Game) clearAllBullets() {
 }
 func (gm *Game) GetPosFromServer() { // GetPosFromServer loops through the players database and updates gm.OtherPos with the new data
 	for {
-		// // fmt.Printf("Working 1 \n")
-		// getStatement := "SELECT * FROM players"
-		// rows, err := db.Query(getStatement)
-		// if err != nil {
-		// 	fmt.Printf("DB Error: %v \n", err)
-		// }
+		startTime := time.Now()
 		gm.PosMu.Lock()
-		// if rows == nil {
-		// 	continue
-		// }
-		// for rows.Next() {
-		// 	var username, battleName string
-		// 	var posX, posY, posZ float32
-		// 	var points int
-		// 	rows.Scan(&username, &posX, &posY, &posZ, &battleName, &points)
-		// 	// fmt.Printf("POINTS: %v   USER: %v \n", points, username)
-		// 	// fmt.Printf("Username: %v \n", username)
-		// 	// fmt.Printf("User: %v \n", USER)
-		// 	if username != USER {
-		// 		gm.OtherPos[username] = &CurPosition{username, CURBATTLE, points, mat32.Vec3{posX, posY, posZ}}
-		// 		// fmt.Printf("Other Pos: %v \n", gm.OtherPos[username])
-		// 	} else {
-		// 		POINTS = points
-		// 	}
-		// }
-		// // time.Sleep(100 * time.Millisecond)
-		// // gm.OtherPos["testyother"] = &CurPosition{"testyother", mat32.Vec3{rand.Float32()*5 - 2.5, 1, rand.Float32()*5 - 2.5}, 50}
-		// // fmt.Printf("Game on: %v \n", gm.GameOn)
+		fmt.Printf("GetPosFromServer Lock: %v Milliseconds\n", time.Since(startTime).Milliseconds())
+		// startServerTime := time.Now()
 		resp, err := http.Get("http://ssdserver.herokuapp.com/playerPosGet/?battleName=" + CURBATTLE)
 		if err != nil {
 			panic(err)
@@ -705,13 +663,17 @@ func (gm *Game) GetPosFromServer() { // GetPosFromServer loops through the playe
 			fmt.Printf("422, Battle maps nil or battle name nil")
 			gm.PosMu.Unlock()
 			gm.PosUpdtChan <- true // tells UpdatePeopleWorldPos to update to new positions
-			gm.FireUpdtChan <- true
+			// gm.FireUpdtChan <- true
 			continue
 		}
 		defer resp.Body.Close()
+		// fmt.Printf("Time for GetPosFromServer server stuff: %v Milliseconds \n", time.Since(startServerTime).Milliseconds())
+		// startDecodingTime := time.Now()
 		tempOtherPos := make(map[string]*CurPosition)
 		decoder := json.NewDecoder(resp.Body)
 		decoder.Decode(&tempOtherPos)
+		// fmt.Printf("Time for GetPosFromServer Decoding: %v Milliseconds \n", time.Since(startDecodingTime).Milliseconds())
+		// startTempTime := time.Now()
 		for _, d := range tempOtherPos {
 			if gm.OtherPos[d.Username] == nil {
 				continue
@@ -721,36 +683,24 @@ func (gm *Game) GetPosFromServer() { // GetPosFromServer loops through the playe
 			}
 		}
 		gm.OtherPos = tempOtherPos
-		// fmt.Printf("Other Pos: %v \n", gm.OtherPos)
-		// 	for i := 0; scanner.Scan(); i++ {
-		// 		jsonStruct := &CurPosition{}
-		// 		fmt.Println(scanner.Text())
-		// 		err := json.Unmarshal([]byte(scanner.Text()), jsonStruct)
-		// 		if err != nil {
-		// 			panic(err)
-		// 		}
-		// 		fmt.Printf("JSON struct: %v \n", jsonStruct)
-		// 		if jsonStruct.Username != USER {
-		// 			gm.OtherPos[jsonStruct.Username] = jsonStruct
-		// 		}
-		// 	if err := scanner.Err(); err != nil {
-		// 		panic(err)
-		// 	}
-		// }
+		// fmt.Printf("Time for GetPosFromServer check for kills: %v Milliseconds \n", time.Since(startTempTime).Milliseconds())
+		// otherTime := time.Now()
 		if !gm.GameOn {
 			close(gm.PosUpdtChan)
-			close(gm.FireUpdtChan)
+			// close(gm.FireUpdtChan)
 			gm.battleOver(gm.Winner)
 			gm.PosMu.Unlock()
 			return
 		}
+		// fmt.Printf("Time for GetPosFromServer check game on: %v Milliseconds \n", time.Since(otherTime).Milliseconds())
 		gm.PosMu.Unlock()
 		gm.PosUpdtChan <- true // tells UpdatePeopleWorldPos to update to new positions
-		gm.FireUpdtChan <- true
-		// todo: don't know from sender perspective if channel is still open!
-		// if !ok {
-		// 	return // game over
-		// }
+		// fmt.Printf("Time for PosUpdtChan: %v Milliseconds \n", time.Since(otherTime).Milliseconds())
+		// gm.FireUpdtChan <- true
+		// fmt.Printf("Time for FireUpdtChan: %v Milliseconds \n", time.Since(otherTime).Milliseconds())
+		// fmt.Printf("Time for GetPosFromServer other stuff: %v Milliseconds \n", time.Since(otherTime).Milliseconds())
+		since := time.Since(startTime)
+		fmt.Printf("Total time for GetPosFromServer: %v Milliseconds\n", since.Milliseconds())
 	}
 }
 
