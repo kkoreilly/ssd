@@ -72,7 +72,7 @@ func serverGetPlayerPos() {
 
 func writePlayerPosToServer(pos mat32.Vec3, battleName string) {
 	// fmt.Printf("Battle Name: %v \n", battleName)
-	info := &CurPosition{USER, battleName, POINTS, pos, TheGame.KilledBy}
+	info := &CurPosition{USER, battleName, POINTS, pos, TheGame.KilledBy, TheGame.SpawnCount}
 	// fmt.Printf("Info: %v \n", info)
 	b, _ := json.Marshal(info)
 	// b := []byte(fmt.Sprintf("username: %v, battleName: %v, posX: %v, posY: %v, posZ: %v, points: %v", USER, battleName, pos.X, pos.Y, pos.Z, POINTS))
@@ -95,20 +95,20 @@ func writeFireEventToServer(origin mat32.Vec3, dir mat32.Vec3, dmg int, battleNa
 	}
 	defer resp.Body.Close()
 }
-
-func writeEnemyPlayerPosToServer(username string, pos mat32.Vec3, battleName string, points int) {
-	// fmt.Printf("Battle Name: %v \n", battleName)
-	info := &CurPosition{username, battleName, points, pos, ""}
-	fmt.Printf("Info: %v \n", info)
-	b, _ := json.Marshal(info)
-	// b := []byte(fmt.Sprintf("username: %v, battleName: %v, posX: %v, posY: %v, posZ: %v, points: %v", USER, battleName, pos.X, pos.Y, pos.Z, POINTS))
-	buff := bytes.NewBuffer(b)
-	resp, err := http.Post("http://ssdserver.herokuapp.com/playerPosPost", "application/json", buff)
-	if err != nil {
-		panic(err)
-	}
-	defer resp.Body.Close()
-}
+//
+// func writeEnemyPlayerPosToServer(username string, pos mat32.Vec3, battleName string, points int) {
+// 	// fmt.Printf("Battle Name: %v \n", battleName)
+// 	info := &CurPosition{username, battleName, points, pos, "", 0}
+// 	fmt.Printf("Info: %v \n", info)
+// 	b, _ := json.Marshal(info)
+// 	// b := []byte(fmt.Sprintf("username: %v, battleName: %v, posX: %v, posY: %v, posZ: %v, points: %v", USER, battleName, pos.X, pos.Y, pos.Z, POINTS))
+// 	buff := bytes.NewBuffer(b)
+// 	resp, err := http.Post("http://ssdserver.herokuapp.com/playerPosPost", "application/json", buff)
+// 	if err != nil {
+// 		panic(err)
+// 	}
+// 	defer resp.Body.Close()
+// }
 
 // func removeFireEventFromServer(key int, battleName string) {
 // 	keyS := strconv.Itoa(key)
@@ -708,7 +708,14 @@ func (gm *Game) GetPosFromServer() { // GetPosFromServer loops through the playe
 			continue
 		}
 		defer resp.Body.Close()
+		tempOtherPos := make(map[string]*CurPosition)
 		decoder := json.NewDecoder(resp.Body)
+		decoder.Decode(&tempOtherPos)
+		for _, d := range tempOtherPos {
+			if (d.KilledBy == USER) && ((d.SpawnCount - 1) == gm.OtherPos[d.Username].SpawnCount) {
+				POINTS += 1
+			}
+		}
 		decoder.Decode(&gm.OtherPos)
 		// fmt.Printf("Other Pos: %v \n", gm.OtherPos)
 		// 	for i := 0; scanner.Scan(); i++ {

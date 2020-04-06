@@ -38,6 +38,7 @@ type CurPosition struct {
 	Points     int
 	Pos        mat32.Vec3
 	KilledBy   string
+	SpawnCount int
 }
 
 type Weapon struct {
@@ -75,6 +76,7 @@ type Game struct {
 	FireEventMu  sync.Mutex
 	FireUpdtChan chan bool
 	KilledBy     string
+	SpawnCount int
 }
 
 // TheGame is the game instance for the current game
@@ -607,6 +609,7 @@ func (gm *Game) removeHealthPoints(dmg int, from string) {
 	}
 	healthBar.SetFullReRender()
 	if HEALTH <= 0 {
+		gm.SpawnCount += 1
 		pers := gm.World.ChildByName("FirstPerson", 0).(*eve.Group)
 		camOff := gm.Scene.Camera.Pose.Pos.Sub(pers.Rel.Pos) // currrent offset of camera vs. person
 		pers.Rel.Pos = mat32.Vec3{1000, 1, 1000}
@@ -779,9 +782,9 @@ func (gm *Game) UpdatePeopleWorldPos() {
 			}
 			ppos := gm.OtherPos[k]
 			pers := pGp.Child(i).(*eve.Group) // this is guaranteed to be for person "k"
-			if (ppos.KilledBy == USER) && (pers.Rel.Pos != mat32.Vec3{1000, 1, 1000}) {
-				POINTS += 1
-			}
+			// if (ppos.KilledBy == USER) && (pers.Rel.Pos != mat32.Vec3{1000, 1, 1000}) {
+			// 	POINTS += 1
+			// }
 			if !pers.HasChildren() { // if has not already been made
 				gm.PhysMakePerson(pers, k, false) // make
 				text := gi3d.AddNewText2D(&gm.Scene.Scene, &gm.Scene.Scene, k+"Text", k)
