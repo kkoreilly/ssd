@@ -402,7 +402,7 @@ func (gm *Game) battleOver(winner string) {
 }
 func resetServer() {
 	buff := bytes.NewBuffer([]byte(""))
-	resp, err := http.Post("http://ssdserver.herokuapp.com/cleanUpBattle?battleName="+battleName, buff)
+	resp, err := http.Post("http://ssdserver.herokuapp.com/cleanUpBattle?battleName="+CURBATTLE, "text", buff)
 	if err != nil {
 		panic(err)
 	}
