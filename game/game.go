@@ -889,7 +889,7 @@ func (gm *Game) UpdatePeopleWorldPos() {
 		if mods {
 			gm.View.Sync() // if something was created or destroyed, it must use Sync to update Scene
 		} else {
-			gm.View.Sync()
+			// gm.View.Sync()
 			gm.View.UpdatePose() // UpdatePose is much faster and assumes no changes in objects
 		}
 		gm.PosMu.Unlock()
