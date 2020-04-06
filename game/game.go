@@ -840,7 +840,7 @@ func (gm *Game) UpdatePeopleWorldPos() {
 				ukt.SetText(fmt.Sprintf("<b>%v:</b>         %v kills              ", k, gm.OtherPos[k].Points))
 				ukt.SetProp("width", "20em")
 				text.Pose.Pos.X = text.Pose.Pos.X - 0.2
-				if gm.OtherPos[k].Points >= 10 {
+				if gm.OtherPos[k].Points >= 100 {
 					gm.PosMu.Unlock()
 					gm.WorldMu.Unlock()
 					gm.setGameOver(k)
@@ -879,7 +879,7 @@ func (gm *Game) UpdatePeopleWorldPos() {
 			ukt.SetText(fmt.Sprintf("<b>%v:</b>         %v kills            ", USER, POINTS))
 			ukt.SetProp("width", "20em")
 		}
-		if POINTS >= 10 {
+		if POINTS >= 100 {
 			gm.PosMu.Unlock()
 			gm.WorldMu.Unlock()
 			gm.setGameOver(USER)
