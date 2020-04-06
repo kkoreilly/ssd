@@ -610,8 +610,9 @@ func (gm *Game) removeHealthPoints(dmg int, from string) {
 		pers := gm.World.ChildByName("FirstPerson", 0).(*eve.Group)
 		camOff := gm.Scene.Camera.Pose.Pos.Sub(pers.Rel.Pos) // currrent offset of camera vs. person
 		pers.Rel.Pos = mat32.Vec3{1000, 1, 1000}
-		updatePosition("pos", pers.Rel.Pos)
 		gm.Scene.Camera.Pose.Pos = pers.Rel.Pos.Add(camOff)
+		gm.KilledBy = from
+		writePlayerPosToServer(pers.Rel.Pos, CURBATTLE)
 		gm.World.WorldRelToAbs()
 		gm.Scene.UpdateSig()
 		gm.Scene.Win.OSWin.SetCursorEnabled(true, false)
@@ -619,7 +620,6 @@ func (gm *Game) removeHealthPoints(dmg int, from string) {
 		resultText.SetText("<b>You were killed by " + from + " - Respawning in 5</b>")
 		resultText.SetFullReRender()
 		// updateBattlePoints(from, gm.OtherPos[from].Points+1)
-		gm.KilledBy = from
 		go gm.timerForResult(from)
 	}
 }
@@ -779,9 +779,9 @@ func (gm *Game) UpdatePeopleWorldPos() {
 			}
 			ppos := gm.OtherPos[k]
 			pers := pGp.Child(i).(*eve.Group) // this is guaranteed to be for person "k"
-			// if (ppos.KilledBy == USER) && (pers.Rel.Pos != mat32.Vec3{1000, 1, 1000}) {
-			// 	POINTS += 1
-			// }
+			if (ppos.KilledBy == USER) && (pers.Rel.Pos != mat32.Vec3{1000, 1, 1000}) {
+				POINTS += 1
+			}
 			if !pers.HasChildren() { // if has not already been made
 				gm.PhysMakePerson(pers, k, false) // make
 				text := gi3d.AddNewText2D(&gm.Scene.Scene, &gm.Scene.Scene, k+"Text", k)

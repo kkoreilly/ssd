@@ -73,6 +73,7 @@ func serverGetPlayerPos() {
 func writePlayerPosToServer(pos mat32.Vec3, battleName string) {
 	// fmt.Printf("Battle Name: %v \n", battleName)
 	info := &CurPosition{USER, battleName, POINTS, pos, TheGame.KilledBy}
+	// fmt.Printf("Info: %v \n", info)
 	b, _ := json.Marshal(info)
 	// b := []byte(fmt.Sprintf("username: %v, battleName: %v, posX: %v, posY: %v, posZ: %v, points: %v", USER, battleName, pos.X, pos.Y, pos.Z, POINTS))
 	buff := bytes.NewBuffer(b)
@@ -161,7 +162,7 @@ func (gm *Game) GetFireEvents() {
 			return
 		}
 		gm.FireEventMu.Lock()
-		fmt.Printf("Curbattle: %v \n", CURBATTLE)
+		// fmt.Printf("Curbattle: %v \n", CURBATTLE)
 		resp, err := http.Get("http://ssdserver.herokuapp.com/fireEventsGet/?battleName=" + CURBATTLE + "&username=" + USER)
 		if err != nil {
 			panic(err)
