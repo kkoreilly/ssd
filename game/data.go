@@ -716,6 +716,7 @@ func (gm *Game) GetPosFromServer() { // GetPosFromServer loops through the playe
 				POINTS += 1
 			}
 		}
+		decoder = json.NewDecoder(resp.Body)
 		decoder.Decode(&gm.OtherPos)
 		// fmt.Printf("Other Pos: %v \n", gm.OtherPos)
 		// 	for i := 0; scanner.Scan(); i++ {
