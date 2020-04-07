@@ -771,6 +771,7 @@ func (gm *Game) UpdatePeopleWorldPos() {
 		updt1 := pgt.UpdateStart()
 		updt2 := uk.UpdateStart()
 		fmt.Printf("Time for keys and mods: %v \n", time.Since(startTime).Milliseconds())
+		needToSync := false
 		// now, the children of pGp are the keys of OtherPos in order
 		for i, k := range keys {
 			if k == USER {
@@ -780,6 +781,7 @@ func (gm *Game) UpdatePeopleWorldPos() {
 			ppos := gm.OtherPos[k]
 			pers := pGp.Child(i).(*eve.Group) // this is guaranteed to be for person "k"
 			if !pers.HasChildren() {          // if has not already been made
+				needToSync = true
 				gm.PhysMakePerson(pers, k, false) // make
 				text := gi3d.AddNewText2D(&gm.Scene.Scene, &gm.Scene.Scene, k+"Text", k)
 				text.SetProp("color", "black")
@@ -843,11 +845,14 @@ func (gm *Game) UpdatePeopleWorldPos() {
 			gm.WorldMu.Lock()
 		}
 		fmt.Printf("Time for user stuff: %v \n", time.Since(startTime).Milliseconds())
-		// if mods {
-		gm.View.Sync() // if something was created or destroyed, it must use Sync to update Scene
-		// } else {
-		gm.View.UpdatePose() // UpdatePose is much faster and assumes no changes in objects
-		// }
+		syncTime := time.Now()
+		if needToSync {
+			gm.View.Sync() // if something was created or destroyed, it must use Sync to update Scene
+		} else {
+			gm.View.Sync()
+			gm.View.UpdatePose() // UpdatePose is much faster and assumes no changes in objects
+		}
+		fmt.Printf("Time to sync: %v \n", time.Since(syncTime).Milliseconds())
 		gm.PosMu.Unlock()
 		// so now everyone's updated
 		gm.World.WorldRelToAbs()
