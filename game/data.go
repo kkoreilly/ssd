@@ -680,6 +680,8 @@ func (gm *Game) GetPosFromServer() { // GetPosFromServer loops through the playe
 			}
 			if (d.KilledBy == USER) && ((d.SpawnCount - 1) == gm.OtherPos[d.Username].SpawnCount) {
 				POINTS += 1
+				resultText.SetText("<b>You killed " + d.Username + "! You get one point.</b>")
+				resultText.SetFullReRender()
 			}
 		}
 		gm.OtherPos = tempOtherPos
