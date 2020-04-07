@@ -721,6 +721,7 @@ func AddNewScene(parent ki.Ki, name string) *Scene {
 func (gm *Game) UpdatePeopleWorldPos() {
 	rec := ki.Node{}
 	rec.InitName(&rec, "rec")
+	// Get all of the groups
 	pGp := gm.World.ChildByName("PeopleGroup", 0).(*eve.Group)
 	pgt := gm.Scene.Scene.ChildByName("PeopleTextGroup", 0)
 	uk := playTab.ChildByName("usernameKey", 0)
@@ -739,36 +740,38 @@ func (gm *Game) UpdatePeopleWorldPos() {
 			ctr++
 		}
 		sort.Strings(keys) // it is "key" to have others in same order so if there are no changes, nothing happens
-		config := kit.TypeAndNameList{}
-		config1 := kit.TypeAndNameList{}
-		for _, k := range keys {
-			config.Add(eve.KiT_Group, k)
-			if uk.ChildByName("ukt_"+k, 0) != nil {
-				config1.Add(gi.KiT_Label, "ukt_"+k)
-			}
-			// if uk.ChildByName("ukt_"+k+"_button", 0) != nil {
-			// 	config1.Add(gi.KiT_Button, "ukt_"+k+"_button")
-			// }
-			if i >= 1 {
-				config1.Add(gi.KiT_Label, "ukt_"+USER)
-				// config1.Add(gi.KiT_Button, "ukt_"+USER+"_button")
-			}
-		}
-		mods, updt := pGp.ConfigChildren(config, ki.NonUniqueNames)
-		mods1, updt1 := pgt.ConfigChildren(config, ki.NonUniqueNames)
-		mods2, updt2 := uk.ConfigChildren(config1, ki.NonUniqueNames)
-		if !mods {
-			updt = pGp.UpdateStart() // updt is automatically set if mods = true, so we're just doing it here
-		}
-		if !mods1 {
-			updt1 = pgt.UpdateStart() // updt is automatically set if mods = true, so we're just doing it here
-		}
-		if !mods2 {
-			updt2 = uk.UpdateStart() // updt is automatically set if mods = true, so we're just doing it here
-		}
+		// config := kit.TypeAndNameList{}
+		// config1 := kit.TypeAndNameList{}
+		// for _, k := range keys {
+		// 	config.Add(eve.KiT_Group, k)
+		// 	if uk.ChildByName("ukt_"+k, 0) != nil {
+		// 		config1.Add(gi.KiT_Label, "ukt_"+k)
+		// 	}
+		// 	// if uk.ChildByName("ukt_"+k+"_button", 0) != nil {
+		// 	// 	config1.Add(gi.KiT_Button, "ukt_"+k+"_button")
+		// 	// }
+		// 	if i >= 1 {
+		// 		config1.Add(gi.KiT_Label, "ukt_"+USER)
+		// 		// config1.Add(gi.KiT_Button, "ukt_"+USER+"_button")
+		// 	}
+		// }
+		// mods, updt := pGp.ConfigChildren(config, ki.NonUniqueNames)
+		// mods1, updt1 := pgt.ConfigChildren(config, ki.NonUniqueNames)
+		// mods2, updt2 := uk.ConfigChildren(config1, ki.NonUniqueNames)
+		// if !mods {
+		// 	updt = pGp.UpdateStart() // updt is automatically set if mods = true, so we're just doing it here
+		// }
+		// if !mods1 {
+		// 	updt1 = pgt.UpdateStart() // updt is automatically set if mods = true, so we're just doing it here
+		// }
+		// if !mods2 {
+		// 	updt2 = uk.UpdateStart() // updt is automatically set if mods = true, so we're just doing it here
+		// }
+		updt := pGp.UpdateStart()
+		updt1 := pgt.UpdateStart()
+		updt2 := uk.UpdateStart()
 		fmt.Printf("Time for keys and mods: %v \n", time.Since(startTime).Milliseconds())
 		// now, the children of pGp are the keys of OtherPos in order
-		gm.WorldMu.Lock()
 		for i, k := range keys {
 			if k == USER {
 				delete(gm.OtherPos, k)
@@ -811,10 +814,8 @@ func (gm *Game) UpdatePeopleWorldPos() {
 				text.Pose.Pos.X = text.Pose.Pos.X - 0.2
 				if gm.OtherPos[k].Points >= 100 {
 					gm.PosMu.Unlock()
-					gm.WorldMu.Unlock()
 					gm.setGameOver(k)
 					gm.PosMu.Lock()
-					gm.WorldMu.Lock()
 				}
 			}
 			pers.Rel.Pos = ppos.Pos
@@ -842,19 +843,17 @@ func (gm *Game) UpdatePeopleWorldPos() {
 			gm.WorldMu.Lock()
 		}
 		fmt.Printf("Time for user stuff: %v \n", time.Since(startTime).Milliseconds())
-		if mods {
-			gm.View.Sync() // if something was created or destroyed, it must use Sync to update Scene
-		} else {
-			gm.View.UpdatePose() // UpdatePose is much faster and assumes no changes in objects
-		}
+		// if mods {
+		gm.View.Sync() // if something was created or destroyed, it must use Sync to update Scene
+		// } else {
+		gm.View.UpdatePose() // UpdatePose is much faster and assumes no changes in objects
+		// }
 		gm.PosMu.Unlock()
 		// so now everyone's updated
 		gm.World.WorldRelToAbs()
 		pGp.UpdateEnd(updt)
 		pgt.UpdateEnd(updt1)
 		uk.UpdateEnd(updt2)
-
-		gm.WorldMu.Unlock()
 		gm.Scene.UpdateSig()
 		fmt.Printf("Total time for rendering people: %v \n", time.Since(startTime).Milliseconds())
 	}
