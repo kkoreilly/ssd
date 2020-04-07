@@ -779,8 +779,13 @@ func (gm *Game) UpdatePeopleWorldPos() {
 				continue
 			}
 			ppos := gm.OtherPos[k]
-			pers := pGp.Child(i).(*eve.Group) // this is guaranteed to be for person "k"
-			if !pers.HasChildren() {          // if has not already been made
+			var pers *eve.Group
+			if i >= len(*pGp.Children()) {
+				pers = eve.AddNewGroup(pGp, k)
+			} else {
+				pers = pGp.Child(i).(*eve.Group) // this is guaranteed to be for person "k"
+			}
+			if !pers.HasChildren() { // if has not already been made
 				needToSync = true
 				gm.PhysMakePerson(pers, k, false) // make
 				text := gi3d.AddNewText2D(&gm.Scene.Scene, &gm.Scene.Scene, k+"Text", k)
