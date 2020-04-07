@@ -652,7 +652,6 @@ func (gm *Game) clearAllBullets() {
 func (gm *Game) GetPosFromServer() { // GetPosFromServer loops through the players database and updates gm.OtherPos with the new data
 	for {
 		startTime := time.Now()
-		gm.PosMu.Lock()
 		fmt.Printf("GetPosFromServer Lock: %v Milliseconds\n", time.Since(startTime).Milliseconds())
 		// startServerTime := time.Now()
 		resp, err := http.Get("http://ssdserver.herokuapp.com/playerPosGet/?battleName=" + CURBATTLE)
@@ -674,6 +673,7 @@ func (gm *Game) GetPosFromServer() { // GetPosFromServer loops through the playe
 		decoder.Decode(&tempOtherPos)
 		// fmt.Printf("Time for GetPosFromServer Decoding: %v Milliseconds \n", time.Since(startDecodingTime).Milliseconds())
 		// startTempTime := time.Now()
+		gm.PosMu.Lock()
 		for _, d := range tempOtherPos {
 			if gm.OtherPos[d.Username] == nil {
 				continue
