@@ -1228,6 +1228,7 @@ func (ev *Game) WorldStep(specialCheck bool) (stillNessecary bool) {
 						}
 					}
 					if strings.Contains(name, "Lava") {
+						POINTS -= 1
 						ev.removeHealthPoints(200, "Lava")
 					}
 				}
