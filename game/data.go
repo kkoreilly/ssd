@@ -284,8 +284,8 @@ func createBattleJoinLayouts() {
 			rec.InitName(&rec, "rec")
 			joinBattleButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 				if sig == int64(gi.ButtonClicked) {
-					currentMapString = "Training Map 1"
-					currentMap = FirstMap
+					currentMapString = "The Arena"
+					currentMap = TheArenaMap
 					curBattleTerritory1 = territory1
 					curBattleTerritory2 = territory2
 					initPlayTab()

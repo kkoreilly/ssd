@@ -43,6 +43,23 @@ func (gm *Game) PhysMakeGrass(par *eve.Group, name string) *eve.Group {
 	return pgroup
 }
 
+func (gm *Game) PhysMakeLava(par *eve.Group, name string, x, z int) *eve.Group {
+	// fmt.Printf("Making lava \n")
+	pgroup := eve.AddNewGroup(par, name) // note: this is probably redundant'
+	for i := 0; i < x; i++ {
+		posOfLava := mat32.Vec3{0, 0.05, 0}
+		for i2 := 0; i2 < z; i2++ {
+			// fmt.Printf("In loop \n")
+			posOfLava.X = float32(i * 10)
+			posOfLava.Z = float32(i2 * 10)
+			person := eve.AddNewBox(pgroup, "Lava", posOfLava, mat32.Vec3{10, 0.1, 10})
+			person.Color = "orange" // for debugging
+			person.Vis = "Lava"
+		}
+	}
+	return pgroup
+}
+
 func (gm *Game) PhysMakeBrickHouse(par *eve.Group, name string) *eve.Group {
 	width := float32(15)
 	depth := float32(15)
@@ -164,6 +181,28 @@ func (gm *Game) PhysMakeTheWall(par *eve.Group, name string) *eve.Group {
 	return wallg
 }
 
+func (gm *Game) PhysMakeArenaWalls(par *eve.Group, name string) *eve.Group {
+	wallg := eve.AddNewGroup(par, name)
+	tw1 := eve.AddNewBox(wallg, "ArenaWall", mat32.Vec3{-100, 50, 0}, mat32.Vec3{2, 100, 200})
+	tw1.Color = "black"
+	tw1.Vis = "ArenaWall"
+
+	tw2 := eve.AddNewBox(wallg, "ArenaWall", mat32.Vec3{100, 50, 0}, mat32.Vec3{2, 100, 200})
+	tw2.Color = "black"
+	tw2.Vis = "ArenaWall"
+
+	tw3 := eve.AddNewBox(wallg, "ArenaWall", mat32.Vec3{0, 50, -100}, mat32.Vec3{2, 100, 200})
+	tw3.Color = "black"
+	tw3.Vis = "ArenaWall"
+	tw3.Initial.SetAxisRotation(0, 1, 0, -90)
+
+	tw4 := eve.AddNewBox(wallg, "ArenaWall", mat32.Vec3{0, 50, 100}, mat32.Vec3{2, 100, 200})
+	tw4.Color = "black"
+	tw4.Vis = "ArenaWall"
+	tw4.Initial.SetAxisRotation(0, 1, 0, -90)
+	return wallg
+}
+
 func (gm *Game) LibMakeItemSpawner() {
 	sc := &gm.Scene.Scene
 	isnm := "ItemSpawner"
@@ -190,9 +229,9 @@ func (gm *Game) LibMakeGrass() {
 	pwg := sc.NewInLibrary(pnm)
 	pwm := gi3d.AddNewBox(sc, pnm, 200, 0.1, 200)
 	pws := gi3d.AddNewSolid(sc, pwg, pnm, pwm.Name())
-	gi3d.AddNewTextureFile(sc, "grass", "objs/grass.jpg")
-	pws.Mat.Texture = gi3d.TexName("grass")
-	pws.Mat.Tiling.Repeat.Set(50, 50)
+	gi3d.AddNewTextureFile(sc, "arenaFloor", "objs/floorTexture.png")
+	pws.Mat.Texture = gi3d.TexName("arenaFloor")
+	pws.Mat.Tiling.Repeat.Set(20, 20)
 }
 
 func (gm *Game) LibMakeRoad() {
@@ -294,6 +333,16 @@ func (gm *Game) LibMakeTheWall() {
 	*/
 }
 
+func (gm *Game) LibMakeArenaWalls() {
+	sc := &gm.Scene.Scene
+	tnm := "ArenaWall"
+	twg := sc.NewInLibrary(tnm)
+	twm := gi3d.AddNewBox(sc, tnm, 2, 100, 200)
+	tws := gi3d.AddNewSolid(sc, twg, tnm, twm.Name())
+	gi3d.AddNewTextureFile(sc, "arenaWall", "objs/arenaWall.png")
+	tws.Mat.Texture = gi3d.TexName("arenaWall")
+}
+
 func (gm *Game) LibMakeBrickHouse() {
 	sc := &gm.Scene.Scene
 	// _, err := sc.OpenToLibrary("objs/BrickHouse.DoorWall.sobj", "BrickHouse.DoorWall")
@@ -353,4 +402,15 @@ func (gm *Game) LibMakeBrickHouse() {
 	// }
 
 	// fi.Pose.SetAxisRotation(1, 0, 0, -45)
+}
+
+func (gm *Game) LibMakeLava() {
+	sc := &gm.Scene.Scene
+	pnm := "Lava"
+	pwg := sc.NewInLibrary(pnm)
+	pwm := gi3d.AddNewBox(sc, pnm, 10, 0.1, 10)
+	pws := gi3d.AddNewSolid(sc, pwg, pnm, pwm.Name())
+	gi3d.AddNewTextureFile(sc, "lava", "objs/lava.jpg")
+	pws.Mat.Texture = gi3d.TexName("lava")
+	// pws.Mat.Tiling.Repeat.Set(20, 20)
 }

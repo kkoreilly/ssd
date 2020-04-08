@@ -130,6 +130,12 @@ func (gm *Game) MakeObj(obj *MapObj, nm string) *eve.Group {
 	case "Road":
 		ogp = eve.AddNewGroup(gm.World, nm)
 		gm.PhysMakeRoad(ogp, nm)
+	case "ArenaWalls":
+		ogp = eve.AddNewGroup(gm.World, nm)
+		gm.PhysMakeArenaWalls(ogp, nm)
+	case "LavaBlockFour":
+		ogp = eve.AddNewGroup(gm.World, nm)
+		gm.PhysMakeLava(ogp, nm, 2, 2)
 	}
 	/*
 		case "Hill":
@@ -236,6 +242,8 @@ func (gm *Game) MakeLibrary() {
 	gm.LibMakePerson1()
 	gm.LibMakeRoad()
 	gm.LibMakeGrass()
+	gm.LibMakeArenaWalls()
+	gm.LibMakeLava()
 }
 
 func (gm *Game) MakeMeshes() {
@@ -854,10 +862,8 @@ func (gm *Game) UpdatePeopleWorldPos() {
 		}
 		if POINTS >= 100 {
 			gm.PosMu.Unlock()
-			gm.WorldMu.Unlock()
 			gm.setGameOver(USER)
 			gm.PosMu.Lock()
-			gm.WorldMu.Lock()
 		}
 		// fmt.Printf("Time for user stuff: %v \n", time.Since(startTime).Milliseconds())
 		// syncTime := time.Now()
@@ -1220,6 +1226,9 @@ func (ev *Game) WorldStep(specialCheck bool) (stillNessecary bool) {
 						if specialCheck {
 							return true
 						}
+					}
+					if strings.Contains(name, "Lava") {
+						ev.removeHealthPoints(200, "Lava")
 					}
 				}
 				// fmt.Printf("A: %v  B: %v\n", c.A.Name(), c.B.Name())
