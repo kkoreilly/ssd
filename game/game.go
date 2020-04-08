@@ -726,13 +726,13 @@ func (gm *Game) UpdatePeopleWorldPos() {
 	pgt := gm.Scene.Scene.ChildByName("PeopleTextGroup", 0)
 	uk := playTab.ChildByName("usernameKey", 0)
 	for i := 0; true; i++ {
-		startTime := time.Now()
+		// startTime := time.Now()
 		_, ok := <-gm.PosUpdtChan // we wait here to receive channel message sent when positions have been updated
 		if !ok {                  // this means channel was closed, we need to bail, game over!
 			return
 		}
 		gm.PosMu.Lock()
-		fmt.Printf("Time for lock %v \n", time.Since(startTime).Milliseconds())
+		// fmt.Printf("Time for lock %v \n", time.Since(startTime).Milliseconds())
 		keys := make([]string, len(gm.OtherPos))
 		ctr := 0
 		for k := range gm.OtherPos {
@@ -770,7 +770,7 @@ func (gm *Game) UpdatePeopleWorldPos() {
 		updt := pGp.UpdateStart()
 		updt1 := pgt.UpdateStart()
 		updt2 := uk.UpdateStart()
-		fmt.Printf("Time for keys and mods: %v \n", time.Since(startTime).Milliseconds())
+		// fmt.Printf("Time for keys and mods: %v \n", time.Since(startTime).Milliseconds())
 		needToSync := false
 		// now, the children of pGp are the keys of OtherPos in order
 		for i, k := range keys {
@@ -826,8 +826,18 @@ func (gm *Game) UpdatePeopleWorldPos() {
 				}
 			}
 			pers.Rel.Pos = ppos.Pos
+			firstPers := gm.World.ChildByName("FirstPerson", 0).(*eve.Group)
+			d := pers.Rel.Pos.Sub(firstPers.Rel.Pos)
+			dn := d.Normal()
+			text1 := gm.Scene.Scene.ChildByName(k+"Text", 0)
+			if text1 == nil {
+				continue
+			}
+			text := text1.(*gi3d.Text2D)
+			text.Pose.Quat.SetFromUnitVectors(mat32.Vec3{1, 0, 0}, dn)
+			fmt.Printf("Quat pose: %v \n", text.Pose.Quat)
 		}
-		fmt.Printf("Time for ranging over keys: %v \n", time.Since(startTime).Milliseconds())
+		// fmt.Printf("Time for ranging over keys: %v \n", time.Since(startTime).Milliseconds())
 
 		_, err := uk.ChildByNameTry("ukt_"+USER, 0)
 		if err != nil {
@@ -849,15 +859,15 @@ func (gm *Game) UpdatePeopleWorldPos() {
 			gm.PosMu.Lock()
 			gm.WorldMu.Lock()
 		}
-		fmt.Printf("Time for user stuff: %v \n", time.Since(startTime).Milliseconds())
-		syncTime := time.Now()
+		// fmt.Printf("Time for user stuff: %v \n", time.Since(startTime).Milliseconds())
+		// syncTime := time.Now()
 		if needToSync {
 			gm.View.Sync() // if something was created or destroyed, it must use Sync to update Scene
 		} else {
 			gm.View.Sync()
 			gm.View.UpdatePose() // UpdatePose is much faster and assumes no changes in objects
 		}
-		fmt.Printf("Time to sync: %v \n", time.Since(syncTime).Milliseconds())
+		// fmt.Printf("Time to sync: %v \n", time.Since(syncTime).Milliseconds())
 		gm.PosMu.Unlock()
 		// so now everyone's updated
 		gm.World.WorldRelToAbs()
@@ -865,7 +875,7 @@ func (gm *Game) UpdatePeopleWorldPos() {
 		pgt.UpdateEnd(updt1)
 		uk.UpdateEnd(updt2)
 		gm.Scene.UpdateSig()
-		fmt.Printf("Total time for rendering people: %v \n", time.Since(startTime).Milliseconds())
+		// fmt.Printf("Total time for rendering people: %v \n", time.Since(startTime).Milliseconds())
 	}
 }
 

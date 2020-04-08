@@ -651,8 +651,8 @@ func (gm *Game) clearAllBullets() {
 }
 func (gm *Game) GetPosFromServer() { // GetPosFromServer loops through the players database and updates gm.OtherPos with the new data
 	for {
-		startTime := time.Now()
-		fmt.Printf("GetPosFromServer Lock: %v Milliseconds\n", time.Since(startTime).Milliseconds())
+		// startTime := time.Now()
+		// fmt.Printf("GetPosFromServer Lock: %v Milliseconds\n", time.Since(startTime).Milliseconds())
 		// startServerTime := time.Now()
 		resp, err := http.Get("http://ssdserver.herokuapp.com/playerPosGet/?battleName=" + CURBATTLE)
 		if err != nil {
@@ -701,8 +701,8 @@ func (gm *Game) GetPosFromServer() { // GetPosFromServer loops through the playe
 		// gm.FireUpdtChan <- true
 		// fmt.Printf("Time for FireUpdtChan: %v Milliseconds \n", time.Since(otherTime).Milliseconds())
 		// fmt.Printf("Time for GetPosFromServer other stuff: %v Milliseconds \n", time.Since(otherTime).Milliseconds())
-		since := time.Since(startTime)
-		fmt.Printf("Total time for GetPosFromServer: %v Milliseconds\n", since.Milliseconds())
+		// since := time.Since(startTime)
+		// fmt.Printf("Total time for GetPosFromServer: %v Milliseconds\n", since.Milliseconds())
 	}
 }
 
