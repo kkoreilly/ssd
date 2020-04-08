@@ -136,6 +136,27 @@ func (gm *Game) MakeObj(obj *MapObj, nm string) *eve.Group {
 	case "LavaBlockFour":
 		ogp = eve.AddNewGroup(gm.World, nm)
 		gm.PhysMakeLava(ogp, nm, 2, 2)
+	case "LavaWallsSetup":
+		ogp = eve.AddNewGroup(gm.World, nm)
+		backRight := gm.PhysMakeLava(ogp, nm+"backRight", 8, 1)
+		backRight.Initial.Pos.Set(10, 0, 85)
+		backLeft := gm.PhysMakeLava(ogp, nm+"backLeft", 8, 1)
+		backLeft.Initial.Pos.Set(-90, 0, 85)
+
+		frontRight := gm.PhysMakeLava(ogp, nm+"frontRight", 8, 1)
+		frontRight.Initial.Pos.Set(10, 0, -85)
+		frontLeft := gm.PhysMakeLava(ogp, nm+"frontLeft", 8, 1)
+		frontLeft.Initial.Pos.Set(-90, 0, -85)
+
+		rightRight := gm.PhysMakeLava(ogp, nm+"rightRight", 1, 7)
+		rightRight.Initial.Pos.Set(90, 0, 80)
+		rightLeft := gm.PhysMakeLava(ogp, nm+"rightLeft", 1, 7)
+		rightLeft.Initial.Pos.Set(90, 0, -80)
+
+		leftRight := gm.PhysMakeLava(ogp, nm+"leftRight", 1, 7)
+		leftRight.Initial.Pos.Set(-90, 0, 80)
+		leftLeft := gm.PhysMakeLava(ogp, nm+"leftLeft", 1, 7)
+		leftLeft.Initial.Pos.Set(-90, 0, -80)
 	}
 	/*
 		case "Hill":

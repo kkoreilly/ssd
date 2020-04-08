@@ -34,6 +34,7 @@ var SecondMap = Map{
 var TheArenaMap = Map{
 	"ArenaWalls":      {"ArenaWalls", mat32.Vec3{0, 0, 0}, DefScale},
 	"LavaBlockCenter": {"LavaBlockFour", mat32.Vec3{0, 0, 0}, DefScale},
+	"LavaSetup":       {"LavaWallsSetup", mat32.Vec3{0, 0, 0}, DefScale},
 }
 
 type MapInfo struct {
