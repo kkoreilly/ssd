@@ -159,7 +159,7 @@ func addTeamUpdateButtons() {
 }
 func (gm *Game) GetFireEvents() {
 	for {
-		startTime := time.Now()
+		// startTime := time.Now()
 		if !gm.GameOn {
 			return
 		}
@@ -182,7 +182,7 @@ func (gm *Game) GetFireEvents() {
 		decoder.Decode(&newInfo)
 		gm.FireEvents = append(gm.FireEvents, newInfo...)
 		gm.FireEventMu.Unlock()
-		fmt.Printf("Total time for GetFireEvents: %v \n", time.Since(startTime).Milliseconds())
+		// fmt.Printf("Total time for GetFireEvents: %v \n", time.Since(startTime).Milliseconds())
 	}
 }
 func addFireEventToDB(creator string, damage int, origin mat32.Vec3, dir mat32.Vec3) {

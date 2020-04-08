@@ -678,9 +678,9 @@ func (gm *Game) UpdatePersonYPos() {
 		if !gm.GameOn {
 			return
 		}
-		startTime := time.Now()
+		// startTime := time.Now()
 		gm.WorldMu.Lock()
-		fmt.Printf("Person y pos lock: %v \n", time.Since(startTime).Milliseconds())
+		// fmt.Printf("Person y pos lock: %v \n", time.Since(startTime).Milliseconds())
 		pers := gm.World.ChildByName("FirstPerson", 0).(*eve.Group)
 
 		camOff := gm.Scene.Camera.Pose.Pos.Sub(pers.Rel.Pos) // currrent offset of camera vs. person
@@ -707,7 +707,7 @@ func (gm *Game) UpdatePersonYPos() {
 			gm.Scene.UpdateSig()
 
 		}
-		fmt.Printf("Total time for update person y pos: %v \n", time.Since(startTime).Milliseconds())
+		// fmt.Printf("Total time for update person y pos: %v \n", time.Since(startTime).Milliseconds())
 		time.Sleep(100 * time.Millisecond)
 	}
 }
@@ -835,7 +835,7 @@ func (gm *Game) UpdatePeopleWorldPos() {
 			}
 			text := text1.(*gi3d.Text2D)
 			text.Pose.Quat.SetFromUnitVectors(mat32.Vec3{1, 0, 0}, dn)
-			fmt.Printf("Quat pose: %v \n", text.Pose.Quat)
+			// fmt.Printf("Quat pose: %v \n", text.Pose.Quat)
 		}
 		// fmt.Printf("Time for ranging over keys: %v \n", time.Since(startTime).Milliseconds())
 
