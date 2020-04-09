@@ -58,25 +58,26 @@ type FireEventInfo struct {
 }
 
 type Game struct {
-	World        *eve.Group
-	View         *evev.View
-	Scene        *Scene
-	Map          Map
-	MapObjs      map[string]bool
-	OtherPos     map[string]*CurPosition
-	PosUpdtChan  chan bool  `desc:"channel connecting server pos updates with world state update"`
-	PosMu        sync.Mutex `desc:"protects updates to OtherPos map"`
-	WorldMu      sync.Mutex `desc:"protects updates to World physics and view"`
-	GameOn       bool       // starts on when game turned out, turn off when close game
-	Winner       string
-	PersHitWall  bool
-	Gravity      float32
-	AbleToFire   bool
-	FireEvents   []*FireEventInfo
-	FireEventMu  sync.Mutex
-	FireUpdtChan chan bool
-	KilledBy     string
-	SpawnCount   int
+	World          *eve.Group
+	View           *evev.View
+	Scene          *Scene
+	Map            Map
+	MapObjs        map[string]bool
+	OtherPos       map[string]*CurPosition
+	PosUpdtChan    chan bool  `desc:"channel connecting server pos updates with world state update"`
+	PosMu          sync.Mutex `desc:"protects updates to OtherPos map"`
+	WorldMu        sync.Mutex `desc:"protects updates to World physics and view"`
+	GameOn         bool       // starts on when game turned out, turn off when close game
+	Winner         string
+	PersHitWall    bool
+	Gravity        float32
+	AbleToFire     bool
+	FireEvents     []*FireEventInfo
+	FireEventMu    sync.Mutex
+	FireUpdtChan   chan bool
+	KilledBy       string
+	SpawnCount     int
+	SpawnPositions []mat32.Vec3
 }
 
 // TheGame is the game instance for the current game
@@ -101,7 +102,8 @@ var KiT_Scene = kit.Types.AddType(&Scene{}, nil)
 func (gm *Game) BuildMap() {
 	ogp := eve.AddNewGroup(gm.World, "FirstPerson")
 	gm.PhysMakePerson(ogp, "FirstPerson", true)
-	ogp.Initial.Pos.Set(0.25, 1, 40)
+	posX, posZ := gm.GetRandomSpawnPoint()
+	ogp.Initial.Pos.Set(posX, 1, posZ)
 
 	eve.AddNewGroup(gm.World, "PeopleGroup")
 	gi3d.AddNewGroup(&gm.Scene.Scene, &gm.Scene.Scene, "RayGroup")
@@ -300,6 +302,14 @@ func (gm *Game) MakeMeshes() {
 // 	gi3d.AddNewTextureFile(sc, "Brick1", "brick.jpg")
 // }
 
+func (gm *Game) GetRandomSpawnPoint() (posX, posZ float32) {
+	rand.Seed(time.Now().UTC().UnixNano())
+	randomNum := int(rand.Intn(len(gm.SpawnPositions)))
+	// fmt.Printf("Random number: %v\n", randomNum)
+	return gm.SpawnPositions[randomNum].X, gm.SpawnPositions[randomNum].Z
+
+}
+
 // MakeWorld constructs a new virtual physics world
 func (gm *Game) MakeWorld() {
 	gm.World = &eve.Group{}
@@ -320,6 +330,7 @@ func (gm *Game) MakeView() {
 }
 
 func (gm *Game) Config() {
+	gm.SpawnPositions = []mat32.Vec3{mat32.Vec3{-50, 0, -50}, mat32.Vec3{-50, 0, 50}, mat32.Vec3{50, 0, 50}, mat32.Vec3{50, 0, -50}}
 	gamerow := gi.AddNewLayout(playTab, "gamerow", gi.LayoutVert)
 	gamerow.SetStretchMaxWidth()
 	gamerow.SetStretchMaxHeight()
@@ -685,7 +696,8 @@ func (gm *Game) timerForResult(from string) {
 			camOff := gm.Scene.Camera.Pose.Pos.Sub(pers.Rel.Pos) // currrent offset of camera vs. person
 			gm.Scene.TrackMouse = true
 			gm.Scene.Win.OSWin.SetCursorEnabled(false, true)
-			pers.Rel.Pos = mat32.Vec3{0, 1, 50}
+			posX, posY := gm.GetRandomSpawnPoint()
+			pers.Rel.Pos = mat32.Vec3{posX, 1, posY}
 			gm.Scene.Camera.Pose.Pos = pers.Rel.Pos.Add(camOff)
 			gm.World.WorldRelToAbs()
 			gm.Scene.UpdateSig()
