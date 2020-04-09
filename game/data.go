@@ -9,11 +9,13 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"net/http"
+
 	"github.com/goki/gi/gi"
 	"github.com/goki/ki/ki"
 	"github.com/goki/mat32"
 	_ "github.com/lib/pq"
-	"net/http"
+
 	// "strconv"
 	"strings"
 	"time"
