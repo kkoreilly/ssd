@@ -881,10 +881,11 @@ func initPlayTab() {
 	resultRow = gi.AddNewFrame(playTab, "resultRow", gi.LayoutVert)
 	resultRow.SetStretchMaxWidth()
 
-	resultText = gi.AddNewLabel(resultRow, "resultText", "                                                                             ")
+	resultText = gi.AddNewLabel(resultRow, "resultText", "<b>Your kills and deaths will show up here</b>      ")
 	resultText.SetProp("font-size", "40px")
 	resultText.SetProp("text-align", "center")
 	resultText.Redrawable = true
+	resultText.SetProp("width", "20em")
 
 	// healthBar.SetInactive()
 	// healthBar.Snap = true
