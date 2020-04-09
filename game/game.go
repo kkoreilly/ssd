@@ -848,6 +848,7 @@ func (gm *Game) UpdatePeopleWorldPos() {
 			}
 			text := text1.(*gi3d.Text2D)
 			text.Pose.Quat.SetFromUnitVectors(mat32.Vec3{1, 0, 0}, dn)
+			text.Pose.RotateOnAxis(0, 1, 0, -90)
 		}
 		_, err := uk.ChildByNameTry("ukt_"+USER, 0)
 		if err != nil {
