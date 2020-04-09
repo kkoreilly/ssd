@@ -170,7 +170,7 @@ func (gm *Game) GetFireEvents() {
 		}
 		if resp.Status == "422" {
 			fmt.Printf("422, Battle maps nil or battle name nil")
-			gm.PosMu.Unlock()
+			// gm.PosMu.Unlock()
 			gm.PosUpdtChan <- true // tells UpdatePeopleWorldPos to update to new positions
 			// gm.FireUpdtChan <- true
 			continue
@@ -660,7 +660,7 @@ func (gm *Game) GetPosFromServer() { // GetPosFromServer loops through the playe
 		}
 		if resp.Status == "422" {
 			fmt.Printf("422, Battle maps nil or battle name nil")
-			gm.PosMu.Unlock()
+			// gm.PosMu.Unlock()
 			gm.PosUpdtChan <- true // tells UpdatePeopleWorldPos to update to new positions
 			// gm.FireUpdtChan <- true
 			continue
@@ -690,8 +690,8 @@ func (gm *Game) GetPosFromServer() { // GetPosFromServer loops through the playe
 		if !gm.GameOn {
 			close(gm.PosUpdtChan)
 			// close(gm.FireUpdtChan)
-			gm.battleOver(gm.Winner)
 			gm.PosMu.Unlock()
+			gm.battleOver(gm.Winner)
 			return
 		}
 		// fmt.Printf("Time for GetPosFromServer check game on: %v Milliseconds \n", time.Since(otherTime).Milliseconds())

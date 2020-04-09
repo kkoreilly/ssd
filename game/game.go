@@ -149,14 +149,14 @@ func (gm *Game) MakeObj(obj *MapObj, nm string) *eve.Group {
 		frontLeft.Initial.Pos.Set(-90, 0, -85)
 
 		rightRight := gm.PhysMakeLava(ogp, nm+"rightRight", 1, 7)
-		rightRight.Initial.Pos.Set(90, 0, 80)
+		rightRight.Initial.Pos.Set(90, 0, 10)
 		rightLeft := gm.PhysMakeLava(ogp, nm+"rightLeft", 1, 7)
-		rightLeft.Initial.Pos.Set(90, 0, -80)
+		rightLeft.Initial.Pos.Set(90, 0, -10)
 
 		leftRight := gm.PhysMakeLava(ogp, nm+"leftRight", 1, 7)
-		leftRight.Initial.Pos.Set(-90, 0, 80)
+		leftRight.Initial.Pos.Set(-90, 0, 10)
 		leftLeft := gm.PhysMakeLava(ogp, nm+"leftLeft", 1, 7)
-		leftLeft.Initial.Pos.Set(-90, 0, -80)
+		leftLeft.Initial.Pos.Set(-90, 0, -10)
 	}
 	/*
 		case "Hill":
@@ -488,7 +488,9 @@ func (gm *Game) RenderEnemyShots() {
 		if !gm.GameOn {
 			return
 		}
+		// fmt.Printf("Before fire event mu \n")
 		gm.FireEventMu.Lock()
+		// fmt.Printf("After fire event mu \n")
 		// fmt.Printf("Lock time: %v \n", time.Since(startTime).Milliseconds())
 		for k, d := range gm.FireEvents {
 			if d.Creator != USER {
@@ -596,8 +598,8 @@ func (gm *Game) fireWeapon() { // standard event for what happens when you fire
 }
 
 func (gm *Game) removeBulletLoop(bullet *gi3d.Solid, origin mat32.Vec3, dir mat32.Vec3, index int) {
-	gm.FireEventMu.Lock()
 	time.Sleep(300 * time.Millisecond)
+	gm.FireEventMu.Lock()
 	// delete(gm.FireEvents, index)
 	// removeFireEventFromServer(index, CURBATTLE)
 	// removeBulletFromDB(origin, dir)
@@ -707,36 +709,22 @@ func (gm *Game) UpdatePersonYPos() {
 		if !gm.GameOn {
 			return
 		}
-		// startTime := time.Now()
-		gm.WorldMu.Lock()
-		// fmt.Printf("Person y pos lock: %v \n", time.Since(startTime).Milliseconds())
 		pers := gm.World.ChildByName("FirstPerson", 0).(*eve.Group)
-
 		camOff := gm.Scene.Camera.Pose.Pos.Sub(pers.Rel.Pos) // currrent offset of camera vs. person
-
 		if pers.Rel.Pos.Y != 1 {
 			pers.Rel.LinVel.Y = pers.Rel.LinVel.Y - gm.Gravity
-
 			pers.Rel.Pos.Y += pers.Rel.LinVel.Y
 			if pers.Rel.Pos.Y <= 1 {
 				pers.Rel.Pos.Y = 1
 				pers.Rel.LinVel.Y = 0
 			}
 			writePlayerPosToServer(pers.Rel.Pos, CURBATTLE)
-			// statement := fmt.Sprintf("UPDATE players SET posY = '%v' WHERE username='%v'", pers.Rel.Pos.Y, USER)
-			// _, err := db.Exec(statement)
-			// if err != nil {
-			// 	fmt.Printf("DB err: %v \n", err)
-			// }
 		}
 		gm.World.WorldRelToAbs()
-		gm.WorldMu.Unlock()
 		gm.Scene.Camera.Pose.Pos = pers.Rel.Pos.Add(camOff)
 		if pers.Rel.Pos.Y != 1 {
 			gm.Scene.UpdateSig()
-
 		}
-		// fmt.Printf("Total time for update person y pos: %v \n", time.Since(startTime).Milliseconds())
 		time.Sleep(100 * time.Millisecond)
 	}
 }
@@ -755,13 +743,11 @@ func (gm *Game) UpdatePeopleWorldPos() {
 	pgt := gm.Scene.Scene.ChildByName("PeopleTextGroup", 0)
 	uk := playTab.ChildByName("usernameKey", 0)
 	for i := 0; true; i++ {
-		// startTime := time.Now()
 		_, ok := <-gm.PosUpdtChan // we wait here to receive channel message sent when positions have been updated
 		if !ok {                  // this means channel was closed, we need to bail, game over!
 			return
 		}
 		gm.PosMu.Lock()
-		// fmt.Printf("Time for lock %v \n", time.Since(startTime).Milliseconds())
 		keys := make([]string, len(gm.OtherPos))
 		ctr := 0
 		for k := range gm.OtherPos {
@@ -799,12 +785,9 @@ func (gm *Game) UpdatePeopleWorldPos() {
 		updt := pGp.UpdateStart()
 		updt1 := pgt.UpdateStart()
 		updt2 := uk.UpdateStart()
-		// fmt.Printf("Time for keys and mods: %v \n", time.Since(startTime).Milliseconds())
 		needToSync := false
-		// now, the children of pGp are the keys of OtherPos in order
 		for i, k := range keys {
 			if k == USER {
-				delete(gm.OtherPos, k)
 				continue
 			}
 			ppos := gm.OtherPos[k]
@@ -834,6 +817,7 @@ func (gm *Game) UpdatePeopleWorldPos() {
 			} else {
 				text1 := gm.Scene.Scene.ChildByName(k+"Text", 0)
 				if text1 == nil {
+					fmt.Printf("Continue \n")
 					continue
 				}
 				text := text1.(*gi3d.Text2D)
@@ -864,10 +848,7 @@ func (gm *Game) UpdatePeopleWorldPos() {
 			}
 			text := text1.(*gi3d.Text2D)
 			text.Pose.Quat.SetFromUnitVectors(mat32.Vec3{1, 0, 0}, dn)
-			// fmt.Printf("Quat pose: %v \n", text.Pose.Quat)
 		}
-		// fmt.Printf("Time for ranging over keys: %v \n", time.Since(startTime).Milliseconds())
-
 		_, err := uk.ChildByNameTry("ukt_"+USER, 0)
 		if err != nil {
 			ukt := gi.AddNewLabel(uk, "ukt_"+USER, "")
@@ -886,15 +867,12 @@ func (gm *Game) UpdatePeopleWorldPos() {
 			gm.setGameOver(USER)
 			gm.PosMu.Lock()
 		}
-		// fmt.Printf("Time for user stuff: %v \n", time.Since(startTime).Milliseconds())
-		// syncTime := time.Now()
 		if needToSync {
 			gm.View.Sync() // if something was created or destroyed, it must use Sync to update Scene
 		} else {
 			gm.View.Sync()
 			gm.View.UpdatePose() // UpdatePose is much faster and assumes no changes in objects
 		}
-		// fmt.Printf("Time to sync: %v \n", time.Since(syncTime).Milliseconds())
 		gm.PosMu.Unlock()
 		// so now everyone's updated
 		gm.World.WorldRelToAbs()
@@ -902,7 +880,6 @@ func (gm *Game) UpdatePeopleWorldPos() {
 		pgt.UpdateEnd(updt1)
 		uk.UpdateEnd(updt2)
 		gm.Scene.UpdateSig()
-		// fmt.Printf("Total time for rendering people: %v \n", time.Since(startTime).Milliseconds())
 	}
 }
 

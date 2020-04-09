@@ -47,12 +47,12 @@ func (gm *Game) PhysMakeLava(par *eve.Group, name string, x, z int) *eve.Group {
 	// fmt.Printf("Making lava \n")
 	pgroup := eve.AddNewGroup(par, name) // note: this is probably redundant'
 	for i := 0; i < x; i++ {
-		posOfLava := mat32.Vec3{0, 0.05, 0}
+		posOfLava := mat32.Vec3{0, 1, 0}
 		for i2 := 0; i2 < z; i2++ {
 			// fmt.Printf("In loop \n")
 			posOfLava.X = float32(i * 10)
 			posOfLava.Z = float32(i2 * 10)
-			person := eve.AddNewBox(pgroup, "Lava", posOfLava, mat32.Vec3{10, 0.1, 10})
+			person := eve.AddNewBox(pgroup, "Lava", posOfLava, mat32.Vec3{10, 2, 10})
 			person.Color = "orange" // for debugging
 			person.Vis = "Lava"
 		}
@@ -408,7 +408,7 @@ func (gm *Game) LibMakeLava() {
 	sc := &gm.Scene.Scene
 	pnm := "Lava"
 	pwg := sc.NewInLibrary(pnm)
-	pwm := gi3d.AddNewBox(sc, pnm, 10, 0.1, 10)
+	pwm := gi3d.AddNewBox(sc, pnm, 10, 2, 10)
 	pws := gi3d.AddNewSolid(sc, pwg, pnm, pwm.Name())
 	gi3d.AddNewTextureFile(sc, "lava", "objs/lava.jpg")
 	pws.Mat.Texture = gi3d.TexName("lava")
