@@ -47,7 +47,7 @@ func (gm *Game) PhysMakeLava(par *eve.Group, name string, x, z int) *eve.Group {
 	// fmt.Printf("Making lava \n")
 	pgroup := eve.AddNewGroup(par, name) // note: this is probably redundant'
 	for i := 0; i < x; i++ {
-		posOfLava := mat32.Vec3{0, 1, 0}
+		posOfLava := mat32.Vec3{0, -0.925, 0}
 		for i2 := 0; i2 < z; i2++ {
 			// fmt.Printf("In loop \n")
 			posOfLava.X = float32(i * 10)
@@ -55,6 +55,10 @@ func (gm *Game) PhysMakeLava(par *eve.Group, name string, x, z int) *eve.Group {
 			person := eve.AddNewBox(pgroup, "Lava", posOfLava, mat32.Vec3{10, 2, 10})
 			person.Color = "orange" // for debugging
 			person.Vis = "Lava"
+
+			// lc := eve.AddNewBox(pgroup, "LavaContainer", mat32.Vec3{posOfLava.X, 0, posOfLava.Z}, mat32.Vec3{10, 2, 10})
+			// lc.Color = "white"
+			// lc.Vis = "LavaContainer"
 		}
 	}
 	return pgroup
@@ -230,6 +234,7 @@ func (gm *Game) LibMakeGrass() {
 	pwm := gi3d.AddNewBox(sc, pnm, 200, 0.1, 200)
 	pws := gi3d.AddNewSolid(sc, pwg, pnm, pwm.Name())
 	gi3d.AddNewTextureFile(sc, "arenaFloor", "objs/floorTexture.png")
+	// texture.SetTransparent(true)
 	pws.Mat.Texture = gi3d.TexName("arenaFloor")
 	pws.Mat.Tiling.Repeat.Set(20, 20)
 }
@@ -413,4 +418,12 @@ func (gm *Game) LibMakeLava() {
 	gi3d.AddNewTextureFile(sc, "lava", "objs/lava.jpg")
 	pws.Mat.Texture = gi3d.TexName("lava")
 	// pws.Mat.Tiling.Repeat.Set(20, 20)
+}
+func (gm *Game) LibMakeLavaContainer() {
+	sc := &gm.Scene.Scene
+	pnm := "LavaContainer"
+	pwg := sc.NewInLibrary(pnm)
+	pwm := gi3d.AddNewBox(sc, pnm, 10, 2, 10)
+	pws := gi3d.AddNewSolid(sc, pwg, pnm, pwm.Name())
+	pws.Mat.Color.SetUInt8(0, 0, 0, 0)
 }

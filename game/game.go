@@ -78,6 +78,7 @@ type Game struct {
 	KilledBy       string
 	SpawnCount     int
 	SpawnPositions []mat32.Vec3
+	IsDead         bool
 }
 
 // TheGame is the game instance for the current game
@@ -267,6 +268,7 @@ func (gm *Game) MakeLibrary() {
 	gm.LibMakeGrass()
 	gm.LibMakeArenaWalls()
 	gm.LibMakeLava()
+	gm.LibMakeLavaContainer()
 }
 
 func (gm *Game) MakeMeshes() {
@@ -513,7 +515,7 @@ func (gm *Game) RenderEnemyShots() {
 				cts := gm.World.RayBodyIntersections(*ray)
 				killed := false
 				for _, d1 := range cts {
-					if d1.Body.Name() == "FirstPerson" {
+					if d1.Body.Name() == "FirstPerson" && !gm.IsDead {
 						gm.FireEventMu.Unlock()
 						gm.removeHealthPoints(d.Damage, d.Creator)
 						gi3d.SetLineStartEnd(rayObj, mat32.Vec3{500, 500, 500}, mat32.Vec3{500, 500, 500})
@@ -643,6 +645,7 @@ func (gm *Game) removeHealthPoints(dmg int, from string) {
 	healthBar.SetFullReRender()
 	if HEALTH <= 0 {
 		gm.SpawnCount += 1
+		gm.IsDead = true
 		pers := gm.World.ChildByName("FirstPerson", 0).(*eve.Group)
 		camOff := gm.Scene.Camera.Pose.Pos.Sub(pers.Rel.Pos) // currrent offset of camera vs. person
 		pers.Rel.Pos = mat32.Vec3{1000, 1, 1000}
@@ -674,6 +677,8 @@ func (gm *Game) timerForResult(from string) {
 	resultText.SetFullReRender()
 	time.Sleep(1 * time.Second)
 	resultText.SetText("<b>You were killed by " + from + "</b>")
+	updt := resultRow.UpdateStart()
+	defer resultRow.UpdateEnd(updt)
 	resultButton := gi.AddNewButton(resultRow, "resultButton")
 	resultButton.Text = "<b>Respawn</b>"
 	resultButton.SetProp("horizontal-align", "center")
@@ -683,6 +688,7 @@ func (gm *Game) timerForResult(from string) {
 	rec.InitName(&rec, "rec")
 	resultButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
+			gm.IsDead = false
 			gm.clearAllBullets()
 			resultText.SetText("")
 			resultText.SetFullReRender()
@@ -706,6 +712,7 @@ func (gm *Game) timerForResult(from string) {
 	})
 	resultButton.SetFullReRender()
 	resultText.SetFullReRender()
+	resultRow.SetFullReRender()
 }
 
 func (gm *Game) updateCursorPosition() {
