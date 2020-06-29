@@ -35,6 +35,7 @@ var livesNum int
 var gameOpen = true
 var curBattleTerritory1, curBattleTerritory2 string
 var CURBATTLE string
+var curTeam1, curTeam2 string
 
 func data() {
 	var str string
@@ -290,6 +291,8 @@ func createBattleJoinLayouts() {
 					currentMap = TheArenaMap
 					curBattleTerritory1 = territory1
 					curBattleTerritory2 = territory2
+					curTeam1 = team1
+					curTeam2 = team2
 					initPlayTab()
 				}
 			})

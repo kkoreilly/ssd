@@ -43,6 +43,7 @@ var simulationTab *gi.Frame
 var simulationControlsTab *gi.Frame
 var map2dTab *gi.Frame
 var weaponsTab *gi.Frame
+var mfr2 *gi.Frame
 
 // var map3dTab *gi.Frame // to be added later
 var teamTab *gi.Frame
@@ -61,6 +62,7 @@ var simulateText *gi.Label
 var simMapSVG *svg.SVG
 var mapSVG *svg.SVG
 var comebacks = false
+var win2 *gi.Window
 
 func mainrun() {
 	data()        // Connect to data base
@@ -826,48 +828,46 @@ func initMainTabs() {
 }
 
 func initPlayTab() {
-	updt := tv.UpdateStart()
-	tv.SetFullReRender()
-
-	rec := ki.Node{}
-	rec.InitName(&rec, "rec")
-
-	if currentMapString == "" { // if no map selected to join
-		tv.UpdateEnd(updt)
-		return // then don't create the game
+	_, winExists := gi.AllWindows.FindName("singularity-showdown-game")
+	if winExists {
+		return
 	}
-	_, err := tv.TabByNameTry("<b>Game</b>") // check if the game tab already exists -- there will not be an error if it already exists
+	// Make game window
+	width := 1024 // pixel sizes of screen
+	height := 768 // pixel sizes of screen
 
-	if err == nil { // if the tab Game already exists
-		tv.SelectTabByName("<b>Game</b>")
-		tv.UpdateEnd(updt)
-		return // and don't create a new tab
-	}
+	win2 = gi.NewMainWindow("singularity-showdown-game", "Singularity Showdown Game", width, height)
 
-	playTab = tv.AddNewTab(gi.KiT_Frame, "<b>Game</b>").(*gi.Frame)
+	vp := win.WinViewport2D()
+	updt := vp.UpdateStart()
 
-	playTab.Lay = gi.LayoutVert
-	playTab.SetStretchMaxWidth()
-	playTab.SetStretchMaxHeight()
+	mfr2 = win2.SetMainFrame()
+	mfr2.SetStretchMaxWidth()
+	mfr2.SetStretchMaxHeight()
 
-	playTitleText := gi.AddNewLabel(playTab, "playTitleText", "Welcome to")
-	playTitleText.SetText("Welcome to " + currentMapString)
-	playTitleText.SetProp("text-align", "center")
-	playTitleText.SetProp("font-size", "40px")
+	trow := gi.AddNewFrame(mfr2, "trow", gi.LayoutVert)
+	trow.SetStretchMaxWidth()
+	trow.SetProp("background-color", "black")
+	gameTitleText := gi.AddNewLabel(trow, "gameTitleText", "")
+	gameTitleText.Text = fmt.Sprintf(`<b>Singularity <span style="color:red">Showdown</span>: Team %v <span style="color:red">VS</span> Team %v - %v </b>`, curTeam1, curTeam2, currentMapString)
+	gameTitleText.SetProp("font-size", "50px")
+	gameTitleText.SetProp("text-align", "center")
+	gameTitleText.SetProp("color", "white")
+	gameTitleText.SetProp("font-family", "georgia")
 
-	usernameKeyTitle := gi.AddNewLabel(playTab, "usernameKeyTitle", "<b>Battle first to 10 kills:</b>")
+	usernameKeyTitle := gi.AddNewLabel(mfr2, "usernameKeyTitle", "<b>Battle first to 10 kills:</b>")
 	usernameKeyTitle.SetProp("text-align", "center")
 	usernameKeyTitle.SetProp("font-size", "40px")
 
-	usernameKey := gi.AddNewFrame(playTab, "usernameKey", gi.LayoutVert)
+	usernameKey := gi.AddNewFrame(mfr2, "usernameKey", gi.LayoutVert)
 	usernameKey.SetStretchMaxWidth()
-	hrow := gi.AddNewFrame(playTab, "hrow", gi.LayoutHoriz)
+	hrow := gi.AddNewFrame(mfr2, "hrow", gi.LayoutHoriz)
 	hrow.SetStretchMaxWidth()
 	healthBar = gi.AddNewSlider(hrow, "healthBar")
 	healthBar.Dim = mat32.X
 	healthBar.Defaults()
 	healthBar.Max = 100
-	healthBar.SetMinPrefWidth(units.NewEm(150))
+	healthBar.SetMinPrefWidth(units.NewPct(90))
 	healthBar.SetMinPrefHeight(units.NewEm(2))
 	healthBar.SetValue(HEALTH)
 	healthBar.SetProp(":value", ki.Props{"background-color": "green"})
@@ -878,7 +878,7 @@ func initPlayTab() {
 	healthText.SetProp("font-size", "30px")
 	healthText.Redrawable = true
 
-	resultRow = gi.AddNewFrame(playTab, "resultRow", gi.LayoutVert)
+	resultRow = gi.AddNewFrame(mfr2, "resultRow", gi.LayoutVert)
 	resultRow.SetStretchMaxWidth()
 
 	resultText = gi.AddNewLabel(resultRow, "resultText", "<b>Your kills and deaths will show up here</b>      ")
@@ -905,6 +905,90 @@ func initPlayTab() {
 	// 	}
 	// })
 
-	tv.SelectTabByName("<b>Game</b>")
-	tv.UpdateEnd(updt)
+	vp.UpdateEndNoSig(updt)
+
+	win2.GoStartEventLoop()
+
+	// updt = tv.UpdateStart()
+	//
+	// tv.SetFullReRender()
+	//
+	// rec := ki.Node{}
+	// rec.InitName(&rec, "rec")
+	//
+	// if currentMapString == "" { // if no map selected to join
+	// 	tv.UpdateEnd(updt)
+	// 	return // then don't create the game
+	// }
+	// _, err := tv.TabByNameTry("<b>Game</b>") // check if the game tab already exists -- there will not be an error if it already exists
+	//
+	// if err == nil { // if the tab Game already exists
+	// 	tv.SelectTabByName("<b>Game</b>")
+	// 	tv.UpdateEnd(updt)
+	// 	return // and don't create a new tab
+	// }
+	//
+	// playTab = tv.AddNewTab(gi.KiT_Frame, "<b>Game</b>").(*gi.Frame)
+	//
+	// playTab.Lay = gi.LayoutVert
+	// playTab.SetStretchMaxWidth()
+	// playTab.SetStretchMaxHeight()
+	//
+	// playTitleText := gi.AddNewLabel(playTab, "playTitleText", "Welcome to")
+	// playTitleText.SetText("Welcome to " + currentMapString)
+	// playTitleText.SetProp("text-align", "center")
+	// playTitleText.SetProp("font-size", "40px")
+	//
+	// usernameKeyTitle := gi.AddNewLabel(playTab, "usernameKeyTitle", "<b>Battle first to 10 kills:</b>")
+	// usernameKeyTitle.SetProp("text-align", "center")
+	// usernameKeyTitle.SetProp("font-size", "40px")
+	//
+	// usernameKey := gi.AddNewFrame(playTab, "usernameKey", gi.LayoutVert)
+	// usernameKey.SetStretchMaxWidth()
+	// hrow := gi.AddNewFrame(playTab, "hrow", gi.LayoutHoriz)
+	// hrow.SetStretchMaxWidth()
+	// healthBar = gi.AddNewSlider(hrow, "healthBar")
+	// healthBar.Dim = mat32.X
+	// healthBar.Defaults()
+	// healthBar.Max = 100
+	// healthBar.SetMinPrefWidth(units.NewEm(150))
+	// healthBar.SetMinPrefHeight(units.NewEm(2))
+	// healthBar.SetValue(HEALTH)
+	// healthBar.SetProp(":value", ki.Props{"background-color": "green"})
+	// healthBar.SetInactive()
+	//
+	// healthText = gi.AddNewLabel(hrow, "healthText", "")
+	// healthText.Text = fmt.Sprintf("You have %v health", HEALTH)
+	// healthText.SetProp("font-size", "30px")
+	// healthText.Redrawable = true
+	//
+	// resultRow = gi.AddNewFrame(playTab, "resultRow", gi.LayoutVert)
+	// resultRow.SetStretchMaxWidth()
+	//
+	// resultText = gi.AddNewLabel(resultRow, "resultText", "<b>Your kills and deaths will show up here</b>      ")
+	// resultText.SetProp("font-size", "40px")
+	// resultText.SetProp("text-align", "center")
+	// resultText.Redrawable = true
+	// resultText.SetProp("width", "20em")
+	//
+	// // healthBar.SetInactive()
+	// // healthBar.Snap = true
+	// // healthBar.Tracking = true
+	// // healthBar.Icon = gi.IconName("circlebutton-on")
+	// // healthBar.Max = 100
+	// // healthBar.Value = HEALTH
+	//
+	// TheGame = &Game{} // Set up game
+	// TheGame.Config()  // Set up game
+	//
+	// // takeDamage1 := gi.AddNewButton(hrow, "takeDamage1")
+	// // takeDamage1.Text = "Take Damage from the Sniper Weapon"
+	// // takeDamage1.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	// // 	if sig == int64(gi.ButtonClicked) {
+	// // 		gm.removeHealthPoints("Sniper")
+	// // 	}
+	// // })
+	//
+	// tv.SelectTabByName("<b>Game</b>")
+	// tv.UpdateEnd(updt)
 }

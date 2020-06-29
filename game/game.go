@@ -333,7 +333,7 @@ func (gm *Game) MakeView() {
 
 func (gm *Game) Config() {
 	gm.SpawnPositions = []mat32.Vec3{mat32.Vec3{-50, 0, -50}, mat32.Vec3{-50, 0, 50}, mat32.Vec3{50, 0, 50}, mat32.Vec3{50, 0, -50}}
-	gamerow := gi.AddNewLayout(playTab, "gamerow", gi.LayoutVert)
+	gamerow := gi.AddNewLayout(mfr2, "gamerow", gi.LayoutVert)
 	gamerow.SetStretchMaxWidth()
 	gamerow.SetStretchMaxHeight()
 
@@ -385,7 +385,7 @@ func (gm *Game) Config() {
 
 	gi.AddNewSpace(gamerow, "space1")
 
-	brow := gi.AddNewLayout(playTab, "brow", gi.LayoutHoriz)
+	brow := gi.AddNewLayout(mfr2, "brow", gi.LayoutHoriz)
 	brow.SetProp("spacing", units.NewEx(2))
 	brow.SetProp("horizontal-align", gi.AlignLeft)
 	brow.SetStretchMaxWidth()
@@ -760,7 +760,7 @@ func (gm *Game) UpdatePeopleWorldPos() {
 	// Get all of the groups
 	pGp := gm.World.ChildByName("PeopleGroup", 0).(*eve.Group)
 	pgt := gm.Scene.Scene.ChildByName("PeopleTextGroup", 0)
-	uk := playTab.ChildByName("usernameKey", 0)
+	uk := mfr2.ChildByName("usernameKey", 0)
 	for i := 0; true; i++ {
 		_, ok := <-gm.PosUpdtChan // we wait here to receive channel message sent when positions have been updated
 		if !ok {                  // this means channel was closed, we need to bail, game over!
