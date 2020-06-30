@@ -7,6 +7,7 @@ package main
 import (
 	"fmt"
 	// "time"
+	"encoding/json"
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/giv"
@@ -14,6 +15,7 @@ import (
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/mat32"
+	"io/ioutil"
 )
 
 func main() {
@@ -43,6 +45,7 @@ var simulationTab *gi.Frame
 var simulationControlsTab *gi.Frame
 var map2dTab *gi.Frame
 var weaponsTab *gi.Frame
+var settingsTab *gi.Frame
 var mfr2 *gi.Frame
 
 // var map3dTab *gi.Frame // to be added later
@@ -63,6 +66,11 @@ var simMapSVG *svg.SVG
 var mapSVG *svg.SVG
 var comebacks = false
 var win2 *gi.Window
+
+type UserPass struct {
+	User string
+	Pass string
+}
 
 func mainrun() {
 	data()        // Connect to data base
@@ -202,6 +210,24 @@ func mainrun() {
 
 	tv.SelectTabIndex(0)
 	tv.ChildByName("tabs", 0).SetProp("background-color", "darkgrey")
+
+	b, err := ioutil.ReadFile("password.json")
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		var UserPassRemember *UserPass
+		err = json.Unmarshal(b, &UserPassRemember)
+		if err != nil {
+			fmt.Println(err)
+		} else {
+
+			logIn(UserPassRemember.User, UserPassRemember.Pass)
+			vp.UpdateEndNoSig(updt)
+
+			win.StartEventLoop()
+		}
+	}
+
 	//
 	// 	// main menu
 	// 	appnm := oswin.TheApp.Name()
@@ -820,6 +846,28 @@ func initMainTabs() {
 	// simMapSVG.SetProp("height", units.NewPx(float32(height-100)))
 	simMapSVG.SetStretchMaxWidth()
 	simMapSVG.SetStretchMaxHeight()
+
+	settingsTab = tv.AddNewTab(gi.KiT_Frame, "<b>Settings</b>").(*gi.Frame)
+
+	settingsTab.Lay = gi.LayoutVert
+	settingsTab.SetStretchMaxWidth()
+	settingsTab.SetStretchMaxHeight()
+	settingsTab.SetProp("background-color", "lightblue")
+
+	savePass := gi.AddNewButton(settingsTab, "savePass")
+	savePass.Text = "Remember Password"
+	savePass.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(gi.ButtonClicked) {
+			b, err := json.MarshalIndent(&UserPass{USER, PASSWORD}, "", "  ")
+			if err != nil {
+				fmt.Println(err)
+			}
+			err = ioutil.WriteFile("password.json", b, 0644)
+			if err != nil {
+				fmt.Println(err)
+			}
+		}
+	})
 
 	FirstWorld.RenderSVGs(simMapSVG)
 
