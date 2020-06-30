@@ -397,17 +397,17 @@ func (gm *Game) Config() {
 			giv.GoGiEditorDialog(gm.World)
 		}
 	})
-	cgbut := gi.AddNewButton(brow, "close-game")
-	cgbut.SetText("Close Game")
-	cgbut.ButtonSig.Connect(gm.World.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(gi.ButtonClicked) {
-			gm.GameOn = false
-			go removePlayer()
-			tabIndex, _ := tv.TabIndexByName("<b>Game</b>")
-			tv.DeleteTabIndex(tabIndex, true)
-			tv.SelectTabIndex(0)
-		}
-	})
+	// cgbut := gi.AddNewButton(brow, "close-game")
+	// cgbut.SetText("Close Game")
+	// cgbut.ButtonSig.Connect(gm.World.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	// 	if sig == int64(gi.ButtonClicked) {
+	// 		gm.GameOn = false
+	// 		go removePlayer()
+	// 		tabIndex, _ := tv.TabIndexByName("<b>Game</b>")
+	// 		tv.DeleteTabIndex(tabIndex, true)
+	// 		tv.SelectTabIndex(0)
+	// 	}
+	// })
 
 	rec := ki.Node{}
 	rec.InitName(&rec, "rec")
@@ -461,7 +461,7 @@ func (gm *Game) Config() {
 	// // market1.Pose.Scale.Set(5, 2.5, 5)
 	// // // market1.Mat.Color.SetString("red", nil)
 	// // market1.Mat.SetTexture(&sc.Scene, tbtx.Name())
-	gm.clearAllBullets()
+	// gm.clearAllBullets()
 	ogp := eve.AddNewGroup(gm.World, "Grass")
 	gm.PhysMakeGrass(ogp, "Grass")
 	// floorp := gi3d.AddNewPlane(&sc.Scene, "floor-plane", 200, 200)
@@ -604,7 +604,7 @@ func (gm *Game) fireWeapon() { // standard event for what happens when you fire
 	// done with what to fire
 	gm.AbleToFire = false
 	writeFireEventToServer(cursor.Pose.Pos, rayPos.Pos, generateDamageAmount(WEAPON), CURBATTLE)
-	addFireEventToDB(ThisUserInfo.Username, generateDamageAmount(WEAPON), cursor.Pose.Pos, rayPos.Pos)
+	// addFireEventToDB(ThisUserInfo.Username, generateDamageAmount(WEAPON), cursor.Pose.Pos, rayPos.Pos)
 	numOfSeconds := TheWeapons[WEAPON].FireRate
 	time.Sleep(time.Duration(1/numOfSeconds) * time.Second)
 	gm.AbleToFire = true
@@ -689,7 +689,7 @@ func (gm *Game) timerForResult(from string) {
 	resultButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
 			gm.IsDead = false
-			gm.clearAllBullets()
+			// gm.clearAllBullets()
 			resultText.SetText("")
 			resultText.SetFullReRender()
 			resultButton.Delete(true)
