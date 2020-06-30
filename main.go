@@ -24,6 +24,17 @@ func main() {
 	})
 }
 
+type UserInfo struct {
+	Username string
+	Password string
+	Team     string
+	Gold     int
+}
+
+// NEW structs/maps with db info
+var ThisUserInfo *UserInfo           // Local user's info
+var AllUserInfo map[string]*UserInfo // Every users's info
+
 var signUpResult *gi.Label
 var logInResult *gi.Label
 var inspectText *gi.Label
@@ -73,9 +84,10 @@ type UserPass struct {
 }
 
 func mainrun() {
-	data()        // Connect to data base
-	width := 1024 // pixel sizes of screen
-	height := 768 // pixel sizes of screen
+	InitDatabase() // Connect to data base
+	InitDataMaps() // Get all of the info from the database, then put in local maps for eaiser access
+	width := 1024  // pixel sizes of screen
+	height := 768  // pixel sizes of screen
 
 	win = gi.NewMainWindow("singularity-showdown-main", "Singularity Showdown Home Screen", width, height)
 
@@ -136,8 +148,8 @@ func mainrun() {
 	byPassButton.Text = "<b>Log in with tester account</b>"
 	byPassButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
-			USER = "tester"
-			PASSWORD = "1234"
+			ThisUserInfo.Username = "tester"
+			ThisUserInfo.Password = "1234"
 
 			tv.DeleteTabIndex(0, true)
 			tv.DeleteTabIndex(0, true)
@@ -532,7 +544,7 @@ func initMainTabs() {
 	readTeam()
 
 	//if TEAM == "" { // when uncommented -- you can not switch teams. When commented, you can switch teams
-	if TEAM == "" {
+	if ThisUserInfo.Team == "" {
 		teamMainText.SetText(teamMainText.Text + "\n\n<b>Since you have no team right now, you must join a team. Click one of the buttons below to join a team</b>.")
 	} else {
 		teamMainText.SetText(teamMainText.Text + "\n\n<b>Click one of the buttons below to switch your team<b>.")
@@ -858,7 +870,7 @@ func initMainTabs() {
 	savePass.Text = "Remember Password"
 	savePass.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
-			b, err := json.MarshalIndent(&UserPass{USER, PASSWORD}, "", "  ")
+			b, err := json.MarshalIndent(&UserPass{ThisUserInfo.Username, ThisUserInfo.Password}, "", "  ")
 			if err != nil {
 				fmt.Println(err)
 			}

@@ -506,7 +506,7 @@ func (gm *Game) RenderEnemyShots() {
 		// fmt.Printf("After fire event mu \n")
 		// fmt.Printf("Lock time: %v \n", time.Since(startTime).Milliseconds())
 		for k, d := range gm.FireEvents {
-			if d.Creator != USER {
+			if d.Creator != ThisUserInfo.Username {
 				bi := k % 30
 				rayObj := RayGroup.ChildByName(fmt.Sprintf("bullet_arrow_enemy%v", bi), 0).(*gi3d.Solid)
 				ray := mat32.NewRay(d.Origin, d.Dir)
@@ -604,7 +604,7 @@ func (gm *Game) fireWeapon() { // standard event for what happens when you fire
 	// done with what to fire
 	gm.AbleToFire = false
 	writeFireEventToServer(cursor.Pose.Pos, rayPos.Pos, generateDamageAmount(WEAPON), CURBATTLE)
-	addFireEventToDB(USER, generateDamageAmount(WEAPON), cursor.Pose.Pos, rayPos.Pos)
+	addFireEventToDB(ThisUserInfo.Username, generateDamageAmount(WEAPON), cursor.Pose.Pos, rayPos.Pos)
 	numOfSeconds := TheWeapons[WEAPON].FireRate
 	time.Sleep(time.Duration(1/numOfSeconds) * time.Second)
 	gm.AbleToFire = true
@@ -806,7 +806,7 @@ func (gm *Game) UpdatePeopleWorldPos() {
 		updt2 := uk.UpdateStart()
 		needToSync := false
 		for i, k := range keys {
-			if k == USER {
+			if k == ThisUserInfo.Username {
 				continue
 			}
 			ppos := gm.OtherPos[k]
@@ -869,22 +869,22 @@ func (gm *Game) UpdatePeopleWorldPos() {
 			text.Pose.Quat.SetFromUnitVectors(mat32.Vec3{1, 0, 0}, dn)
 			text.Pose.RotateOnAxis(0, 1, 0, -90)
 		}
-		_, err := uk.ChildByNameTry("ukt_"+USER, 0)
+		_, err := uk.ChildByNameTry("ukt_"+ThisUserInfo.Username, 0)
 		if err != nil {
-			ukt := gi.AddNewLabel(uk, "ukt_"+USER, "")
-			ukt.SetText(fmt.Sprintf("<b>%v:</b>         %v kills              ", USER, POINTS))
+			ukt := gi.AddNewLabel(uk, "ukt_"+ThisUserInfo.Username, "")
+			ukt.SetText(fmt.Sprintf("<b>%v:</b>         %v kills              ", ThisUserInfo.Username, POINTS))
 			ukt.SetProp("font-size", "30px")
 			ukt.Redrawable = true
 			ukt.SetProp("width", "20em")
 			ukt.SetFullReRender()
 		} else {
-			ukt := uk.ChildByName("ukt_"+USER, 0).(*gi.Label)
-			ukt.SetText(fmt.Sprintf("<b>%v:</b>         %v kills            ", USER, POINTS))
+			ukt := uk.ChildByName("ukt_"+ThisUserInfo.Username, 0).(*gi.Label)
+			ukt.SetText(fmt.Sprintf("<b>%v:</b>         %v kills            ", ThisUserInfo.Username, POINTS))
 			ukt.SetProp("width", "20em")
 		}
 		if POINTS >= 100 {
 			gm.PosMu.Unlock()
-			gm.setGameOver(USER)
+			gm.setGameOver(ThisUserInfo.Username)
 			gm.PosMu.Lock()
 		}
 		if needToSync {

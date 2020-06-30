@@ -9,35 +9,25 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"net/http"
-
 	"github.com/goki/gi/gi"
 	"github.com/goki/ki/ki"
 	"github.com/goki/mat32"
 	_ "github.com/lib/pq"
-
-	// "strconv"
+	"net/http"
 	"strings"
 	"time"
-	// "io/ioutil"
 )
 
 var db *sql.DB
-var USER string     // Global variable for your username
-var PASSWORD string // Global variable for your password
-var GOLD int        // Global variable for the amount of gold you have in game
-var LIVES int       // Global variable for the amount of lives you have in game
-var TEAM string     // Global variable for what team you're on
-var POINTS int      // Global variable for the currrent amount of points you have in a battle
 var WEAPON = "Basic"
 var goldNum int
-var livesNum int
 var gameOpen = true
 var curBattleTerritory1, curBattleTerritory2 string
 var CURBATTLE string
 var curTeam1, curTeam2 string
+var POINTS int
 
-func data() {
+func InitDatabase() {
 	var str string
 	if URL_GLOBAL != "" {
 		str = URL_GLOBAL
@@ -54,9 +44,22 @@ func data() {
 	if err != nil {
 		panic(err)
 	}
+}
 
-	// fmt.Printf("Connected!  %T \n", db)
-
+func InitDataMaps() {
+	AllUserInfo = make(map[string]*UserInfo)
+	ThisUserInfo = &UserInfo{"", "", "", 1}
+	userRows, err := db.Query("SELECT * FROM users")
+	if err != nil {
+		panic(err)
+	}
+	for userRows.Next() {
+		var UserInfoTemp = &UserInfo{"", "", "", 1}
+		var UsernameTemp string
+		userRows.Scan(&UsernameTemp, &UserInfoTemp.Password, &UserInfoTemp.Team, &UserInfoTemp.Gold)
+		UserInfoTemp.Username = UsernameTemp
+		AllUserInfo[UsernameTemp] = UserInfoTemp
+	}
 }
 
 func serverGetPlayerPos() {
@@ -75,7 +78,7 @@ func serverGetPlayerPos() {
 
 func writePlayerPosToServer(pos mat32.Vec3, battleName string) {
 	// fmt.Printf("Battle Name: %v \n", battleName)
-	info := &CurPosition{USER, battleName, POINTS, pos, TheGame.KilledBy, TheGame.SpawnCount}
+	info := &CurPosition{ThisUserInfo.Username, battleName, POINTS, pos, TheGame.KilledBy, TheGame.SpawnCount}
 	// fmt.Printf("Info: %v \n", info)
 	b, _ := json.Marshal(info)
 	// b := []byte(fmt.Sprintf("username: %v, battleName: %v, posX: %v, posY: %v, posZ: %v, points: %v", USER, battleName, pos.X, pos.Y, pos.Z, POINTS))
@@ -88,7 +91,7 @@ func writePlayerPosToServer(pos mat32.Vec3, battleName string) {
 }
 func writeFireEventToServer(origin mat32.Vec3, dir mat32.Vec3, dmg int, battleName string) {
 	// fmt.Printf("Battle Name: %v \n", battleName)
-	info := &FireEventInfo{USER, origin, dir, dmg, battleName, time.Now()}
+	info := &FireEventInfo{ThisUserInfo.Username, origin, dir, dmg, battleName, time.Now()}
 	b, _ := json.Marshal(info)
 	// b := []byte(fmt.Sprintf("username: %v, battleName: %v, posX: %v, posY: %v, posZ: %v, points: %v", USER, battleName, pos.X, pos.Y, pos.Z, POINTS))
 	buff := bytes.NewBuffer(b)
@@ -124,14 +127,14 @@ func writeFireEventToServer(origin mat32.Vec3, dir mat32.Vec3, dmg int, battleNa
 // 	defer resp.Body.Close()
 // }
 func readTeam() {
-	findUserStatement := fmt.Sprintf("SELECT * FROM users WHERE username='%v'", USER)
+	findUserStatement := fmt.Sprintf("SELECT * FROM users WHERE username='%v'", ThisUserInfo.Username)
 
 	findUserResult, err := db.Query(findUserStatement)
 	if err != nil {
 		panic(err)
 	}
-	findUserResult.Scan(&USER, &PASSWORD, &goldNum, &livesNum, &TEAM)
-	teamMainText.SetText(fmt.Sprintf("<b>Your team is<b>: <i><u>%v</u></i>", TEAM))
+	findUserResult.Scan(&ThisUserInfo.Username, &ThisUserInfo.Password, &goldNum, &ThisUserInfo.Team)
+	teamMainText.SetText(fmt.Sprintf("<b>Your team is<b>: <i><u>%v</u></i>", ThisUserInfo.Team))
 
 }
 func addTeamUpdateButtons() {
@@ -167,7 +170,7 @@ func (gm *Game) GetFireEvents() {
 			return
 		}
 
-		resp, err := http.Get("http://ssdserver.herokuapp.com/fireEventsGet/?battleName=" + CURBATTLE + "&username=" + USER)
+		resp, err := http.Get("http://ssdserver.herokuapp.com/fireEventsGet/?battleName=" + CURBATTLE + "&username=" + ThisUserInfo.Username)
 		if err != nil {
 			panic(err)
 		}
@@ -267,7 +270,7 @@ func createBattleJoinLayouts() {
 		rows.Scan(&territory1, &territory2, &team1, &team2, &team1points, &team2points)
 		// fmt.Printf("Team 1 points: %v   Team 2 points: %v \n", team1points, team2points)
 		// fmt.Printf("TEAM Global var: %v \n", TEAM)
-		if (FirstWorldLive[territory1].Owner != FirstWorldLive[territory2].Owner) && (team1 == TEAM || team2 == TEAM) {
+		if (FirstWorldLive[territory1].Owner != FirstWorldLive[territory2].Owner) && (team1 == ThisUserInfo.Team || team2 == ThisUserInfo.Team) {
 			joinLayout := gi.AddNewFrame(joinLayoutG, "joinLayout", gi.LayoutVert)
 			joinLayout.SetStretchMaxWidth()
 			scoreText := gi.AddNewLabel(joinLayout, "scoreText", fmt.Sprintf("<b>%v             -                %v</b>", team1points, team2points))
@@ -311,7 +314,7 @@ func createBattleJoinLayouts() {
 		var territory1, territory2, team1, team2 string
 		var team1points, team2points int
 		rows.Scan(&territory1, &territory2, &team1, &team2, &team1points, &team2points)
-		if FirstWorldLive[territory1].Owner != FirstWorldLive[territory2].Owner && (team1 != TEAM && team2 != TEAM) {
+		if FirstWorldLive[territory1].Owner != FirstWorldLive[territory2].Owner && (team1 != ThisUserInfo.Team && team2 != ThisUserInfo.Team) {
 			joinLayout := gi.AddNewFrame(joinLayoutG1, "joinLayout1", gi.LayoutVert)
 			joinLayout.SetStretchMaxWidth()
 			scoreText := gi.AddNewLabel(joinLayout, "scoreText", fmt.Sprintf("<b>%v             -                %v</b>", team1points, team2points))
@@ -347,9 +350,9 @@ func (gm *Game) battleOver(winner string) {
 	gameResultTab.SetStretchMaxHeight()
 
 	gameResultText := gi.AddNewLabel(gameResultTab, "gameResultText", "")
-	if winner == USER {
-		gameResultText.SetText(fmt.Sprintf("<b>Congratulations on winning the battle with %v points. \nYour team (%v) wins one point in the battle %v vs. %v. \nYou win 10 gold.</b>", POINTS, TEAM, curBattleTerritory1, curBattleTerritory2))
-		updateResource("gold", GOLD+10)
+	if winner == ThisUserInfo.Username {
+		gameResultText.SetText(fmt.Sprintf("<b>Congratulations on winning the battle with %v points. \nYour team (%v) wins one point in the battle %v vs. %v. \nYou win 10 gold.</b>", POINTS, ThisUserInfo.Team, curBattleTerritory1, curBattleTerritory2))
+		updateResource("gold", ThisUserInfo.Gold+10)
 		readResources()
 	} else {
 		oppTeam := getEnemyTeamFromName(winner)
@@ -602,7 +605,7 @@ func addKeyItems() {
 	}
 }
 func joinTeam(name string) {
-	joinTeamStatement := fmt.Sprintf("UPDATE users SET %v = '%v' WHERE username='%v'", "team", name, USER)
+	joinTeamStatement := fmt.Sprintf("UPDATE users SET %v = '%v' WHERE username='%v'", "team", name, ThisUserInfo.Username)
 	// fmt.Printf("%v \n", joinTeamStatement)
 
 	_, err := db.Exec(joinTeamStatement)
@@ -612,7 +615,7 @@ func joinTeam(name string) {
 		fmt.Printf("Error")
 		panic(err)
 	}
-	TEAM = name
+	ThisUserInfo.Team = name
 	readTeam()
 	teamMainText.SetText(teamMainText.Text + "\n\n<b>Click one of the buttons below to switch your team<b>.")
 	joinLayout := homeTab.ChildByName("joinLayoutG", 0)
@@ -683,7 +686,7 @@ func (gm *Game) GetPosFromServer() { // GetPosFromServer loops through the playe
 			if gm.OtherPos[d.Username] == nil {
 				continue
 			}
-			if (d.KilledBy == USER) && ((d.SpawnCount - 1) == gm.OtherPos[d.Username].SpawnCount) {
+			if (d.KilledBy == ThisUserInfo.Username) && ((d.SpawnCount - 1) == gm.OtherPos[d.Username].SpawnCount) {
 				POINTS += 1
 				resultText.SetText("<b>You killed " + d.Username + "! You get one point.</b>")
 				resultText.SetFullReRender()
@@ -712,7 +715,7 @@ func (gm *Game) GetPosFromServer() { // GetPosFromServer loops through the playe
 }
 
 func readResources() {
-	findUserStatement := fmt.Sprintf("SELECT * FROM users WHERE username='%v'", USER)
+	findUserStatement := fmt.Sprintf("SELECT * FROM users WHERE username='%v'", ThisUserInfo.Username)
 	findUserResult, err := db.Query(findUserStatement)
 
 	if err != nil {
@@ -720,17 +723,16 @@ func readResources() {
 	}
 
 	for findUserResult.Next() {
-		findUserResult.Scan(&USER, &PASSWORD, &goldNum, &livesNum, &TEAM)
+		findUserResult.Scan(&ThisUserInfo.Username, &ThisUserInfo.Password, &goldNum, &ThisUserInfo.Team)
 		// fmt.Printf("Gold: %v \n", goldNum)
 		// fmt.Printf("Lives: %v \n", livesNum)
 		goldResourcesText.SetText(fmt.Sprintf("You have %v gold", goldNum))
-		GOLD = goldNum
+		ThisUserInfo.Gold = goldNum
 		// livesResourcesText.SetText(fmt.Sprintf("%v \n \n You have %v lives", livesResourcesText.Text, livesNum))
-		LIVES = livesNum
 	}
 }
 func updateResource(name string, value int) {
-	updateResourceStatement := fmt.Sprintf("UPDATE users SET %v = '%v' WHERE username='%v'", name, value, USER)
+	updateResourceStatement := fmt.Sprintf("UPDATE users SET %v = '%v' WHERE username='%v'", name, value, ThisUserInfo.Username)
 	_, err := db.Exec(updateResourceStatement)
 	if err != nil {
 		panic(err)
@@ -740,7 +742,7 @@ func updateResource(name string, value int) {
 
 }
 func removePlayer() {
-	statement := fmt.Sprintf("DELETE FROM players WHERE username='%v'", USER)
+	statement := fmt.Sprintf("DELETE FROM players WHERE username='%v'", ThisUserInfo.Username)
 	_, err := db.Exec(statement)
 	if err != nil {
 		panic(err)
@@ -908,7 +910,7 @@ func readMessages() {
 	for rows.Next() {
 		var messageType, message, username string
 		rows.Scan(&messageType, &message, &username)
-		if username == USER {
+		if username == ThisUserInfo.Username {
 			if messageType == "important" {
 				var name string
 				for i := 0; 1 < 2; i++ {
@@ -1043,13 +1045,18 @@ func logIn(user string, password string) {
 	}
 	for results.Next() {
 		in = true
+		var team string
+		var gold int
+		results.Scan(user, password, team, gold)
+		ThisUserInfo.Username = user
+		ThisUserInfo.Password = password
+		ThisUserInfo.Gold = gold
+		ThisUserInfo.Team = team
 	}
 	if in == true {
 		// fmt.Printf("Found pair, logging in \n")
 		updt := tv.UpdateStart()
 
-		USER = user
-		PASSWORD = password
 		tv.Viewport.SetFullReRender()
 		tv.DeleteTabIndex(0, true)
 		tv.DeleteTabIndex(0, true)
