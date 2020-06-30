@@ -48,6 +48,7 @@ func InitDatabase() {
 
 func InitDataMaps() {
 	AllUserInfo = make(map[string]*UserInfo)
+	AllBorders = make(map[string]*BorderInfo)
 	ThisUserInfo = &UserInfo{"", "", "", 1}
 	userRows, err := db.Query("SELECT * FROM users")
 	if err != nil {
@@ -59,6 +60,16 @@ func InitDataMaps() {
 		userRows.Scan(&UsernameTemp, &UserInfoTemp.Password, &UserInfoTemp.Team, &UserInfoTemp.Gold)
 		UserInfoTemp.Username = UsernameTemp
 		AllUserInfo[UsernameTemp] = UserInfoTemp
+	}
+
+	borderRows, err := db.Query("SELECT * FROM borders")
+	if err != nil {
+		panic(err)
+	}
+	for borderRows.Next() {
+		BorderInfoTemp := &BorderInfo{"", "", "", "", 1, 1}
+		borderRows.Scan(&BorderInfoTemp.Territory1, &BorderInfoTemp.Territory2, &BorderInfoTemp.Team1, &BorderInfoTemp.Team2, &BorderInfoTemp.Team1Points, &BorderInfoTemp.Team2Points)
+		AllBorders[BorderInfoTemp.Territory1+BorderInfoTemp.Territory2] = BorderInfoTemp
 	}
 }
 
@@ -242,16 +253,16 @@ func createBattleJoinLayouts() {
 		var territory1, territory2, team1, team2 string
 		var team1points, team2points int
 		rows.Scan(&territory1, &territory2, &team1, &team2, &team1points, &team2points)
-		if FirstWorldLive[territory1].Owner != team1 {
-			fixStatement := fmt.Sprintf("UPDATE borders SET team1 = '%v' WHERE territory1 = '%v' AND territory2 = '%v'", FirstWorldLive[territory1].Owner, territory1, territory2)
+		if TheWorldMap[territory1].Owner != team1 {
+			fixStatement := fmt.Sprintf("UPDATE borders SET team1 = '%v' WHERE territory1 = '%v' AND territory2 = '%v'", TheWorldMap[territory1].Owner, territory1, territory2)
 			_, err := db.Exec(fixStatement)
 			if err != nil {
 				panic(err)
 			}
 		}
 
-		if FirstWorldLive[territory2].Owner != team2 {
-			fixStatement := fmt.Sprintf("UPDATE borders SET team2 = '%v' WHERE territory1 = '%v' AND territory2 = '%v'", FirstWorldLive[territory2].Owner, territory1, territory2)
+		if TheWorldMap[territory2].Owner != team2 {
+			fixStatement := fmt.Sprintf("UPDATE borders SET team2 = '%v' WHERE territory1 = '%v' AND territory2 = '%v'", TheWorldMap[territory2].Owner, territory1, territory2)
 			_, err := db.Exec(fixStatement)
 			if err != nil {
 				panic(err)
@@ -270,7 +281,7 @@ func createBattleJoinLayouts() {
 		rows.Scan(&territory1, &territory2, &team1, &team2, &team1points, &team2points)
 		// fmt.Printf("Team 1 points: %v   Team 2 points: %v \n", team1points, team2points)
 		// fmt.Printf("TEAM Global var: %v \n", TEAM)
-		if (FirstWorldLive[territory1].Owner != FirstWorldLive[territory2].Owner) && (team1 == ThisUserInfo.Team || team2 == ThisUserInfo.Team) {
+		if (TheWorldMap[territory1].Owner != TheWorldMap[territory2].Owner) && (team1 == ThisUserInfo.Team || team2 == ThisUserInfo.Team) {
 			joinLayout := gi.AddNewFrame(joinLayoutG, "joinLayout", gi.LayoutVert)
 			joinLayout.SetStretchMaxWidth()
 			scoreText := gi.AddNewLabel(joinLayout, "scoreText", fmt.Sprintf("<b>%v             -                %v</b>", team1points, team2points))
@@ -314,7 +325,7 @@ func createBattleJoinLayouts() {
 		var territory1, territory2, team1, team2 string
 		var team1points, team2points int
 		rows.Scan(&territory1, &territory2, &team1, &team2, &team1points, &team2points)
-		if FirstWorldLive[territory1].Owner != FirstWorldLive[territory2].Owner && (team1 != ThisUserInfo.Team && team2 != ThisUserInfo.Team) {
+		if TheWorldMap[territory1].Owner != TheWorldMap[territory2].Owner && (team1 != ThisUserInfo.Team && team2 != ThisUserInfo.Team) {
 			joinLayout := gi.AddNewFrame(joinLayoutG1, "joinLayout1", gi.LayoutVert)
 			joinLayout.SetStretchMaxWidth()
 			scoreText := gi.AddNewLabel(joinLayout, "scoreText", fmt.Sprintf("<b>%v             -                %v</b>", team1points, team2points))
@@ -466,7 +477,7 @@ func updateBorderPoints(team string, changeNum int, territory1, territory2 strin
 			panic(err)
 		}
 
-		FirstWorldLive.RenderSVGs(mapSVG)
+		TheWorldMap.RenderSVGs(mapSVG)
 	}
 }
 func getEnemyTeamFromName(username string) (team string) {
@@ -761,7 +772,7 @@ func readWorld() {
 	for readResult.Next() {
 		readResult.Scan(&name, &owner, &color)
 		// fmt.Printf("In loop. Name = %v \n", name)
-		tr, has := FirstWorldLive[name]
+		tr, has := TheWorldMap[name]
 		if !has {
 			// fmt.Printf("Leaving loop")
 			continue
@@ -772,7 +783,7 @@ func readWorld() {
 	var previousMapObjOwner string
 	mapDone := true
 	var i = 0
-	for _, d := range FirstWorldLive {
+	for _, d := range TheWorldMap {
 		// fmt.Printf("Map Done During: %v \n", mapDone)
 		if d.Owner == previousMapObjOwner || i == 0 || d.Owner == "none" || previousMapObjOwner == "none" {
 			previousMapObjOwner = d.Owner

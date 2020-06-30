@@ -62,7 +62,7 @@ var FirstWorld = World{
 	"Antarctica":     {"Antarctica", "none", "white", ""},
 }
 
-var FirstWorldLive = World{
+var TheWorldMap = World{
 	"Alaska":         {"Alaska", "human2", "green", ""},
 	"Canada":         {"Canada", "human2", "green", ""},
 	"USA":            {"USA", "human1", "blue", ""},

@@ -31,9 +31,19 @@ type UserInfo struct {
 	Gold     int
 }
 
+type BorderInfo struct {
+	Territory1  string
+	Territory2  string
+	Team1       string
+	Team2       string
+	Team1Points int
+	Team2Points int
+}
+
 // NEW structs/maps with db info
-var ThisUserInfo *UserInfo           // Local user's info
-var AllUserInfo map[string]*UserInfo // Every users's info
+var ThisUserInfo *UserInfo            // Local user's info
+var AllUserInfo map[string]*UserInfo  // Every users's info
+var AllBorders map[string]*BorderInfo // All borders
 
 var signUpResult *gi.Label
 var logInResult *gi.Label
@@ -504,7 +514,7 @@ func initMainTabs() {
 	mapSVG.SetStretchMaxWidth()
 	mapSVG.SetStretchMaxHeight()
 
-	FirstWorldLive.RenderSVGs(mapSVG)
+	TheWorldMap.RenderSVGs(mapSVG)
 
 	keyMainTextM := gi.AddNewLabel(keyRowM, "keyMainTextM", "<b>Team Key:</b>")
 	keyMainTextM.SetProp("font-size", "30px")
