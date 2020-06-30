@@ -218,18 +218,6 @@ func mainrun() {
 	logInResult.Text = "                                                                                                                                                                                  "
 	logInResult.Redrawable = true
 
-	// if SUPERMODE == true {
-	//
-	// 	inspectTab := tv.AddNewTab(gi.KiT_Frame, "Inspect Tab").(*gi.Frame)
-	//
-	// 	inspectTab.Lay = gi.LayoutVert
-	//
-	// 	inspectText = inspectTab.AddNewChild(gi.KiT_Label, "inspectText").(*gi.Label)
-	// 	inspectText.Redrawable = true
-	// 	inspectText.SetStretchMaxWidth()
-	// 	initInspect()
-	// }
-
 	tv.SelectTabIndex(0)
 	tv.ChildByName("tabs", 0).SetProp("background-color", "darkgrey")
 
@@ -249,26 +237,6 @@ func mainrun() {
 			win.StartEventLoop()
 		}
 	}
-
-	//
-	// 	// main menu
-	// 	appnm := oswin.TheApp.Name()
-	// 	mmen := win.MainMenu
-	// 	mmen.ConfigMenus([]string{appnm, "Edit", "Window"})
-	//
-	// 	amen := win.MainMenu.ChildByName(appnm, 0).(*gi.Action)
-	// 	amen.Menu = make(gi.Menu, 0, 10)
-	// 	amen.Menu.AddAppMenu(win)
-	//
-	// 	emen := win.MainMenu.ChildByName("Edit", 1).(*gi.Action)
-	// 	emen.Menu = make(gi.Menu, 0, 10)
-	// 	emen.Menu.AddCopyCutPaste(win)
-	//
-	// 	win.OSWin.SetCloseCleanFunc(func(w oswin.Window) {
-	// 		go oswin.TheApp.Quit() // once main window is closed, quit
-	// 	})
-	//
-	// win.MainMenuUpdated()
 
 	vp.UpdateEndNoSig(updt)
 
@@ -296,51 +264,6 @@ func initMainTabs() {
 	mainTitle.SetProp("text-align", "center")
 	mainTitle.Text = "Welcome to Singularity Showdown, a strategic 3D Battle Game"
 
-	// playButton := homeTab.AddNewChild(gi.KiT_Button, "playButton").(*gi.Button)
-	// playButton.Text = "<b>Play (Tester Mode)</b>"
-	//
-	// playButton.SetProp("horizontal-align", gi.AlignCenter)
-	//
-	// playButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-	// 	if sig == int64(gi.ButtonClicked) {
-	// 		initPlayTab()
-	// 	}
-	// })
-	// trow := gi.AddNewLayout(homeTab, "trainingRow", gi.LayoutHoriz)
-	// trow.SetProp("spacing", units.NewEx(2))
-	// trow.SetProp("horizontal-align", gi.AlignLeft)
-	// trow.SetStretchMaxWidth()
-	//
-	// trainingText := gi.AddNewLabel(trow, "trainingRowText", "Practice and level up in Training Mode:")
-	// trainingText.SetProp("font-size", "30px")
-	//
-	// trainingDropdown := gi.AddNewMenuButton(trow, "trainingDropdown")
-	// trainingDropdown.SetText("Choose a map to train in")
-	//
-	// for _, value := range AllMaps {
-	// 	var value1 = value.Name
-	// 	var value2 = value.MapData
-	// 	// fmt.Printf("Value (0): %v \n", value.Name)
-	// 	trainingDropdown.Menu.AddAction(gi.ActOpts{Label: value1},
-	// 		win.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-	// 			// fmt.Printf("Value (1): %v \n", value.Name)
-	// 			// fmt.Printf("Value (2): %v \n", value1)
-	// 			currentMap = value2 // Set the correct map for this dropdown
-	// 			currentMapString = value1
-	// 			trainingDropdown.SetText(value1)
-	// 			// fmt.Printf("Value: %v \n", value1)
-	// 		})
-	// }
-	//
-	// trainingPlayButton := trow.AddNewChild(gi.KiT_Button, "trainingPlayButton").(*gi.Button)
-	// trainingPlayButton.Text = "<b>Play in Training Mode</b>"
-	// trainingPlayButton.SetProp("background-color", "orange")
-	//
-	// trainingPlayButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-	// 	if sig == int64(gi.ButtonClicked) {
-	// 		initPlayTab()
-	// 	}
-	// })
 	homeTabText := gi.AddNewLabel(homeTab, "homeTabText", "")
 	homeTabText.Text = "Singularity Showdown is an open-source 3D strategic battle game, for more information about Singularity Showdown see the about page. This version of Singularity Showdown also includes a simulation that simulates what team would win given different strengths. You can see the simulation on the simulation tab, and set the strengths of different teams on the simulation settings tab. A list of all the borders and who is winning is below, to join a battle click 'Join Battle'."
 	homeTab.SetProp("background-color", "lightblue")
@@ -371,57 +294,6 @@ func initMainTabs() {
 	goldResourcesText.Text = "                                                                                                                                      "
 	goldResourcesText.Redrawable = true
 
-	// brow := gi.AddNewLayout(resourcesTab, "gbrow", gi.LayoutHoriz)
-	// brow.SetProp("spacing", units.NewEx(2))
-	// brow.SetProp("horizontal-align", gi.AlignLeft)
-	// brow.SetStretchMaxWidth()
-	//
-	// goldButton := gi.AddNewButton(brow, "goldButton")
-	// goldButton.Text = "Purchase 100 gold for just 99 cents"
-	// goldButton.SetProp("background-color", "#D4AF37")
-	// goldButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-	// 	if sig == int64(gi.ButtonClicked) {
-	// 		updateResource("gold", GOLD+100)
-	// 		goldResourcesText.SetText("                                            ")
-	// 		readResources()
-	// 	}
-	// })
-	//
-	// goldButton1 := gi.AddNewButton(brow, "goldButton1")
-	// goldButton1.Text = "BEST DEAL: Purchase 1000 gold for $8.99"
-	// goldButton1.SetProp("background-color", "#D4AF37")
-	// goldButton1.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-	// 	if sig == int64(gi.ButtonClicked) {
-	// 		// t0 := time.Now()
-	// 		updateResource("gold", GOLD+1000)
-	// 		goldResourcesText.SetText("                                            ")
-	// 		readResources()
-	// 		// t1 := time.Now()
-	// 		// d := t1.Sub(t0)
-	// 		// fmt.Printf("Time to update: %v \n", d.Milliseconds())
-	// 	}
-	// })
-	// livesResourcesText = resourcesTab.AddNewChild(gi.KiT_Label, "livesResourcesText").(*gi.Label)
-	// livesResourcesText.SetProp("font-size", "30px")
-	// livesResourcesText.SetProp("font-family", "Times New Roman, serif")
-	// livesResourcesText.SetProp("text-align", "left")
-	// livesResourcesText.Text = "                                                                                                                                      "
-	// livesResourcesText.Redrawable = true
-	//
-	// livesButton := gi.AddNewButton(resourcesTab, "livesButton")
-	// livesButton.Text = "Purchase 10 lives for 10 gold"
-	// livesButton.SetProp("background-color", "pink")
-	// livesButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-	// 	if sig == int64(gi.ButtonClicked) {
-	// 		updateResource("gold", GOLD-10)
-	// 		updateResource("lives", LIVES+10)
-	// 		goldResourcesText.SetText("                                            ")
-	// 		livesResourcesText.SetText("                                            ")
-	// 		readResources()
-	// 	}
-	// })
-	//
-	// // updateResource("gold", 70)
 	readResources()
 
 	aboutResourcesText := gi.AddNewLabel(resourcesTab, "aboutResourcesText", "")
@@ -518,19 +390,6 @@ func initMainTabs() {
 
 	keyMainTextM := gi.AddNewLabel(keyRowM, "keyMainTextM", "<b>Team Key:</b>")
 	keyMainTextM.SetProp("font-size", "30px")
-
-	// map3dTab = tv.AddNewTab(gi.KiT_Frame, "<b>Map (3D)</b>").(*gi.Frame)
-	//
-	// map3dTab.Lay = gi.LayoutVert
-	// map3dTab.SetStretchMaxWidth()
-	// map3dTab.SetStretchMaxHeight()
-	// map3dTab.SetProp("background-color", "lightblue")
-	//
-	// map3dTitle := map3dTab.AddNewChild(gi.KiT_Label, "map3dTitle").(*gi.Label)
-	// map3dTitle.SetProp("font-size", "60px")
-	// map3dTitle.SetProp("font-family", "Times New Roman, serif")
-	// map3dTitle.SetProp("text-align", "center")
-	// map3dTitle.Text = "Live Map of the World (3D):"
 
 	teamTab = tv.AddNewTab(gi.KiT_Frame, "<b>Your Team</b>").(*gi.Frame)
 
@@ -957,108 +816,11 @@ func initPlayTab() {
 	resultText.Redrawable = true
 	resultText.SetProp("width", "20em")
 
-	// healthBar.SetInactive()
-	// healthBar.Snap = true
-	// healthBar.Tracking = true
-	// healthBar.Icon = gi.IconName("circlebutton-on")
-	// healthBar.Max = 100
-	// healthBar.Value = HEALTH
-
 	TheGame = &Game{} // Set up game
 	TheGame.Config()  // Set up game
-
-	// takeDamage1 := gi.AddNewButton(hrow, "takeDamage1")
-	// takeDamage1.Text = "Take Damage from the Sniper Weapon"
-	// takeDamage1.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-	// 	if sig == int64(gi.ButtonClicked) {
-	// 		gm.removeHealthPoints("Sniper")
-	// 	}
-	// })
 
 	vp.UpdateEndNoSig(updt)
 
 	win2.GoStartEventLoop()
 
-	// updt = tv.UpdateStart()
-	//
-	// tv.SetFullReRender()
-	//
-	// rec := ki.Node{}
-	// rec.InitName(&rec, "rec")
-	//
-	// if currentMapString == "" { // if no map selected to join
-	// 	tv.UpdateEnd(updt)
-	// 	return // then don't create the game
-	// }
-	// _, err := tv.TabByNameTry("<b>Game</b>") // check if the game tab already exists -- there will not be an error if it already exists
-	//
-	// if err == nil { // if the tab Game already exists
-	// 	tv.SelectTabByName("<b>Game</b>")
-	// 	tv.UpdateEnd(updt)
-	// 	return // and don't create a new tab
-	// }
-	//
-	// playTab = tv.AddNewTab(gi.KiT_Frame, "<b>Game</b>").(*gi.Frame)
-	//
-	// playTab.Lay = gi.LayoutVert
-	// playTab.SetStretchMaxWidth()
-	// playTab.SetStretchMaxHeight()
-	//
-	// playTitleText := gi.AddNewLabel(playTab, "playTitleText", "Welcome to")
-	// playTitleText.SetText("Welcome to " + currentMapString)
-	// playTitleText.SetProp("text-align", "center")
-	// playTitleText.SetProp("font-size", "40px")
-	//
-	// usernameKeyTitle := gi.AddNewLabel(playTab, "usernameKeyTitle", "<b>Battle first to 10 kills:</b>")
-	// usernameKeyTitle.SetProp("text-align", "center")
-	// usernameKeyTitle.SetProp("font-size", "40px")
-	//
-	// usernameKey := gi.AddNewFrame(playTab, "usernameKey", gi.LayoutVert)
-	// usernameKey.SetStretchMaxWidth()
-	// hrow := gi.AddNewFrame(playTab, "hrow", gi.LayoutHoriz)
-	// hrow.SetStretchMaxWidth()
-	// healthBar = gi.AddNewSlider(hrow, "healthBar")
-	// healthBar.Dim = mat32.X
-	// healthBar.Defaults()
-	// healthBar.Max = 100
-	// healthBar.SetMinPrefWidth(units.NewEm(150))
-	// healthBar.SetMinPrefHeight(units.NewEm(2))
-	// healthBar.SetValue(HEALTH)
-	// healthBar.SetProp(":value", ki.Props{"background-color": "green"})
-	// healthBar.SetInactive()
-	//
-	// healthText = gi.AddNewLabel(hrow, "healthText", "")
-	// healthText.Text = fmt.Sprintf("You have %v health", HEALTH)
-	// healthText.SetProp("font-size", "30px")
-	// healthText.Redrawable = true
-	//
-	// resultRow = gi.AddNewFrame(playTab, "resultRow", gi.LayoutVert)
-	// resultRow.SetStretchMaxWidth()
-	//
-	// resultText = gi.AddNewLabel(resultRow, "resultText", "<b>Your kills and deaths will show up here</b>      ")
-	// resultText.SetProp("font-size", "40px")
-	// resultText.SetProp("text-align", "center")
-	// resultText.Redrawable = true
-	// resultText.SetProp("width", "20em")
-	//
-	// // healthBar.SetInactive()
-	// // healthBar.Snap = true
-	// // healthBar.Tracking = true
-	// // healthBar.Icon = gi.IconName("circlebutton-on")
-	// // healthBar.Max = 100
-	// // healthBar.Value = HEALTH
-	//
-	// TheGame = &Game{} // Set up game
-	// TheGame.Config()  // Set up game
-	//
-	// // takeDamage1 := gi.AddNewButton(hrow, "takeDamage1")
-	// // takeDamage1.Text = "Take Damage from the Sniper Weapon"
-	// // takeDamage1.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-	// // 	if sig == int64(gi.ButtonClicked) {
-	// // 		gm.removeHealthPoints("Sniper")
-	// // 	}
-	// // })
-	//
-	// tv.SelectTabByName("<b>Game</b>")
-	// tv.UpdateEnd(updt)
 }
