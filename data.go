@@ -225,8 +225,6 @@ func createBattleJoinLayouts() {
 		var territory1, territory2, team1, team2 string
 		var team1points, team2points int
 		rows.Scan(&territory1, &territory2, &team1, &team2, &team1points, &team2points)
-		// fmt.Printf("Team 1 points: %v   Team 2 points: %v \n", team1points, team2points)
-		// fmt.Printf("TEAM Global var: %v \n", TEAM)
 		if (TheWorldMap[territory1].Owner != TheWorldMap[territory2].Owner) && (team1 == ThisUserInfo.Team || team2 == ThisUserInfo.Team) {
 			joinLayout := gi.AddNewFrame(joinLayoutG, "joinLayout", gi.LayoutVert)
 			joinLayout.SetStretchMaxWidth()
@@ -848,41 +846,20 @@ func removeMessage(message string, username string) {
 func updatePosition(t string, value mat32.Vec3) {
 	writePlayerPosToServer(mat32.Vec3{value.X, value.Y, value.Z}, CURBATTLE)
 }
+
 func addUser(user string, password string) {
-	tableCreateStatement := `CREATE TABLE IF NOT EXISTS users (
-		username varchar,
-		passwd varchar
-		)`
-	_, err := db.Query(tableCreateStatement)
-	// fmt.Printf("Result: %v \n", tableResult)
-	if err != nil {
-		panic(err)
-	}
-
-	checkUsernameStatement := fmt.Sprintf("SELECT * FROM users WHERE username='%v'", user)
-
-	checkResultRows, err := db.Query(checkUsernameStatement)
-
-	if err != nil {
-		panic(err)
-	}
 	gotResults := false
-
-	for checkResultRows.Next() {
-		gotResults = true
+	for k := range AllUserInfo {
+		if user == k {
+			gotResults = true
+		}
 	}
-	// fmt.Printf("Results (Got): %v \n", gotResults)
-
-	if gotResults == false {
-		// fmt.Printf("Username isn't in use, will create user. \n")
+	if gotResults == false { // No user with our name exists, so create
 
 		// create user code
-		createAccountStatement :=
-
-			fmt.Sprintf("INSERT INTO users(username, passwd) VALUES ('%v', '%v')", user, password)
-
-		// fmt.Printf("STATEMENT: %v \n", createAccountStatement)
-
+		createAccountStatement := fmt.Sprintf("INSERT INTO users(username, passwd) VALUES ('%v', '%v')", user, password)
+		AllUserInfo[user] = &UserInfo{user, password, "", 500}
+		ThisUserInfo = &UserInfo{user, password, "", 500}
 		_, err := db.Exec(createAccountStatement)
 		if err != nil {
 			panic(err)
@@ -891,33 +868,25 @@ func addUser(user string, password string) {
 		signUpResult.SetText("<b>Account created</b>")
 
 	} else {
-		// fmt.Printf("Failed, username exists. \n")
 		signUpResult.SetText("<b>Username exists, failed</b>")
 	}
 
 }
 
 func logIn(user string, password string) {
-	loginCheckStatement := fmt.Sprintf("SELECT * FROM users WHERE username='%v' AND passwd='%v'", user, password)
-	results, err := db.Query(loginCheckStatement)
 	var in = false
-	if err != nil {
-		panic(err)
-	}
-	for results.Next() {
-		in = true
-		var team string
-		var gold int
-		results.Scan(user, password, team, gold)
-		ThisUserInfo.Username = user
-		ThisUserInfo.Password = password
-		ThisUserInfo.Gold = gold
-		ThisUserInfo.Team = team
+	for k, d := range AllUserInfo {
+		if k == user && d.Password == password {
+			in = true
+
+			ThisUserInfo.Username = user
+			ThisUserInfo.Password = password
+			ThisUserInfo.Gold = d.Gold
+			ThisUserInfo.Team = d.Team
+		}
 	}
 	if in == true {
-		// fmt.Printf("Found pair, logging in \n")
 		updt := tv.UpdateStart()
-
 		tv.Viewport.SetFullReRender()
 		tv.DeleteTabIndex(0, true)
 		tv.DeleteTabIndex(0, true)
@@ -927,10 +896,7 @@ func logIn(user string, password string) {
 		tv.UpdateEnd(updt)
 
 	} else {
-		// fmt.Printf("Username and password do not match \n")
 		logInResult.SetText("<b>Username and password do not match</b>")
 	}
 
 }
-
-// Login and signup functuions should use maps
