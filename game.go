@@ -332,7 +332,7 @@ func (gm *Game) MakeView() {
 }
 
 func (gm *Game) Config() {
-	gm.SpawnPositions = []mat32.Vec3{mat32.Vec3{-50, 0, -50}, mat32.Vec3{-50, 0, 50}, mat32.Vec3{50, 0, 50}, mat32.Vec3{50, 0, -50}}
+	gm.SpawnPositions = []mat32.Vec3{{-50, 0, -50}, {-50, 0, 50}, {50, 0, 50}, {50, 0, -50}}
 	gamerow := gi.AddNewLayout(mfr2, "gamerow", gi.LayoutVert)
 	gamerow.SetStretchMaxWidth()
 	gamerow.SetStretchMaxHeight()
