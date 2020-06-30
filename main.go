@@ -893,7 +893,7 @@ func initMainTabs() {
 
 	FirstWorld.RenderSVGs(simMapSVG)
 
-	createBattleJoinLayouts()
+	// createBattleJoinLayouts()
 	tv.UpdateEnd(updt)
 }
 

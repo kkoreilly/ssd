@@ -184,106 +184,104 @@ func joinPlayersTable(battleName string) {
 	POINTS = 0
 }
 
-// A complete piece of trash, way too complex and terrible. MUST BE FIXED, TOP PRI
-func createBattleJoinLayouts() {
+// The function below is being retired and will be completely re-written and updated with new updates:
 
-	// updt := homeTab.UpdateStart()
-	// defer homeTab.UpdateEnd(updt)
-	homeTab.SetFullReRender()
-	statement := "SELECT * FROM borders"
-	rows, err := db.Query(statement)
-	if err != nil {
-		panic(err)
-	}
-	for rows.Next() {
-		var territory1, territory2, team1, team2 string
-		var team1points, team2points int
-		rows.Scan(&territory1, &territory2, &team1, &team2, &team1points, &team2points)
-		if TheWorldMap[territory1].Owner != team1 {
-			fixStatement := fmt.Sprintf("UPDATE borders SET team1 = '%v' WHERE territory1 = '%v' AND territory2 = '%v'", TheWorldMap[territory1].Owner, territory1, territory2)
-			_, err := db.Exec(fixStatement)
-			if err != nil {
-				panic(err)
-			}
-		}
-
-		if TheWorldMap[territory2].Owner != team2 {
-			fixStatement := fmt.Sprintf("UPDATE borders SET team2 = '%v' WHERE territory1 = '%v' AND territory2 = '%v'", TheWorldMap[territory2].Owner, territory1, territory2)
-			_, err := db.Exec(fixStatement)
-			if err != nil {
-				panic(err)
-			}
-		}
-	}
-	teamJoinTitle := gi.AddNewLabel(homeTab, "teamJoinTitle", "<b>Battles that you can join:</b>")
-	teamJoinTitle.SetProp("text-align", "center")
-	teamJoinTitle.SetProp("font-size", "40px")
-	joinLayoutG := gi.AddNewFrame(homeTab, "joinLayoutG", gi.LayoutVert)
-	joinLayoutG.SetStretchMaxWidth()
-	rows, err = db.Query(statement)
-	for rows.Next() {
-		var territory1, territory2, team1, team2 string
-		var team1points, team2points int
-		rows.Scan(&territory1, &territory2, &team1, &team2, &team1points, &team2points)
-		if (TheWorldMap[territory1].Owner != TheWorldMap[territory2].Owner) && (team1 == ThisUserInfo.Team || team2 == ThisUserInfo.Team) {
-			joinLayout := gi.AddNewFrame(joinLayoutG, "joinLayout", gi.LayoutVert)
-			joinLayout.SetStretchMaxWidth()
-			scoreText := gi.AddNewLabel(joinLayout, "scoreText", fmt.Sprintf("<b>%v             -                %v</b>", team1points, team2points))
-			scoreText.SetProp("font-size", "35px")
-			scoreText.SetProp("text-align", "center")
-			teamsText := gi.AddNewLabel(joinLayout, "teamsText", "Team "+team1+"           vs.             Team "+team2)
-			teamsText.SetProp("font-size", "30px")
-			teamsText.SetProp("text-align", "center")
-			territoriesText := gi.AddNewLabel(joinLayout, "territoriesText", territory1+"   vs.  "+territory2)
-			territoriesText.SetProp("font-size", "25px")
-			territoriesText.SetProp("text-align", "center")
-			joinBattleButton := gi.AddNewButton(joinLayout, "joinBattleButton")
-			joinBattleButton.Text = "Join Battle"
-			joinBattleButton.SetProp("font-size", "30px")
-			joinBattleButton.SetProp("horizontal-align", gi.AlignCenter)
-			rec := ki.Node{}
-			rec.InitName(&rec, "rec")
-			joinBattleButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-				if sig == int64(gi.ButtonClicked) {
-					currentMapString = "The Arena"
-					currentMap = TheArenaMap
-					curBattleTerritory1 = territory1
-					curBattleTerritory2 = territory2
-					curTeam1 = team1
-					curTeam2 = team2
-					initPlayTab()
-				}
-			})
-		}
-	}
-	teamNoJoinTitle := gi.AddNewLabel(homeTab, "teamNoJoinTitle", "<b>Other Battles:</b>")
-	teamNoJoinTitle.SetProp("text-align", "center")
-	teamNoJoinTitle.SetProp("font-size", "40px")
-	rows, err = db.Query(statement)
-	if err != nil {
-		panic(err)
-	}
-	joinLayoutG1 := gi.AddNewFrame(homeTab, "joinLayoutG1", gi.LayoutVert)
-	joinLayoutG1.SetStretchMaxWidth()
-	for rows.Next() {
-		var territory1, territory2, team1, team2 string
-		var team1points, team2points int
-		rows.Scan(&territory1, &territory2, &team1, &team2, &team1points, &team2points)
-		if TheWorldMap[territory1].Owner != TheWorldMap[territory2].Owner && (team1 != ThisUserInfo.Team && team2 != ThisUserInfo.Team) {
-			joinLayout := gi.AddNewFrame(joinLayoutG1, "joinLayout1", gi.LayoutVert)
-			joinLayout.SetStretchMaxWidth()
-			scoreText := gi.AddNewLabel(joinLayout, "scoreText", fmt.Sprintf("<b>%v             -                %v</b>", team1points, team2points))
-			scoreText.SetProp("font-size", "35px")
-			scoreText.SetProp("text-align", "center")
-			teamsText := gi.AddNewLabel(joinLayout, "teamsText", "Team "+team1+"           vs.             Team "+team2)
-			teamsText.SetProp("font-size", "30px")
-			teamsText.SetProp("text-align", "center")
-			territoriesText := gi.AddNewLabel(joinLayout, "territoriesText", territory1+"   vs.  "+territory2)
-			territoriesText.SetProp("font-size", "25px")
-			territoriesText.SetProp("text-align", "center")
-		}
-	}
-}
+// func createBattleJoinLayouts() {
+// 	homeTab.SetFullReRender()
+// 	statement := "SELECT * FROM borders"
+// 	rows, err := db.Query(statement)
+// 	if err != nil {
+// 		panic(err)
+// 	}
+// 	for rows.Next() {
+// 		var territory1, territory2, team1, team2 string
+// 		var team1points, team2points int
+// 		rows.Scan(&territory1, &territory2, &team1, &team2, &team1points, &team2points)
+// 		if TheWorldMap[territory1].Owner != team1 {
+// 			fixStatement := fmt.Sprintf("UPDATE borders SET team1 = '%v' WHERE territory1 = '%v' AND territory2 = '%v'", TheWorldMap[territory1].Owner, territory1, territory2)
+// 			_, err := db.Exec(fixStatement)
+// 			if err != nil {
+// 				panic(err)
+// 			}
+// 		}
+//
+// 		if TheWorldMap[territory2].Owner != team2 {
+// 			fixStatement := fmt.Sprintf("UPDATE borders SET team2 = '%v' WHERE territory1 = '%v' AND territory2 = '%v'", TheWorldMap[territory2].Owner, territory1, territory2)
+// 			_, err := db.Exec(fixStatement)
+// 			if err != nil {
+// 				panic(err)
+// 			}
+// 		}
+// 	}
+// 	teamJoinTitle := gi.AddNewLabel(homeTab, "teamJoinTitle", "<b>Battles that you can join:</b>")
+// 	teamJoinTitle.SetProp("text-align", "center")
+// 	teamJoinTitle.SetProp("font-size", "40px")
+// 	joinLayoutG := gi.AddNewFrame(homeTab, "joinLayoutG", gi.LayoutVert)
+// 	joinLayoutG.SetStretchMaxWidth()
+// 	rows, err = db.Query(statement)
+// 	for rows.Next() {
+// 		var territory1, territory2, team1, team2 string
+// 		var team1points, team2points int
+// 		rows.Scan(&territory1, &territory2, &team1, &team2, &team1points, &team2points)
+// 		if (TheWorldMap[territory1].Owner != TheWorldMap[territory2].Owner) && (team1 == ThisUserInfo.Team || team2 == ThisUserInfo.Team) {
+// 			joinLayout := gi.AddNewFrame(joinLayoutG, "joinLayout", gi.LayoutVert)
+// 			joinLayout.SetStretchMaxWidth()
+// 			scoreText := gi.AddNewLabel(joinLayout, "scoreText", fmt.Sprintf("<b>%v             -                %v</b>", team1points, team2points))
+// 			scoreText.SetProp("font-size", "35px")
+// 			scoreText.SetProp("text-align", "center")
+// 			teamsText := gi.AddNewLabel(joinLayout, "teamsText", "Team "+team1+"           vs.             Team "+team2)
+// 			teamsText.SetProp("font-size", "30px")
+// 			teamsText.SetProp("text-align", "center")
+// 			territoriesText := gi.AddNewLabel(joinLayout, "territoriesText", territory1+"   vs.  "+territory2)
+// 			territoriesText.SetProp("font-size", "25px")
+// 			territoriesText.SetProp("text-align", "center")
+// 			joinBattleButton := gi.AddNewButton(joinLayout, "joinBattleButton")
+// 			joinBattleButton.Text = "Join Battle"
+// 			joinBattleButton.SetProp("font-size", "30px")
+// 			joinBattleButton.SetProp("horizontal-align", gi.AlignCenter)
+// 			rec := ki.Node{}
+// 			rec.InitName(&rec, "rec")
+// 			joinBattleButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+// 				if sig == int64(gi.ButtonClicked) {
+// 					currentMapString = "The Arena"
+// 					currentMap = TheArenaMap
+// 					curBattleTerritory1 = territory1
+// 					curBattleTerritory2 = territory2
+// 					curTeam1 = team1
+// 					curTeam2 = team2
+// 					initPlayTab()
+// 				}
+// 			})
+// 		}
+// 	}
+// 	teamNoJoinTitle := gi.AddNewLabel(homeTab, "teamNoJoinTitle", "<b>Other Battles:</b>")
+// 	teamNoJoinTitle.SetProp("text-align", "center")
+// 	teamNoJoinTitle.SetProp("font-size", "40px")
+// 	rows, err = db.Query(statement)
+// 	if err != nil {
+// 		panic(err)
+// 	}
+// 	joinLayoutG1 := gi.AddNewFrame(homeTab, "joinLayoutG1", gi.LayoutVert)
+// 	joinLayoutG1.SetStretchMaxWidth()
+// 	for rows.Next() {
+// 		var territory1, territory2, team1, team2 string
+// 		var team1points, team2points int
+// 		rows.Scan(&territory1, &territory2, &team1, &team2, &team1points, &team2points)
+// 		if TheWorldMap[territory1].Owner != TheWorldMap[territory2].Owner && (team1 != ThisUserInfo.Team && team2 != ThisUserInfo.Team) {
+// 			joinLayout := gi.AddNewFrame(joinLayoutG1, "joinLayout1", gi.LayoutVert)
+// 			joinLayout.SetStretchMaxWidth()
+// 			scoreText := gi.AddNewLabel(joinLayout, "scoreText", fmt.Sprintf("<b>%v             -                %v</b>", team1points, team2points))
+// 			scoreText.SetProp("font-size", "35px")
+// 			scoreText.SetProp("text-align", "center")
+// 			teamsText := gi.AddNewLabel(joinLayout, "teamsText", "Team "+team1+"           vs.             Team "+team2)
+// 			teamsText.SetProp("font-size", "30px")
+// 			teamsText.SetProp("text-align", "center")
+// 			territoriesText := gi.AddNewLabel(joinLayout, "territoriesText", territory1+"   vs.  "+territory2)
+// 			territoriesText.SetProp("font-size", "25px")
+// 			territoriesText.SetProp("text-align", "center")
+// 		}
+// 	}
+// }
 
 // 2 functions below a little sketch
 func (gm *Game) setGameOver(winner string) {
@@ -343,7 +341,7 @@ func (gm *Game) battleOver(winner string) {
 	joinLayoutTitle.Delete(true)
 	joinLayoutNoTitle.Delete(true)
 	readWorld()
-	go createBattleJoinLayouts()
+	// go createBattleJoinLayouts()
 	tv.SelectTabIndex(tabIndexResult)
 	gm.WorldMu.Unlock()
 }
@@ -546,7 +544,7 @@ func joinTeam(name string) {
 	joinLayoutTitle.Delete(true)
 	joinLayoutNoTitle.Delete(true)
 	readWorld()
-	createBattleJoinLayouts()
+	// createBattleJoinLayouts()
 
 }
 
