@@ -73,20 +73,6 @@ func InitDataMaps() {
 
 // The two functions above are well written, used and good
 
-// This function has been commented out due to not being used.
-// func serverGetPlayerPos() {
-// 	resp, err := http.Get("http://ssdserver.herokuapp.com/playerPosGet")
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	defer resp.Body.Close()
-// 	scanner := bufio.NewScanner(resp.Body)
-// 	fmt.Printf("Got data: %v \n", scanner.Text())
-// 	if err := scanner.Err(); err != nil {
-// 		panic(err)
-// 	}
-// }
-
 // Function below is good and used.
 func writePlayerPosToServer(pos mat32.Vec3, battleName string) {
 	info := &CurPosition{ThisUserInfo.Username, battleName, POINTS, pos, TheGame.KilledBy, TheGame.SpawnCount}
@@ -111,30 +97,6 @@ func writeFireEventToServer(origin mat32.Vec3, dir mat32.Vec3, dmg int, battleNa
 	defer resp.Body.Close()
 }
 
-//
-// func writeEnemyPlayerPosToServer(username string, pos mat32.Vec3, battleName string, points int) {
-// 	// fmt.Printf("Battle Name: %v \n", battleName)
-// 	info := &CurPosition{username, battleName, points, pos, "", 0}
-// 	fmt.Printf("Info: %v \n", info)
-// 	b, _ := json.Marshal(info)
-// 	// b := []byte(fmt.Sprintf("username: %v, battleName: %v, posX: %v, posY: %v, posZ: %v, points: %v", USER, battleName, pos.X, pos.Y, pos.Z, POINTS))
-// 	buff := bytes.NewBuffer(b)
-// 	resp, err := http.Post("http://ssdserver.herokuapp.com/playerPosPost", "application/json", buff)
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	defer resp.Body.Close()
-// }
-
-// func removeFireEventFromServer(key int, battleName string) {
-// 	keyS := strconv.Itoa(key)
-// 	buff := bytes.NewBuffer([]byte(""))
-// 	resp, err := http.Post("http://ssdserver.herokuapp.com/fireEventsDelete?battleName="+battleName+"&key="+keyS, "application/json", buff)
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	defer resp.Body.Close()
-// }
 // Below is used and good
 func readTeam() {
 	findUserStatement := fmt.Sprintf("SELECT * FROM users WHERE username='%v'", ThisUserInfo.Username)
@@ -200,14 +162,6 @@ func (gm *Game) GetFireEvents() {
 	}
 }
 
-// RETIRED, no more db
-// func addFireEventToDB(creator string, damage int, origin mat32.Vec3, dir mat32.Vec3) {
-// 	statement := fmt.Sprintf("INSERT INTO fireEvents(creator, damage, originX, originY, originZ, dirX, dirY, dirZ) VALUES ('%v', '%v', '%v', '%v', '%v', '%v', '%v', '%v')", creator, damage, origin.X, origin.Y, origin.Z, dir.X, dir.Y, dir.Z)
-// 	_, err := db.Exec(statement)
-// 	if err != nil {
-// 		fmt.Printf("Err: %v \n", err)
-// 	}
-// }
 //Backup function, only used in the case of someone winning. Leave for now...
 func initBorders() {
 	for _, d := range FirstWorldBorders {
@@ -215,10 +169,6 @@ func initBorders() {
 		territory2 := d.Territory2
 		team1 := FirstWorld[territory1].Owner
 		team2 := FirstWorld[territory2].Owner
-		// activeString := "false"
-		// if d.Owner == "battle" {
-		// 	activeString = "true"
-		// }
 		statement := fmt.Sprintf("INSERT INTO borders(territory1, territory2, team1, team2) VALUES ('%v', '%v', '%v', '%v')", territory1, territory2, team1, team2)
 		_, err := db.Exec(statement)
 		if err != nil {
@@ -400,15 +350,6 @@ func (gm *Game) battleOver(winner string) {
 	gm.WorldMu.Unlock()
 }
 
-// RETIRED
-// func resetServer() {
-// 	buff := bytes.NewBuffer([]byte(""))
-// 	resp, err := http.Post("http://ssdserver.herokuapp.com/cleanUpBattle?battleName="+CURBATTLE, "text", buff)
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	defer resp.Body.Close()
-// }
 func updateBorderPoints(team string, changeNum int, territory1, territory2 string) {
 	rowsB, err := db.Query(fmt.Sprintf("SELECT * FROM borders WHERE territory1 = '%v' AND territory2 = '%v'", territory1, territory2))
 	if err != nil {
@@ -497,45 +438,8 @@ func getEnemyTeamFromName(username string) (team string) {
 }
 
 // Function above needs to be fixed with new maps
-// Function below retired
-// func updateBattlePoints(username string, value int) {
-// 	// statement := fmt.Sprintf("UPDATE players SET points = '%v' WHERE username = '%v'", value, username)
-// 	// _, err := db.Exec(statement)
-// 	// if err != nil {
-// 	// 	panic(err)
-// 	// }
-// }
-// Below is RETIRED
-// func setActive() {
-// 	for _, d := range FirstWorldBorders {
-// 		activeString := "f"
-// 		if d.Owner == "battle" {
-// 			activeString = "t"
-// 		}
-// 		fmt.Printf("Active string: %v \n", activeString)
-//
-// 		statement := fmt.Sprintf("UPDATE borders SET active='t'")
-// 		_, err := db.Exec(statement)
-// 		if err != nil {
-// 			panic(err)
-// 		}
-// 	}
-// 	rowsB, err := db.Query("SELECT * FROM borders")
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	for rowsB.Next() {
-// 		var t string
-// 		var active string
-// 		rowsB.Scan(t, t, t, t, t, t, &active)
-// 		// fmt.Printf("Active: %v \n", active)
-// 		// fmt.Printf("In rows \n")
-// 		// fmt.Printf("\n \n USER: %v TEAM: %v \n \n", username, team)
-// 		// fmt.Printf("<b>Username:</b> %v        <b>Password:</b> %v        <b>Gold:</b> %v        <b>Lives:</b> %v        <b>Team:</b> %v\n \n", username, password, gold, lives, team)
-// 		fmt.Printf("Active result: %v \n", active)
-// 	}
-// }
-// Way to complex, fix
+
+// Way too complex, fix
 func addKeyItems() {
 	// the ordering of doing this twice and the if statements will make the key be in the correct order
 	// todo: make this code more efficient
@@ -648,35 +552,6 @@ func joinTeam(name string) {
 
 }
 
-// RETIRED
-// func removeBulletFromDB(originP, dirP mat32.Vec3) {
-// 	readStatement := "SELECT * FROM fireEvents"
-// 	rows, err := db.Query(readStatement)
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	for rows.Next() {
-// 		var creator string
-// 		var damage int
-// 		var origin, dir mat32.Vec3
-// 		rows.Scan(&creator, &damage, &origin.X, &origin.Y, &origin.Z, &dir.X, &dir.Y, &dir.Z)
-// 		if origin.Round() == originP.Round() && dir.Round() == dirP.Round() {
-// 			statement := fmt.Sprintf("DELETE FROM fireEvents WHERE originX='%v' AND originY='%v' AND originZ='%v' AND dirX = '%v' AND dirY = '%v' AND dirZ = '%v'", origin.X, origin.Y, origin.Z, dir.X, dir.Y, dir.Z)
-// 			_, err := db.Exec(statement)
-// 			if err != nil {
-// 				panic(err)
-// 			}
-// 		}
-//
-// 	}
-//
-// }
-// RETIRED
-// func (gm *Game) clearAllBullets() {
-// 	// for k, _ := range gm.FireEvents {
-// 	// 	// removeFireEventFromServer(k, CURBATTLE)
-// 	// }
-// }
 // Needs improvement
 func (gm *Game) GetPosFromServer() { // GetPosFromServer loops through the players database and updates gm.OtherPos with the new data
 	for {
@@ -723,15 +598,8 @@ func (gm *Game) GetPosFromServer() { // GetPosFromServer loops through the playe
 			gm.battleOver(gm.Winner)
 			return
 		}
-		// fmt.Printf("Time for GetPosFromServer check game on: %v Milliseconds \n", time.Since(otherTime).Milliseconds())
 		gm.PosMu.Unlock()
 		gm.PosUpdtChan <- true // tells UpdatePeopleWorldPos to update to new positions
-		// fmt.Printf("Time for PosUpdtChan: %v Milliseconds \n", time.Since(otherTime).Milliseconds())
-		// gm.FireUpdtChan <- true
-		// fmt.Printf("Time for FireUpdtChan: %v Milliseconds \n", time.Since(otherTime).Milliseconds())
-		// fmt.Printf("Time for GetPosFromServer other stuff: %v Milliseconds \n", time.Since(otherTime).Milliseconds())
-		// since := time.Since(startTime)
-		// fmt.Printf("Total time for GetPosFromServer: %v Milliseconds\n", since.Milliseconds())
 	}
 }
 
@@ -764,16 +632,6 @@ func updateResource(name string, value int) {
 
 }
 
-// RETIRED
-// func removePlayer() {
-// 	statement := fmt.Sprintf("DELETE FROM players WHERE username='%v'", ThisUserInfo.Username)
-// 	_, err := db.Exec(statement)
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// }
-
-// fmt.Printf("Find User Result: %v \n", findUserResult)
 // Needs to be fixed
 func readWorld() {
 	// fmt.Printf("In function \n")
@@ -1038,29 +896,6 @@ func addUser(user string, password string) {
 	}
 
 }
-
-// RETIRED
-// func initInspect() {
-//
-// 	rows, err := db.Query("SELECT * FROM users")
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	for rows.Next() {
-// 		var username string
-// 		var password string
-// 		rows.Scan(&username, &password)
-// 		// fmt.Printf("In rows \n")
-// 		// fmt.Printf("New username: %v New password %v \n", username, password)
-// 		newText := fmt.Sprintf("Username: %v, Password: %v            ", username, password)
-// 		inspectText.SetText(fmt.Sprintf("%v %v", inspectText.Text, newText))
-// 	}
-//
-// 	// fixStatement :=
-// 	// `ALTER TABLE Users RENAME TO users`
-// 	// db.Query(fixStatement)
-//
-// }
 
 func logIn(user string, password string) {
 	loginCheckStatement := fmt.Sprintf("SELECT * FROM users WHERE username='%v' AND passwd='%v'", user, password)
