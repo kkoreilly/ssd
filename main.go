@@ -272,6 +272,21 @@ func initMainTabs() {
 	homeTabText.SetProp("max-width", -1)
 	homeTabText.SetProp("width", "20em")
 	homeTabText.SetProp("text-align", "center")
+	joinBattleButton := gi.AddNewButton(homeTab, "joinBattleButton")
+	joinBattleButton.Text = "Join Battle"
+	joinBattleButton.SetProp("font-size", "30px")
+	joinBattleButton.SetProp("horizontal-align", gi.AlignCenter)
+	joinBattleButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(gi.ButtonClicked) {
+			currentMapString = "The Arena"
+			currentMap = TheArenaMap
+			curBattleTerritory1 = "USA"
+			curBattleTerritory2 = "CentralAmerica"
+			curTeam1 = "human1"
+			curTeam2 = "human2"
+			initPlayTab()
+		}
+	})
 	readMessages()
 
 	resourcesTab = tv.AddNewTab(gi.KiT_Frame, "<b>Resources</b>").(*gi.Frame)
@@ -784,19 +799,19 @@ func initPlayTab() {
 	gameTitleText.SetProp("color", "white")
 	gameTitleText.SetProp("font-family", "georgia")
 
-	usernameKeyTitle := gi.AddNewLabel(mfr2, "usernameKeyTitle", "<b>Battle first to 10 kills:</b>")
-	usernameKeyTitle.SetProp("text-align", "center")
-	usernameKeyTitle.SetProp("font-size", "40px")
-
-	usernameKey := gi.AddNewFrame(mfr2, "usernameKey", gi.LayoutVert)
-	usernameKey.SetStretchMaxWidth()
+	// usernameKeyTitle := gi.AddNewLabel(mfr2, "usernameKeyTitle", "<b>Battle first to 10 kills:</b>")
+	// usernameKeyTitle.SetProp("text-align", "center")
+	// usernameKeyTitle.SetProp("font-size", "40px")
+	//
+	// usernameKey := gi.AddNewFrame(mfr2, "usernameKey", gi.LayoutVert)
+	// usernameKey.SetStretchMaxWidth()
 	hrow := gi.AddNewFrame(mfr2, "hrow", gi.LayoutHoriz)
 	hrow.SetStretchMaxWidth()
 	healthBar = gi.AddNewSlider(hrow, "healthBar")
 	healthBar.Dim = mat32.X
 	healthBar.Defaults()
 	healthBar.Max = 100
-	healthBar.SetMinPrefWidth(units.NewPct(90))
+	healthBar.SetMinPrefWidth(units.NewPct(100))
 	healthBar.SetMinPrefHeight(units.NewEm(2))
 	healthBar.SetValue(HEALTH)
 	healthBar.SetProp(":value", ki.Props{"background-color": "green"})

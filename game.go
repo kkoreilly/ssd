@@ -409,16 +409,16 @@ func (gm *Game) Config() {
 	// 	}
 	// })
 
-	rec := ki.Node{}
-	rec.InitName(&rec, "rec")
+	// rec := ki.Node{}
+	// rec.InitName(&rec, "rec")
 
-	takeDamage := gi.AddNewButton(brow, "takeDamage")
-	takeDamage.Text = "Take Damage"
-	takeDamage.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
-		if sig == int64(gi.ButtonClicked) {
-			go gm.fireWeapon()
-		}
-	})
+	// takeDamage := gi.AddNewButton(brow, "takeDamage")
+	// takeDamage.Text = "Take Damage"
+	// takeDamage.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+	// 	if sig == int64(gi.ButtonClicked) {
+	// 		go gm.fireWeapon()
+	// 	}
+	// })
 	// center_bluem :=
 	// cbm.Segs.Set(10, 10, 10) // not clear if any diff really..
 	// fpobj = gm.MakeObj(&MapObj{"FirstPerson", mat32.Vec3{0,0,0}, mat32.Vec3{1,1,1}}, "FirstPerson")
@@ -760,7 +760,7 @@ func (gm *Game) UpdatePeopleWorldPos() {
 	// Get all of the groups
 	pGp := gm.World.ChildByName("PeopleGroup", 0).(*eve.Group)
 	pgt := gm.Scene.Scene.ChildByName("PeopleTextGroup", 0)
-	uk := mfr2.ChildByName("usernameKey", 0)
+	// uk := mfr2.ChildByName("usernameKey", 0)
 	for i := 0; true; i++ {
 		_, ok := <-gm.PosUpdtChan // we wait here to receive channel message sent when positions have been updated
 		if !ok {                  // this means channel was closed, we need to bail, game over!
@@ -803,7 +803,7 @@ func (gm *Game) UpdatePeopleWorldPos() {
 		// }
 		updt := pGp.UpdateStart()
 		updt1 := pgt.UpdateStart()
-		updt2 := uk.UpdateStart()
+		// updt2 := uk.UpdateStart()
 		needToSync := false
 		for i, k := range keys {
 			if k == ThisUserInfo.Username {
@@ -826,13 +826,13 @@ func (gm *Game) UpdatePeopleWorldPos() {
 				text.Pose.Scale.SetScalar(0.3)
 				text.Pose.Pos = ppos.Pos
 				text.Pose.Pos.Y = text.Pose.Pos.Y + 1.3
-				uktn := "ukt_" + k
-				ukt := gi.AddNewLabel(uk, uktn, "")
-				ukt.SetText(fmt.Sprintf("<b>%v:</b>         %v kills         ", k, gm.OtherPos[k].Points))
-				ukt.SetProp("font-size", "30px")
-				ukt.Redrawable = true
-				ukt.SetProp("width", "20em")
-				ukt.SetFullReRender()
+				// uktn := "ukt_" + k
+				// ukt := gi.AddNewLabel(uk, uktn, "")
+				// ukt.SetText(fmt.Sprintf("<b>%v:</b>         %v kills         ", k, gm.OtherPos[k].Points))
+				// ukt.SetProp("font-size", "30px")
+				// ukt.Redrawable = true
+				// ukt.SetProp("width", "20em")
+				// ukt.SetFullReRender()
 			} else {
 				text1 := gm.Scene.Scene.ChildByName(k+"Text", 0)
 				if text1 == nil {
@@ -843,14 +843,14 @@ func (gm *Game) UpdatePeopleWorldPos() {
 				text.Pose.Pos = ppos.Pos
 				text.Pose.Pos.Y = text.Pose.Pos.Y + 1.3
 				text.SetProp("text-align", gi.AlignLeft)
-				uktt, err := uk.ChildByNameTry("ukt_"+k, 0)
-				if err != nil {
-					panic(err)
-				}
-				ukt := uktt.(*gi.Label)
-				ukt.SetText(fmt.Sprintf("<b>%v:</b>         %v kills              ", k, gm.OtherPos[k].Points))
-				ukt.SetProp("width", "20em")
-				text.Pose.Pos.X = text.Pose.Pos.X - 0.2
+				// uktt, err := uk.ChildByNameTry("ukt_"+k, 0)
+				// if err != nil {
+				// 	panic(err)
+				// }
+				// ukt := uktt.(*gi.Label)
+				// ukt.SetText(fmt.Sprintf("<b>%v:</b>         %v kills              ", k, gm.OtherPos[k].Points))
+				// ukt.SetProp("width", "20em")
+				// text.Pose.Pos.X = text.Pose.Pos.X - 0.2
 				if gm.OtherPos[k].Points >= 100 {
 					gm.PosMu.Unlock()
 					gm.setGameOver(k)
@@ -869,19 +869,19 @@ func (gm *Game) UpdatePeopleWorldPos() {
 			text.Pose.Quat.SetFromUnitVectors(mat32.Vec3{1, 0, 0}, dn)
 			text.Pose.RotateOnAxis(0, 1, 0, -90)
 		}
-		_, err := uk.ChildByNameTry("ukt_"+ThisUserInfo.Username, 0)
-		if err != nil {
-			ukt := gi.AddNewLabel(uk, "ukt_"+ThisUserInfo.Username, "")
-			ukt.SetText(fmt.Sprintf("<b>%v:</b>         %v kills              ", ThisUserInfo.Username, POINTS))
-			ukt.SetProp("font-size", "30px")
-			ukt.Redrawable = true
-			ukt.SetProp("width", "20em")
-			ukt.SetFullReRender()
-		} else {
-			ukt := uk.ChildByName("ukt_"+ThisUserInfo.Username, 0).(*gi.Label)
-			ukt.SetText(fmt.Sprintf("<b>%v:</b>         %v kills            ", ThisUserInfo.Username, POINTS))
-			ukt.SetProp("width", "20em")
-		}
+		// _, err := uk.ChildByNameTry("ukt_"+ThisUserInfo.Username, 0)
+		// if err != nil {
+		// 	ukt := gi.AddNewLabel(uk, "ukt_"+ThisUserInfo.Username, "")
+		// 	ukt.SetText(fmt.Sprintf("<b>%v:</b>         %v kills              ", ThisUserInfo.Username, POINTS))
+		// 	ukt.SetProp("font-size", "30px")
+		// 	ukt.Redrawable = true
+		// 	ukt.SetProp("width", "20em")
+		// 	ukt.SetFullReRender()
+		// } else {
+		// 	ukt := uk.ChildByName("ukt_"+ThisUserInfo.Username, 0).(*gi.Label)
+		// 	ukt.SetText(fmt.Sprintf("<b>%v:</b>         %v kills            ", ThisUserInfo.Username, POINTS))
+		// 	ukt.SetProp("width", "20em")
+		// }
 		if POINTS >= 100 {
 			gm.PosMu.Unlock()
 			gm.setGameOver(ThisUserInfo.Username)
@@ -898,7 +898,7 @@ func (gm *Game) UpdatePeopleWorldPos() {
 		gm.World.WorldRelToAbs()
 		pGp.UpdateEnd(updt)
 		pgt.UpdateEnd(updt1)
-		uk.UpdateEnd(updt2)
+		// uk.UpdateEnd(updt2)
 		gm.Scene.UpdateSig()
 	}
 }
@@ -926,13 +926,13 @@ func (sc *Scene) NavEvents() {
 		me := d.(*mouse.MoveEvent)
 		me.SetProcessed()
 		ssc := recv.Embed(KiT_Scene).(*Scene)
-		orbDel := float32(.2)
+		orbDel := float32(.005)
 		orbDels := orbDel * 1
 		panDel := float32(.05)
 		del := me.Where.Sub(me.From)
 		dx := float32(-del.X)
 		dy := float32(-del.Y)
-		// fmt.Printf("pos: %v  fm: %v del: %v\n", me.Where, me.From, del)
+		fmt.Printf("pos: %v  fm: %v del: %v\n", me.Where, me.From, del)
 		switch {
 		case key.HasAllModifierBits(me.Modifiers, key.Shift):
 			ssc.Camera.Pan(dx*panDel, -dy*panDel)
