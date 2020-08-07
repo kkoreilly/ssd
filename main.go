@@ -750,8 +750,84 @@ func initMainTabs() {
 	settingsTab.SetStretchMaxHeight()
 	settingsTab.SetProp("background-color", "lightblue")
 
-	savePass := gi.AddNewButton(settingsTab, "savePass")
+	stv := settingsTab.AddNewChild(gi.KiT_TabView, "stv").(*gi.TabView) // Create main tab view
+	stv.NewTabButton = false
+	stv.NoDeleteTabs = true
+	stv.SetStretchMaxWidth()
+
+	settingsMouseTab := stv.AddNewTab(gi.KiT_Frame, "Mouse").(*gi.Frame)
+
+	settingsMouseTab.Lay = gi.LayoutVert
+	settingsMouseTab.SetStretchMaxWidth()
+	settingsMouseTab.SetStretchMaxHeight()
+	// Load current settings:
+
+	b, err := ioutil.ReadFile("settings.json")
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		err = json.Unmarshal(b, &TheSettings)
+		if err != nil {
+			fmt.Println(err)
+		}
+	}
+
+	gameSensText := gi.AddNewLabel(settingsMouseTab, "gameSensText", "<b>Game sensitvity</b>: ")
+	gameSensText.SetProp("font-size", "xx-large")
+
+	gameSensSlider := gi.AddNewSlider(settingsMouseTab, "gameSensSlider")
+	gameSensSlider.Dim = mat32.X
+	gameSensSlider.Defaults()
+	gameSensSlider.Max = 1
+	gameSensSlider.SetMinPrefWidth(units.NewPct(10))
+	gameSensSlider.SetMinPrefHeight(units.NewEm(2))
+	if TheSettings.GameSensitivity != 0 {
+		gameSensSlider.SetValue(TheSettings.GameSensitivity)
+	} else {
+		gameSensSlider.SetValue(0.2)
+	}
+
+	saveMouseSettingsButton := gi.AddNewButton(settingsMouseTab, "saveMouseSettingsButton")
+	saveMouseSettingsButton.Text = "Save"
+	saveMouseSettingsButton.SetProp("font-size", "40px")
+
+	saveMouseSettingsButton.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
+		if sig == int64(gi.ButtonClicked) {
+			TheSettings.GameSensitivity = gameSensSlider.Value
+			b, err := json.MarshalIndent(TheSettings, "", "  ")
+			if err != nil {
+				fmt.Println(err)
+			}
+			err = ioutil.WriteFile("settings.json", b, 0644)
+			if err != nil {
+				fmt.Println(err)
+			}
+		}
+	})
+
+	settingsKeyboardTab := stv.AddNewTab(gi.KiT_Frame, "Keyboard").(*gi.Frame)
+
+	settingsKeyboardTab.Lay = gi.LayoutVert
+	settingsKeyboardTab.SetStretchMaxWidth()
+	settingsKeyboardTab.SetStretchMaxHeight()
+
+	placeholderTextKeyboard := gi.AddNewLabel(settingsKeyboardTab, "placeholderTextKeyboard", "Keybind options coming soon")
+	placeholderTextKeyboard.SetProp("font-size", "50px")
+	placeholderTextKeyboard.SetProp("text-align", "center")
+
+	settingsAccountTab := stv.AddNewTab(gi.KiT_Frame, "Account").(*gi.Frame)
+
+	settingsAccountTab.Lay = gi.LayoutVert
+	settingsAccountTab.SetStretchMaxWidth()
+	settingsAccountTab.SetStretchMaxHeight()
+
+	usernameAccountText := gi.AddNewLabel(settingsAccountTab, "usernameAccountText", "<b>Your username is: </b>"+ThisUserInfo.Username)
+	usernameAccountText.SetProp("font-size", "50px")
+	gi.AddNewSpace(settingsAccountTab, "spc1")
+	gi.AddNewSpace(settingsAccountTab, "spc2")
+	savePass := gi.AddNewButton(settingsAccountTab, "savePass")
 	savePass.Text = "Remember Password"
+	savePass.SetProp("font-size", "40px")
 	savePass.ButtonSig.Connect(rec.This(), func(recv, send ki.Ki, sig int64, data interface{}) {
 		if sig == int64(gi.ButtonClicked) {
 			b, err := json.MarshalIndent(&UserPass{ThisUserInfo.Username, ThisUserInfo.Password}, "", "  ")
@@ -764,6 +840,9 @@ func initMainTabs() {
 			}
 		}
 	})
+
+	savePassText := gi.AddNewLabel(settingsAccountTab, "savePassText", "Remember password will automatically log you into your current account on this device.")
+	savePassText.SetProp("font-size", "40px")
 
 	FirstWorld.RenderSVGs(simMapSVG)
 

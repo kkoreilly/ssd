@@ -98,6 +98,12 @@ type Scene struct {
 	CamRotLR   float32 // current camera rotation LR
 }
 
+type Settings struct {
+	GameSensitivity float32
+}
+
+var TheSettings Settings
+
 var KiT_Scene = kit.Types.AddType(&Scene{}, nil)
 
 func (gm *Game) BuildMap() {
@@ -926,13 +932,18 @@ func (sc *Scene) NavEvents() {
 		me := d.(*mouse.MoveEvent)
 		me.SetProcessed()
 		ssc := recv.Embed(KiT_Scene).(*Scene)
-		orbDel := float32(.005)
+		var orbDel float32
+		if TheSettings.GameSensitivity != 0 {
+			orbDel = TheSettings.GameSensitivity
+		} else {
+			orbDel = 0.2
+		}
 		orbDels := orbDel * 1
 		panDel := float32(.05)
 		del := me.Where.Sub(me.From)
 		dx := float32(-del.X)
 		dy := float32(-del.Y)
-		fmt.Printf("pos: %v  fm: %v del: %v\n", me.Where, me.From, del)
+		// fmt.Printf("pos: %v  fm: %v del: %v\n", me.Where, me.From, del)
 		switch {
 		case key.HasAllModifierBits(me.Modifiers, key.Shift):
 			ssc.Camera.Pan(dx*panDel, -dy*panDel)
@@ -946,6 +957,8 @@ func (sc *Scene) NavEvents() {
 			} else {
 				dx = 0
 			}
+
+			// fmt.Printf("%v %v \n", dx,  dy)
 			sc.CamRotUD += dy * orbDels
 			if sc.CamRotUD > 90 {
 				sc.CamRotUD = 90
