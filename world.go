@@ -6,8 +6,9 @@ package main
 
 import (
 	"fmt"
-	"github.com/goki/gi/svg"
 	"math/rand"
+
+	"github.com/goki/gi/svg"
 )
 
 type Territory struct {

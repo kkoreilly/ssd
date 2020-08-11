@@ -6,7 +6,6 @@ package main
 
 import (
 	"fmt"
-	"sort"
 	"sync"
 
 	"math"
@@ -32,15 +31,6 @@ const (
 	BulletTimeMsec = 300
 )
 
-type CurPosition struct {
-	Username   string
-	BattleName string
-	Points     int
-	Pos        mat32.Vec3
-	KilledBy   string
-	SpawnCount int
-}
-
 type Weapon struct {
 	Name     string
 	MinD     float32 `desc:"Minimum amount of damage that this weapon will do"`
@@ -58,14 +48,17 @@ type FireEventInfo struct {
 }
 
 type Game struct {
+	BattleName     string
+	IsDead         bool
 	World          *eve.Group
 	View           *evev.View
 	Scene          *Scene
-	Map            Map
+	Map            Map // Fixed struct of the world
 	MapObjs        map[string]bool
-	OtherPos       map[string]*CurPosition
+	User           Player
+	Players        map[string]*Player
 	PosUpdtChan    chan bool  `desc:"channel connecting server pos updates with world state update"`
-	PosMu          sync.Mutex `desc:"protects updates to OtherPos map"`
+	PosMu          sync.Mutex `desc:"protects updates to Players map"`
 	WorldMu        sync.Mutex `desc:"protects updates to World physics and view"`
 	GameOn         bool       // starts on when game turned out, turn off when close game
 	Winner         string
@@ -78,7 +71,7 @@ type Game struct {
 	KilledBy       string
 	SpawnCount     int
 	SpawnPositions []mat32.Vec3
-	IsDead         bool
+	Events         Deque // Queue of events
 }
 
 // TheGame is the game instance for the current game
@@ -115,38 +108,74 @@ func (gm *Game) BuildMap() {
 	eve.AddNewGroup(gm.World, "PeopleGroup")
 	gi3d.AddNewGroup(&gm.Scene.Scene, &gm.Scene.Scene, "RayGroup")
 	gi3d.AddNewGroup(&gm.Scene.Scene, &gm.Scene.Scene, "PeopleTextGroup")
+	eve.AddNewGroup(gm.World, "Statics")
 	for nm, obj := range gm.Map {
 		// fmt.Printf("Object type: %v \n", obj.ObjType)
 		gm.MakeObj(obj, nm)
 	}
 }
 
+func (gm *Game) AddMoveEvent(pose *eve.Phys) { // Us only
+	gm.User.Pose = *pose
+	ev := &Event{Type: Move, User: gm.User.Username, Pos: pose.Pos, Quat: pose.Quat}
+	gm.AddEvent(ev)
+}
+
+func (gm *Game) AddEvent(ev *Event) {
+	// fmt.Printf("%v \n", ev.Pos)
+	// fmt.Printf("%v \n", gm.User.Username)
+	gm.Events.Send(ev)
+	// TODO: Send this to server
+}
+
+func (gm *Game) EventLoop() {
+	for {
+		// fmt.Printf("waiting for events \n")
+		ev := gm.Events.NextEvent()
+		// fmt.Printf("%v \n", ev.Pos)
+		gm.WorldMu.Lock()
+		if ev.User == gm.User.Username {
+			// fmt.Printf("1 \n")
+			gm.User.ApplyEvent(ev)
+		} else {
+			// fmt.Printf("2 \n")
+			otherUser, ok := gm.Players[ev.User]
+			if ok {
+				otherUser.ApplyEvent(ev)
+			}
+
+		}
+		gm.WorldMu.Unlock()
+
+	}
+}
 func (gm *Game) MakeObj(obj *MapObj, nm string) *eve.Group {
 	var ogp *eve.Group
+	stat := gm.World.ChildByName("Statics", 0)
 	switch obj.ObjType {
 	case "TheWall":
-		ogp = eve.AddNewGroup(gm.World, nm)
+		ogp = eve.AddNewGroup(stat, nm)
 		gm.PhysMakeTheWall(ogp, nm)
 	case "House":
-		ogp = eve.AddNewGroup(gm.World, nm)
+		ogp = eve.AddNewGroup(stat, nm)
 		gm.PhysMakeBrickHouse(ogp, nm)
 	case "Block":
-		ogp = eve.AddNewGroup(gm.World, nm)
+		ogp = eve.AddNewGroup(stat, nm)
 		for i := 0; i < 3; i++ {
 			house := gm.PhysMakeBrickHouse(ogp, fmt.Sprintf("%v-House%v", nm, i))
 			house.Initial.Pos.Set(float32(20*i), 0, 0)
 		}
 	case "Road":
-		ogp = eve.AddNewGroup(gm.World, nm)
+		ogp = eve.AddNewGroup(stat, nm)
 		gm.PhysMakeRoad(ogp, nm)
 	case "ArenaWalls":
-		ogp = eve.AddNewGroup(gm.World, nm)
+		ogp = eve.AddNewGroup(stat, nm)
 		gm.PhysMakeArenaWalls(ogp, nm)
 	case "LavaBlockFour":
-		ogp = eve.AddNewGroup(gm.World, nm)
+		ogp = eve.AddNewGroup(stat, nm)
 		gm.PhysMakeLava(ogp, nm, 2, 2)
 	case "LavaWallsSetup":
-		ogp = eve.AddNewGroup(gm.World, nm)
+		ogp = eve.AddNewGroup(stat, nm)
 		backRight := gm.PhysMakeLava(ogp, nm+"backRight", 8, 1)
 		backRight.Initial.Pos.Set(10, 0, 85)
 		backLeft := gm.PhysMakeLava(ogp, nm+"backLeft", 8, 1)
@@ -483,7 +512,7 @@ func (gm *Game) Config() {
 	gm.PosUpdtChan = make(chan bool) // todo: close channel when ending game, will terminate goroutines
 	gm.FireUpdtChan = make(chan bool)
 
-	gm.OtherPos = make(map[string]*CurPosition)
+	gm.Players = make(map[string]*Player)
 	gm.FireEvents = make([]*FireEventInfo, 0)
 	gm.GameOn = true
 	RayGroup := gm.Scene.Scene.ChildByName("RayGroup", 0).(*gi3d.Group)
@@ -492,128 +521,16 @@ func (gm *Game) Config() {
 		line := gi3d.AddNewLine(&gm.Scene.Scene, RayGroup, fmt.Sprintf("bullet_arrow_enemy%v", i), mat32.Vec3{0, 0, 0}, mat32.Vec3{1, 1, 1}, .05, color)
 		line.SetInvisible()
 	}
+	pers := gm.World.ChildByName("FirstPerson", 0).(*eve.Group)
+	gm.User.Pose = pers.Rel
 
-	go gm.GetPosFromServer()     // this is loop getting positions from server
-	go gm.UpdatePeopleWorldPos() // this is loop updating positions
-	go gm.UpdatePersonYPos()     // deals with jumping and gravity
-	go gm.GetFireEvents()
-	go gm.RenderEnemyShots()
-}
+	gm.User.Username = ThisUserInfo.Username
 
-func (gm *Game) RenderEnemyShots() {
-	RayGroup := gm.Scene.Scene.ChildByName("RayGroup", 0).(*gi3d.Group)
-	for {
-		// startTime := time.Now()
-		if !gm.GameOn {
-			return
-		}
-		// fmt.Printf("Before fire event mu \n")
-		gm.FireEventMu.Lock()
-		// fmt.Printf("After fire event mu \n")
-		// fmt.Printf("Lock time: %v \n", time.Since(startTime).Milliseconds())
-		for k, d := range gm.FireEvents {
-			if d.Creator != ThisUserInfo.Username {
-				bi := k % 30
-				rayObj := RayGroup.ChildByName(fmt.Sprintf("bullet_arrow_enemy%v", bi), 0).(*gi3d.Solid)
-				ray := mat32.NewRay(d.Origin, d.Dir)
-				endPos := mat32.Vec3{0, 0, 0}
-				sepPos := d.Dir.Mul(mat32.Vec3{100, 100, 100})
-				cts := gm.World.RayBodyIntersections(*ray)
-				killed := false
-				for _, d1 := range cts {
-					if d1.Body.Name() == "FirstPerson" && !gm.IsDead {
-						gm.FireEventMu.Unlock()
-						gm.removeHealthPoints(d.Damage, d.Creator)
-						gi3d.SetLineStartEnd(rayObj, mat32.Vec3{500, 500, 500}, mat32.Vec3{500, 500, 500})
-						gm.FireEventMu.Lock()
-						killed = true
-					}
-
-					endPos = d1.Point
-					break
-				}
-				if cts == nil {
-
-					endPos = sepPos
-				}
-				if !killed {
-					gi3d.SetLineStartEnd(rayObj, d.Origin, endPos)
-					rayObj.ClearInvisible()
-				}
-			}
-			if time.Now().Sub(d.StartTime) >= time.Millisecond*BulletTimeMsec {
-				bi := k % 30
-				rayObjKi := RayGroup.ChildByName(fmt.Sprintf("bullet_arrow_enemy%v", bi), 0)
-				gm.FireEvents[k].Origin = mat32.Vec3{500, 500, 500}
-				gm.FireEvents[k].Dir = mat32.Vec3{-1, 0, 0}
-				if rayObjKi == nil {
-					continue
-				}
-				rayObj := rayObjKi.(*gi3d.Solid)
-				rayObj.SetInvisible()
-				gi3d.SetLineStartEnd(rayObj, mat32.Vec3{500, 500, 500}, mat32.Vec3{500, 500, 500})
-			}
-		}
-
-		gm.FireEventMu.Unlock()
-		// fmt.Printf("Total time for render enemy shots: %v \n", time.Since(startTime).Milliseconds())
-	}
-}
-func (gm *Game) fireWeapon() { // standard event for what happens when you fire
-	// Currently just deal damage to yourself, at interval
-	// todo: actually fire and deal damage to others
-	if !gm.AbleToFire {
-		return
-	}
-	// what to do on fire in here:
-
-	cursor := gm.Scene.Scene.ChildByName("CrossGroup", 0).(*gi3d.Group)
-	endPos := cursor.Pose
-	rayPos := cursor.Pose
-	sPos := cursor.Pose
-	// endPos.MoveOnAxis(0, 0, -1, 100)
-	rayPos.Pos = mat32.Vec3{0, 0, 0}
-	rayPos.MoveOnAxis(0, 0, -1, 1)
-	ray := mat32.NewRay(cursor.Pose.Pos, rayPos.Pos)
-	// fmt.Printf("Ray: %v \n", ray)
-	cts := gm.World.RayBodyIntersections(*ray)
-	var closest *eve.BodyPoint
-	// fmt.Printf("Contacts: %v \n", cts)
-	for _, d := range cts {
-		// fmt.Printf("Key: %v Body: %v  Point: %v \n", k, d.Body, d.Point)
-		if closest == nil {
-			closest = d
-		} else {
-			if cursor.Pose.Pos.DistTo(closest.Point) > cursor.Pose.Pos.DistTo(d.Point) {
-				closest = d
-			}
-		}
-		if d.Body.Name() == "FirstPerson" {
-			// gm.removeHealthPoints(WEAPON)
-		}
-	}
-	if cts != nil {
-		endPos.Pos = closest.Point
-	} else {
-		sPos.MoveOnAxis(0, 0, -1, 100)
-		endPos.Pos = sPos.Pos
-	}
-	index := len(gm.FireEvents)
-	RayGroup := gm.Scene.Scene.ChildByName("RayGroup", 0).(*gi3d.Group)
-	index = index % 30
-	// fmt.Printf("Name: bullet_arrow_enemy%v \n", index)
-	rayObj := RayGroup.ChildByName(fmt.Sprintf("bullet_arrow_enemy%v", index), 0).(*gi3d.Solid)
-	gi3d.SetLineStartEnd(rayObj, cursor.Pose.Pos, endPos.Pos)
-	rayObj.ClearInvisible()
-	// bullet = gi3d.AddNewLine(&gm.Scene.Scene, RayGroup, "bullet_arrow_you", cursor.Pose.Pos, endPos.Pos, .05, color)
-	go gm.removeBulletLoop(rayObj, cursor.Pose.Pos, rayPos.Pos, index)
-	// done with what to fire
-	gm.AbleToFire = false
-	writeFireEventToServer(cursor.Pose.Pos, rayPos.Pos, generateDamageAmount(WEAPON), CURBATTLE)
-	// addFireEventToDB(ThisUserInfo.Username, generateDamageAmount(WEAPON), cursor.Pose.Pos, rayPos.Pos)
-	numOfSeconds := TheWeapons[WEAPON].FireRate
-	time.Sleep(time.Duration(1/numOfSeconds) * time.Second)
-	gm.AbleToFire = true
+	go gm.RenderLoop()
+	go gm.EventLoop()
+	// go gm.ServerLoop()
+	// go gm.GetFireEvents()
+	// go gm.RenderEnemyShots()
 }
 
 func (gm *Game) removeBulletLoop(bullet *gi3d.Solid, origin mat32.Vec3, dir mat32.Vec3, index int) {
@@ -657,14 +574,14 @@ func (gm *Game) removeHealthPoints(dmg int, from string) {
 		pers.Rel.Pos = mat32.Vec3{1000, 1, 1000}
 		gm.Scene.Camera.Pose.Pos = pers.Rel.Pos.Add(camOff)
 		gm.KilledBy = from
-		writePlayerPosToServer(pers.Rel.Pos, CURBATTLE)
+		// writePlayerPosToServer(pers.Rel.Pos, CURBATTLE)
 		gm.World.WorldRelToAbs()
 		gm.Scene.UpdateSig()
 		gm.Scene.Win.OSWin.SetCursorEnabled(true, false)
 		gm.Scene.TrackMouse = false
 		resultText.SetText("<b>You were killed by " + from + " - Respawning in 5</b>")
 		resultText.SetFullReRender()
-		// updateBattlePoints(from, gm.OtherPos[from].Points+1)
+		// updateBattlePoints(from, gm.Players[from].Points+1)
 		go gm.timerForResult(from)
 	}
 }
@@ -729,184 +646,10 @@ func (gm *Game) updateCursorPosition() {
 	cursor.Pose.Scale.SetScalar(0.3)
 }
 
-func (gm *Game) UpdatePersonYPos() {
-	for {
-		if !gm.GameOn {
-			return
-		}
-		pers := gm.World.ChildByName("FirstPerson", 0).(*eve.Group)
-		camOff := gm.Scene.Camera.Pose.Pos.Sub(pers.Rel.Pos) // currrent offset of camera vs. person
-		if pers.Rel.Pos.Y != 1 {
-			pers.Rel.LinVel.Y = pers.Rel.LinVel.Y - gm.Gravity
-			pers.Rel.Pos.Y += pers.Rel.LinVel.Y
-			if pers.Rel.Pos.Y <= 1 {
-				pers.Rel.Pos.Y = 1
-				pers.Rel.LinVel.Y = 0
-			}
-			writePlayerPosToServer(pers.Rel.Pos, CURBATTLE)
-		}
-		gm.World.WorldRelToAbs()
-		gm.Scene.Camera.Pose.Pos = pers.Rel.Pos.Add(camOff)
-		if pers.Rel.Pos.Y != 1 {
-			gm.Scene.UpdateSig()
-		}
-		time.Sleep(100 * time.Millisecond)
-	}
-}
-
 func AddNewScene(parent ki.Ki, name string) *Scene {
 	sc := parent.AddNewChild(KiT_Scene, name).(*Scene)
 	sc.Defaults()
 	return sc
-}
-
-func (gm *Game) UpdatePeopleWorldPos() {
-	rec := ki.Node{}
-	rec.InitName(&rec, "rec")
-	// Get all of the groups
-	pGp := gm.World.ChildByName("PeopleGroup", 0).(*eve.Group)
-	pgt := gm.Scene.Scene.ChildByName("PeopleTextGroup", 0)
-	// uk := mfr2.ChildByName("usernameKey", 0)
-	for i := 0; true; i++ {
-		_, ok := <-gm.PosUpdtChan // we wait here to receive channel message sent when positions have been updated
-		if !ok {                  // this means channel was closed, we need to bail, game over!
-			return
-		}
-		gm.PosMu.Lock()
-		keys := make([]string, len(gm.OtherPos))
-		ctr := 0
-		for k := range gm.OtherPos {
-			keys[ctr] = k
-			ctr++
-		}
-		sort.Strings(keys) // it is "key" to have others in same order so if there are no changes, nothing happens
-		// config := kit.TypeAndNameList{}
-		// config1 := kit.TypeAndNameList{}
-		// for _, k := range keys {
-		// 	config.Add(eve.KiT_Group, k)
-		// 	if uk.ChildByName("ukt_"+k, 0) != nil {
-		// 		config1.Add(gi.KiT_Label, "ukt_"+k)
-		// 	}
-		// 	// if uk.ChildByName("ukt_"+k+"_button", 0) != nil {
-		// 	// 	config1.Add(gi.KiT_Button, "ukt_"+k+"_button")
-		// 	// }
-		// 	if i >= 1 {
-		// 		config1.Add(gi.KiT_Label, "ukt_"+USER)
-		// 		// config1.Add(gi.KiT_Button, "ukt_"+USER+"_button")
-		// 	}
-		// }
-		// mods, updt := pGp.ConfigChildren(config, ki.NonUniqueNames)
-		// mods1, updt1 := pgt.ConfigChildren(config, ki.NonUniqueNames)
-		// mods2, updt2 := uk.ConfigChildren(config1, ki.NonUniqueNames)
-		// if !mods {
-		// 	updt = pGp.UpdateStart() // updt is automatically set if mods = true, so we're just doing it here
-		// }
-		// if !mods1 {
-		// 	updt1 = pgt.UpdateStart() // updt is automatically set if mods = true, so we're just doing it here
-		// }
-		// if !mods2 {
-		// 	updt2 = uk.UpdateStart() // updt is automatically set if mods = true, so we're just doing it here
-		// }
-		updt := pGp.UpdateStart()
-		updt1 := pgt.UpdateStart()
-		// updt2 := uk.UpdateStart()
-		needToSync := false
-		for i, k := range keys {
-			if k == ThisUserInfo.Username {
-				continue
-			}
-			ppos := gm.OtherPos[k]
-			var pers *eve.Group
-			if i >= len(*pGp.Children()) {
-				pers = eve.AddNewGroup(pGp, k)
-			} else {
-				pers = pGp.Child(i).(*eve.Group) // this is guaranteed to be for person "k"
-			}
-			if !pers.HasChildren() { // if has not already been made
-				needToSync = true
-				gm.PhysMakePerson(pers, k, false) // make
-				text := gi3d.AddNewText2D(&gm.Scene.Scene, &gm.Scene.Scene, k+"Text", k)
-				text.SetProp("color", "black")
-				text.SetProp("background-color", "white")
-				text.SetProp("text-align", gi.AlignLeft)
-				text.Pose.Scale.SetScalar(0.3)
-				text.Pose.Pos = ppos.Pos
-				text.Pose.Pos.Y = text.Pose.Pos.Y + 1.3
-				// uktn := "ukt_" + k
-				// ukt := gi.AddNewLabel(uk, uktn, "")
-				// ukt.SetText(fmt.Sprintf("<b>%v:</b>         %v kills         ", k, gm.OtherPos[k].Points))
-				// ukt.SetProp("font-size", "30px")
-				// ukt.Redrawable = true
-				// ukt.SetProp("width", "20em")
-				// ukt.SetFullReRender()
-			} else {
-				text1 := gm.Scene.Scene.ChildByName(k+"Text", 0)
-				if text1 == nil {
-					fmt.Printf("Continue \n")
-					continue
-				}
-				text := text1.(*gi3d.Text2D)
-				text.Pose.Pos = ppos.Pos
-				text.Pose.Pos.Y = text.Pose.Pos.Y + 1.3
-				text.SetProp("text-align", gi.AlignLeft)
-				// uktt, err := uk.ChildByNameTry("ukt_"+k, 0)
-				// if err != nil {
-				// 	panic(err)
-				// }
-				// ukt := uktt.(*gi.Label)
-				// ukt.SetText(fmt.Sprintf("<b>%v:</b>         %v kills              ", k, gm.OtherPos[k].Points))
-				// ukt.SetProp("width", "20em")
-				// text.Pose.Pos.X = text.Pose.Pos.X - 0.2
-				if gm.OtherPos[k].Points >= 100 {
-					gm.PosMu.Unlock()
-					gm.setGameOver(k)
-					gm.PosMu.Lock()
-				}
-			}
-			pers.Rel.Pos = ppos.Pos
-			firstPers := gm.World.ChildByName("FirstPerson", 0).(*eve.Group)
-			d := pers.Rel.Pos.Sub(firstPers.Rel.Pos)
-			dn := d.Normal()
-			text1 := gm.Scene.Scene.ChildByName(k+"Text", 0)
-			if text1 == nil {
-				continue
-			}
-			text := text1.(*gi3d.Text2D)
-			text.Pose.Quat.SetFromUnitVectors(mat32.Vec3{1, 0, 0}, dn)
-			text.Pose.RotateOnAxis(0, 1, 0, -90)
-		}
-		// _, err := uk.ChildByNameTry("ukt_"+ThisUserInfo.Username, 0)
-		// if err != nil {
-		// 	ukt := gi.AddNewLabel(uk, "ukt_"+ThisUserInfo.Username, "")
-		// 	ukt.SetText(fmt.Sprintf("<b>%v:</b>         %v kills              ", ThisUserInfo.Username, POINTS))
-		// 	ukt.SetProp("font-size", "30px")
-		// 	ukt.Redrawable = true
-		// 	ukt.SetProp("width", "20em")
-		// 	ukt.SetFullReRender()
-		// } else {
-		// 	ukt := uk.ChildByName("ukt_"+ThisUserInfo.Username, 0).(*gi.Label)
-		// 	ukt.SetText(fmt.Sprintf("<b>%v:</b>         %v kills            ", ThisUserInfo.Username, POINTS))
-		// 	ukt.SetProp("width", "20em")
-		// }
-		if POINTS >= 100 {
-			gm.PosMu.Unlock()
-			gm.setGameOver(ThisUserInfo.Username)
-			gm.PosMu.Lock()
-		}
-		if needToSync {
-			gm.View.Sync() // if something was created or destroyed, it must use Sync to update Scene
-		} else {
-			gm.View.Sync()
-			gm.View.UpdatePose() // UpdatePose is much faster and assumes no changes in objects
-		}
-		gm.PosMu.Unlock()
-		// so now everyone's updated
-		gm.World.WorldRelToAbs()
-		pGp.UpdateEnd(updt)
-		pgt.UpdateEnd(updt1)
-		// uk.UpdateEnd(updt2)
-		gm.Scene.UpdateSig()
-	}
 }
 
 func (sc *Scene) Render2D() {
@@ -1051,13 +794,14 @@ func (sc *Scene) NavKeyEvents(kt *key.ChordEvent) {
 	// zoomPct := float32(.05)
 
 	gm := TheGame
-	gm.WorldMu.Lock()
-	defer gm.WorldMu.Unlock()
+	// gm.WorldMu.Lock()
+	// defer gm.WorldMu.Unlock()
 
-	wupdt := gm.World.UpdateStart()
+	// wupdt := gm.World.UpdateStart()
 
-	pers := gm.World.ChildByName("FirstPerson", 0).(*eve.Group)
-	camOff := sc.Camera.Pose.Pos.Sub(pers.Rel.Pos) // currrent offset of camera vs. person
+	// pers := gm.World.ChildByName("FirstPerson", 0).(*eve.Group)
+	phys := gm.User.Pose
+	// camOff := sc.Camera.Pose.Pos.Sub(phys.Pos) // currrent offset of camera vs. person
 	// todo: get current camera axis-angle
 
 	switch ch {
@@ -1069,166 +813,105 @@ func (sc *Scene) NavKeyEvents(kt *key.ChordEvent) {
 			sc.Win.OSWin.SetCursorEnabled(true, false)
 		}
 		kt.SetProcessed()
-
-		// case "UpArrow":
-		//
-		// 	sc.Camera.Pose.SetEulerRotation(orbDeg, 0, 0)
-		// kt.SetProcessed()
-
-		// case "Shift+UpArrow":
-		// 	sc.Camera.Pan(0, panDel)
-		// 	kt.SetProcessed()
-		// case "Control+UpArrow":
-		// 	sc.Camera.PanAxis(0, panDel)
-		// 	kt.SetProcessed()
-		// case "Alt+UpArrow":
-		// 	sc.Camera.PanTarget(0, panDel, 0)
-		// 	kt.SetProcessed()
-		// case "DownArrow":
-		// sc.Camera.Orbit(0, -orbDeg)
-		// kt.SetProcessed()
-		// case "Shift+DownArrow":
-		// 	sc.Camera.Pan(0, -panDel)
-		// 	kt.SetProcessed()
-		// case "Control+DownArrow":
-		// 	sc.Camera.PanAxis(0, -panDel)
-		// 	kt.SetProcessed()
-		// case "Alt+DownArrow":
-		// 	sc.Camera.PanTarget(0, -panDel, 0)
-		// 	kt.SetProcessed()
-		// case "LeftArrow":
-		// sc.Camera.Orbit(orbDeg, 0)
-		// kt.SetProcessed()
-		// case "Shift+LeftArrow":
-		// 	sc.Camera.Pan(-panDel, 0)
-		// 	kt.SetProcessed()
-		// case "Control+LeftArrow":
-		// 	sc.Camera.PanAxis(-panDel, 0)
-		// 	kt.SetProcessed()
-		// case "Alt+LeftArrow":
-		// 	sc.Camera.PanTarget(-panDel, 0, 0)
-		// 	kt.SetProcessed()
-		// case "RightArrow":
-		// sc.Camera.Orbit(-orbDeg, 0)
-		// kt.SetProcessed()
-		// case "Shift+RightArrow":
-		// 	sc.Camera.Pan(panDel, 0)
-		// 	kt.SetProcessed()
-		// case "Control+RightArrow":
-		// 	sc.Camera.PanAxis(panDel, 0)
-		// 	kt.SetProcessed()
-		// case "Alt+RightArrow":
-		// 	sc.Camera.PanTarget(panDel, 0, 0)
-		// 	kt.SetProcessed()
-		// case "Alt++", "Alt+=":
-		// 	sc.Camera.PanTarget(0, 0, panDel)
-		// 	kt.SetProcessed()
-		// case "Alt+-", "Alt+_":
-		// 	sc.Camera.PanTarget(0, 0, -panDel)
-		// 	kt.SetProcessed()
-		// case "+", "=":
-		// 	sc.Camera.Zoom(-zoomPct)
-		// 	kt.SetProcessed()
-		// case "-", "_":
-		// 	sc.Camera.Zoom(zoomPct)
-		// 	kt.SetProcessed()
 	case " ":
-		if pers.Rel.Pos.Y == 1 {
-			pers.Rel.LinVel.Y = 1
-			pers.Rel.Pos.Y += pers.Rel.LinVel.Y
+		if phys.Pos.Y == 1 {
+			phys.LinVel.Y = 1
+			phys.Pos.Y += phys.LinVel.Y
 		}
 	case "r":
-		pers.Rel.Pos.Set(0, 1, 0)
-		pers.Rel.Quat.SetFromAxisAngle(mat32.Vec3{0, 1, 0}, 0)
+		phys.Pos.Set(0, 1, 0)
+		phys.Quat.SetFromAxisAngle(mat32.Vec3{0, 1, 0}, 0)
 	case "w":
 		kt.SetProcessed()
-		y := pers.Rel.Pos.Y // keep height fixed -- no jumping right now.
+		y := phys.Pos.Y // keep height fixed -- no jumping right now.
 		if !gm.PersHitWall {
-			pers.Rel.MoveOnAxis(0, 0, -1, .5) // todo: use camera axis not fixed axis
+			phys.MoveOnAxis(0, 0, -1, .5) // todo: use camera axis not fixed axis
 		} else {
-			prevPosX := pers.Rel.Pos.X
-			prevPosZ := pers.Rel.Pos.Z
-			pers.Rel.MoveOnAxis(0, 0, -1, .5)
-			stillNessecary := gm.WorldStep(true)
-			if stillNessecary {
-				pers.Rel.Pos.X = prevPosX
-				pers.Rel.Pos.Z = prevPosZ
-			}
+			// prevPosX := phys.Pos.X
+			// prevPosZ := phys.Pos.Z
+			phys.MoveOnAxis(0, 0, -1, .5)
+			// stillNessecary := gm.WorldStep(true)
+			// if stillNessecary {
+			// 	phys.Pos.X = prevPosX
+			// 	phys.Pos.Z = prevPosZ
+			// }
 		}
-		pers.Rel.Pos.Y = y
-		gm.WorldStep(false)
+		phys.Pos.Y = y
+		// gm.WorldStep(false)
+		// fmt.Printf("%v", phys.Pos)
+		gm.AddMoveEvent(&phys)
 	case "s":
 		kt.SetProcessed()
-		y := pers.Rel.Pos.Y // keep height fixed -- no jumping right now.
+		y := phys.Pos.Y // keep height fixed -- no jumping right now.
 		if !gm.PersHitWall {
-			pers.Rel.MoveOnAxis(0, 0, 1, .5)
+			phys.MoveOnAxis(0, 0, 1, .5)
 		} else {
-			prevPosX := pers.Rel.Pos.X
-			prevPosZ := pers.Rel.Pos.Z
-			pers.Rel.MoveOnAxis(0, 0, 1, .5)
-			stillNessecary := gm.WorldStep(true)
-			// fmt.Printf("Still for s: %v \n", stillNessecary)
-			if stillNessecary {
-				pers.Rel.Pos.X = prevPosX
-				pers.Rel.Pos.Z = prevPosZ
-			}
+			// prevPosX := phys.Pos.X
+			// prevPosZ := phys.Pos.Z
+			phys.MoveOnAxis(0, 0, 1, .5)
+			// stillNessecary := gm.WorldStep(true)
+			// // fmt.Printf("Still for s: %v \n", stillNessecary)
+			// if stillNessecary {
+			// 	phys.Pos.X = prevPosX
+			// 	phys.Pos.Z = prevPosZ
+			// }
 		}
 
-		pers.Rel.Pos.Y = y
-		gm.WorldStep(false)
+		phys.Pos.Y = y
+		// gm.WorldStep(false)
 	case "a":
 		kt.SetProcessed()
-		y := pers.Rel.Pos.Y // keep height fixed -- no jumping right now.
+		y := phys.Pos.Y // keep height fixed -- no jumping right now.
 		if !gm.PersHitWall {
-			pers.Rel.MoveOnAxis(-0.75, 0, 0, .5)
+			phys.MoveOnAxis(-0.75, 0, 0, .5)
 		} else {
-			prevPosX := pers.Rel.Pos.X
-			prevPosZ := pers.Rel.Pos.Z
-			pers.Rel.MoveOnAxis(-0.75, 0, 0, .5)
-			stillNessecary := gm.WorldStep(true)
-			if stillNessecary {
-				pers.Rel.Pos.X = prevPosX
-				pers.Rel.Pos.Z = prevPosZ
-			}
+			// prevPosX := phys.Pos.X
+			// prevPosZ := phys.Pos.Z
+			phys.MoveOnAxis(-0.75, 0, 0, .5)
+			// stillNessecary := gm.WorldStep(true)
+			// if stillNessecary {
+			// 	phys.Pos.X = prevPosX
+			// 	phys.Pos.Z = prevPosZ
+			// }
 		}
-		pers.Rel.Pos.Y = y
-		gm.WorldStep(false)
+		phys.Pos.Y = y
+		// gm.WorldStep(false)
 		// sc.Camera.Pan(panDel, 0)
 		// kt.SetProcessed()
 		// go updatePosition("posX", rcb.Initial.Pos.X)
 	case "d":
 		kt.SetProcessed()
-		y := pers.Rel.Pos.Y // keep height fixed -- no jumping right now.
+		y := phys.Pos.Y // keep height fixed -- no jumping right now.
 		if !gm.PersHitWall {
-			pers.Rel.MoveOnAxis(0.75, 0, 0, .5)
+			phys.MoveOnAxis(0.75, 0, 0, .5)
 		} else {
-			prevPosX := pers.Rel.Pos.X
-			prevPosZ := pers.Rel.Pos.Z
-			pers.Rel.MoveOnAxis(0.75, 0, 0, .5)
-			stillNessecary := gm.WorldStep(true)
-			if stillNessecary {
-				pers.Rel.Pos.X = prevPosX
-				pers.Rel.Pos.Z = prevPosZ
-			}
+			// prevPosX := phys.Pos.X
+			// prevPosZ := phys.Pos.Z
+			phys.MoveOnAxis(0.75, 0, 0, .5)
+			// stillNessecary := gm.WorldStep(true)
+			// if stillNessecary {
+			// 	phys.Pos.X = prevPosX
+			// 	phys.Pos.Z = prevPosZ
+			// }
 		}
-		pers.Rel.Pos.Y = y
-		gm.WorldStep(false)
+		phys.Pos.Y = y
+		// gm.WorldStep(false)
 		// sc.Camera.Pan(-panDel, 0)
 		// kt.SetProcessed()
 		// go updatePosition("posX", rcb.Initial.Pos.X)
 	}
 
-	go updatePosition("pos", pers.Abs.Pos) // this was updated from UpdateWorld
+	// go updatePosition("pos", pers.Abs.Pos) // this was updated from UpdateWorld
 	// fmt.Printf("Pos Abs: %v  Pos Rel: %v \n", pers.Abs.Pos, pers.Rel.Pos)
-	sc.Camera.Pose.Pos = pers.Rel.Pos.Add(camOff)
-	gm.updateCursorPosition()
+	// sc.Camera.Pose.Pos = phys.Pos.Add(camOff)
+	// gm.updateCursorPosition()
 	// text.TrackCamera(&sc.Scene)
 	// text.Pose.Pos.Z -= 10
 	// text.Pose.Pos.X += 2
 
-	gm.World.UpdateEnd(wupdt)
-	gm.View.UpdatePose()
-	sc.UpdateSig()
+	// gm.World.UpdateEnd(wupdt)
+	// gm.View.UpdatePose()
+	// sc.UpdateSig()
 }
 
 func (ev *Game) WorldStep(specialCheck bool) (stillNessecary bool) {

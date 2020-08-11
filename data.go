@@ -4,17 +4,18 @@
 package main
 
 import (
-	"bytes"
+	// "bytes"
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"strings"
+
 	"github.com/goki/gi/gi"
 	"github.com/goki/ki/ki"
 	"github.com/goki/mat32"
 	_ "github.com/lib/pq"
-	"net/http"
-	"strings"
-	"time"
+	// "time"
 )
 
 var db *sql.DB
@@ -74,28 +75,28 @@ func InitDataMaps() {
 // The two functions above are well written, used and good
 
 // Function below is good and used.
-func writePlayerPosToServer(pos mat32.Vec3, battleName string) {
-	info := &CurPosition{ThisUserInfo.Username, battleName, POINTS, pos, TheGame.KilledBy, TheGame.SpawnCount}
-	b, _ := json.Marshal(info)
-	buff := bytes.NewBuffer(b)
-	resp, err := http.Post("http://ssdserver.herokuapp.com/playerPosPost", "application/json", buff)
-	if err != nil {
-		panic(err)
-	}
-	defer resp.Body.Close()
-}
-
-// Function below is used and good
-func writeFireEventToServer(origin mat32.Vec3, dir mat32.Vec3, dmg int, battleName string) {
-	info := &FireEventInfo{ThisUserInfo.Username, origin, dir, dmg, battleName, time.Now()}
-	b, _ := json.Marshal(info)
-	buff := bytes.NewBuffer(b)
-	resp, err := http.Post("http://ssdserver.herokuapp.com/fireEventsPost", "application/json", buff)
-	if err != nil {
-		panic(err)
-	}
-	defer resp.Body.Close()
-}
+// func writePlayerPosToServer(pos mat32.Vec3, battleName string) {
+// 	info := &Player{ThisUserInfo.Username, POINTS, pos, TheGame.KilledBy, TheGame.SpawnCount}
+// 	b, _ := json.Marshal(info)
+// 	buff := bytes.NewBuffer(b)
+// 	resp, err := http.Post("http://ssdserver.herokuapp.com/playerPosPost", "application/json", buff)
+// 	if err != nil {
+// 		panic(err)
+// 	}
+// 	defer resp.Body.Close()
+// }
+//
+// // Function below is used and good
+// func writeFireEventToServer(origin mat32.Vec3, dir mat32.Vec3, dmg int, battleName string) {
+// 	info := &FireEventInfo{ThisUserInfo.Username, origin, dir, dmg, battleName, time.Now()}
+// 	b, _ := json.Marshal(info)
+// 	buff := bytes.NewBuffer(b)
+// 	resp, err := http.Post("http://ssdserver.herokuapp.com/fireEventsPost", "application/json", buff)
+// 	if err != nil {
+// 		panic(err)
+// 	}
+// 	defer resp.Body.Close()
+// }
 
 // Below is used and good
 func readTeam() {
@@ -179,7 +180,7 @@ func initBorders() {
 
 // Simple, good, used
 func joinPlayersTable(battleName string) {
-	writePlayerPosToServer(mat32.Vec3{0, 1, 0}, battleName)
+	// writePlayerPosToServer(mat32.Vec3{0, 1, 0}, battleName)
 	CURBATTLE = battleName
 	POINTS = 0
 }
@@ -311,7 +312,7 @@ func (gm *Game) battleOver(winner string) {
 		readResources()
 	} else {
 		oppTeam := getEnemyTeamFromName(winner)
-		gameResultText.SetText(fmt.Sprintf("<b>User %v won the battle with %v points. \nTheir team (%v) wins one point in the battle %v vs. %v</b>", winner, gm.OtherPos[winner].Points, oppTeam, curBattleTerritory1, curBattleTerritory2))
+		gameResultText.SetText(fmt.Sprintf("<b>User %v won the battle with %v points. \nTheir team (%v) wins one point in the battle %v vs. %v</b>", winner, gm.Players[winner].Points, oppTeam, curBattleTerritory1, curBattleTerritory2))
 	}
 	tabIndexResult, _ := tv.TabIndexByName("<b>Game Result</b>")
 	gameResultText.SetProp("text-align", "center")
@@ -549,7 +550,7 @@ func joinTeam(name string) {
 }
 
 // Needs improvement
-func (gm *Game) GetPosFromServer() { // GetPosFromServer loops through the players database and updates gm.OtherPos with the new data
+func (gm *Game) GetPosFromServer() { // GetPosFromServer loops through the players database and updates gm.Players with the new data
 	for {
 		// startTime := time.Now()
 		// fmt.Printf("GetPosFromServer Lock: %v Milliseconds\n", time.Since(startTime).Milliseconds())
@@ -568,23 +569,23 @@ func (gm *Game) GetPosFromServer() { // GetPosFromServer loops through the playe
 		defer resp.Body.Close()
 		// fmt.Printf("Time for GetPosFromServer server stuff: %v Milliseconds \n", time.Since(startServerTime).Milliseconds())
 		// startDecodingTime := time.Now()
-		tempOtherPos := make(map[string]*CurPosition)
+		tempPlayers := make(map[string]*Player)
 		decoder := json.NewDecoder(resp.Body)
-		decoder.Decode(&tempOtherPos)
+		decoder.Decode(&tempPlayers)
 		// fmt.Printf("Time for GetPosFromServer Decoding: %v Milliseconds \n", time.Since(startDecodingTime).Milliseconds())
 		// startTempTime := time.Now()
 		gm.PosMu.Lock()
-		for _, d := range tempOtherPos {
-			if gm.OtherPos[d.Username] == nil {
+		for _, d := range tempPlayers {
+			if gm.Players[d.Username] == nil {
 				continue
 			}
-			if (d.KilledBy == ThisUserInfo.Username) && ((d.SpawnCount - 1) == gm.OtherPos[d.Username].SpawnCount) {
+			if (d.KilledBy == ThisUserInfo.Username) && ((d.SpawnCount - 1) == gm.Players[d.Username].SpawnCount) {
 				POINTS += 1
 				resultText.SetText("<b>You killed " + d.Username + "! You get one point.</b>")
 				resultText.SetFullReRender()
 			}
 		}
-		gm.OtherPos = tempOtherPos
+		gm.Players = tempPlayers
 		// fmt.Printf("Time for GetPosFromServer check for kills: %v Milliseconds \n", time.Since(startTempTime).Milliseconds())
 		// otherTime := time.Now()
 		if !gm.GameOn {
@@ -842,7 +843,7 @@ func removeMessage(message string, username string) {
 
 // Still used?
 func updatePosition(t string, value mat32.Vec3) {
-	writePlayerPosToServer(mat32.Vec3{value.X, value.Y, value.Z}, CURBATTLE)
+	// writePlayerPosToServer(mat32.Vec3{value.X, value.Y, value.Z}, CURBATTLE)
 }
 
 func addUser(user string, password string) {

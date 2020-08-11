@@ -8,6 +8,8 @@ import (
 	"fmt"
 	// "time"
 	"encoding/json"
+	"io/ioutil"
+
 	"github.com/goki/gi/gi"
 	"github.com/goki/gi/gimain"
 	"github.com/goki/gi/giv"
@@ -15,7 +17,6 @@ import (
 	"github.com/goki/gi/units"
 	"github.com/goki/ki/ki"
 	"github.com/goki/mat32"
-	"io/ioutil"
 )
 
 func main() {
