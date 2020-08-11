@@ -53,6 +53,7 @@ type Game struct {
 	World          *eve.Group
 	View           *evev.View
 	Scene          *Scene
+	Camera         CameraState
 	Map            Map // Fixed struct of the world
 	MapObjs        map[string]bool
 	User           Player
@@ -72,6 +73,12 @@ type Game struct {
 	SpawnCount     int
 	SpawnPositions []mat32.Vec3
 	Events         Deque // Queue of events
+}
+
+type CameraState struct {
+	Moved bool
+	UD    float32
+	LR    float32
 }
 
 // TheGame is the game instance for the current game
@@ -525,7 +532,7 @@ func (gm *Game) Config() {
 	gm.User.Pose = pers.Rel
 
 	gm.User.Username = ThisUserInfo.Username
-
+	gm.View.Sync()
 	go gm.RenderLoop()
 	go gm.EventLoop()
 	// go gm.ServerLoop()
@@ -674,7 +681,7 @@ func (sc *Scene) NavEvents() {
 		}
 		me := d.(*mouse.MoveEvent)
 		me.SetProcessed()
-		ssc := recv.Embed(KiT_Scene).(*Scene)
+		// ssc := recv.Embed(KiT_Scene).(*Scene)
 		var orbDel float32
 		if TheSettings.GameSensitivity != 0 {
 			orbDel = TheSettings.GameSensitivity
@@ -682,68 +689,34 @@ func (sc *Scene) NavEvents() {
 			orbDel = 0.2
 		}
 		orbDels := orbDel * 1
-		panDel := float32(.05)
+		// panDel := float32(.05)
 		del := me.Where.Sub(me.From)
 		dx := float32(-del.X)
 		dy := float32(-del.Y)
 		// fmt.Printf("pos: %v  fm: %v del: %v\n", me.Where, me.From, del)
-		switch {
-		case key.HasAllModifierBits(me.Modifiers, key.Shift):
-			ssc.Camera.Pan(dx*panDel, -dy*panDel)
-		case key.HasAllModifierBits(me.Modifiers, key.Control):
-			ssc.Camera.PanAxis(dx*panDel, -dy*panDel)
-		case key.HasAllModifierBits(me.Modifiers, key.Alt):
-			ssc.Camera.PanTarget(dx*panDel, -dy*panDel, 0)
-		default:
-			if mat32.Abs(dx) > mat32.Abs(dy) {
-				dy = 0
-			} else {
-				dx = 0
-			}
-
-			// fmt.Printf("%v %v \n", dx,  dy)
-			sc.CamRotUD += dy * orbDels
-			if sc.CamRotUD > 90 {
-				sc.CamRotUD = 90
-			}
-			if sc.CamRotUD < -90 {
-				sc.CamRotUD = -90
-			}
-
-			sc.CamRotLR += dx * orbDels * 2
-			pers := TheGame.World.ChildByName("FirstPerson", 0).(*eve.Group)
-			ssc.Camera.Pose.Pos = pers.Abs.Pos
-			ssc.Camera.Pose.Quat = pers.Abs.Quat
-			ssc.Camera.Pose.Pos.Y += 1
-			ssc.Camera.Pose.SetAxisRotation(0, 1, 0, sc.CamRotLR)
-			ssc.Camera.Pose.RotateOnAxis(1, 0, 0, sc.CamRotUD)
-			ssc.Camera.Pose.MoveOnAxis(0, 0, 1, 3)
-			ssc.Camera.Pose.MoveOnAxis(1, 0, 0, 1)
-			pers.Rel.SetAxisRotation(0, 1, 0, sc.CamRotLR)
-
-			TheGame.updateCursorPosition()
+		gm := TheGame
+		if mat32.Abs(dx) > mat32.Abs(dy) {
+			dy = 0
+		} else {
+			dx = 0
 		}
-		ssc.UpdateSig()
+
+		// fmt.Printf("%v %v \n", dx,  dy)
+		gm.WorldMu.Lock()
+		gm.Camera.UD += dy * orbDels
+		if gm.Camera.UD > 90 {
+			gm.Camera.UD = 90
+		}
+		if gm.Camera.UD < -90 {
+			gm.Camera.UD = -90
+		}
+
+		gm.Camera.LR += dx * orbDels * 2
+		gm.Camera.Moved = true
+		gm.WorldMu.Unlock()
+
 	})
-	// sc.ConnectEvent(oswin.MouseScrollEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
-	// 	me := d.(*mouse.ScrollEvent)
-	// 	me.SetProcessed()
-	// 	ssc := recv.Embed(KiT_Scene).(*Scene)
-	// 	if ssc.SetDragCursor {
-	// 		oswin.TheApp.Cursor(ssc.Viewport.Win.OSWin).Pop()
-	// 		ssc.SetDragCursor = false
-	// 	}
-	// 	zoom := float32(me.NonZeroDelta(false))
-	// 	zoomPct := float32(.05)
-	// 	zoomDel := float32(.05)
-	// 	switch {
-	// 	case key.HasAllModifierBits(me.Modifiers, key.Alt):
-	// 		ssc.Camera.PanTarget(0, 0, zoom*zoomDel)
-	// 	default:
-	// 		ssc.Camera.Zoom(zoomPct * zoom)
-	// 	}
-	// 	ssc.UpdateSig()
-	// })
+
 	sc.ConnectEvent(oswin.MouseEvent, gi.RegPri, func(recv, send ki.Ki, sig int64, d interface{}) {
 		me := d.(*mouse.Event)
 		me.SetProcessed()
