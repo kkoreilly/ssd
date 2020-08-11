@@ -832,6 +832,8 @@ func (sc *Scene) NavKeyEvents(kt *key.ChordEvent) {
 
 		phys.Pos.Y = y
 		// gm.WorldStep(false)
+		gm.AddMoveEvent(&phys)
+
 	case "a":
 		kt.SetProcessed()
 		y := phys.Pos.Y // keep height fixed -- no jumping right now.
@@ -848,6 +850,8 @@ func (sc *Scene) NavKeyEvents(kt *key.ChordEvent) {
 			// }
 		}
 		phys.Pos.Y = y
+		gm.AddMoveEvent(&phys)
+
 		// gm.WorldStep(false)
 		// sc.Camera.Pan(panDel, 0)
 		// kt.SetProcessed()
@@ -868,6 +872,8 @@ func (sc *Scene) NavKeyEvents(kt *key.ChordEvent) {
 			// }
 		}
 		phys.Pos.Y = y
+		gm.AddMoveEvent(&phys)
+
 		// gm.WorldStep(false)
 		// sc.Camera.Pan(-panDel, 0)
 		// kt.SetProcessed()
